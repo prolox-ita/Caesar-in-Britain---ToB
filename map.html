@@ -179,11 +179,13 @@
             loading.style.color = '#ff4444';
         }
 
-        // Load images
+        // Load images with CORS support
+        mapImage.crossOrigin = "anonymous";
         mapImage.onload = onImageLoad;
         mapImage.onerror = () => onImageError('map.png');
         mapImage.src = 'map.png';
 
+        regionImage.crossOrigin = "anonymous";
         regionImage.onload = onImageLoad;
         regionImage.onerror = () => onImageError('region_reference.png');
         regionImage.src = 'region_reference.png';
