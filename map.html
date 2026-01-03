@@ -129,7 +129,7 @@
 </head>
 
 <body>
-    <a href="index.html" class="back-button">ê Back to Home</a>
+    <a href="index.html" class="back-button">ÔøΩ Back to Home</a>
 
     <div class="map-container">
         <div class="map-area">
@@ -163,59 +163,87 @@
         let regionMap = new Map(); // Maps color strings to region data
         let regionCounter = 0;
 
-        // Load images
-        mapImage.src = 'map.png';
-        regionImage.src = 'region_reference.png';
-
         let imagesLoaded = 0;
         function onImageLoad() {
             imagesLoaded++;
+            console.log(`Image loaded: ${imagesLoaded}/2`);
             if (imagesLoaded === 2) {
+                console.log('Both images loaded, initializing map...');
                 initializeMap();
             }
         }
 
+        function onImageError(imageName) {
+            console.error(`Failed to load ${imageName}`);
+            loading.textContent = `Error loading ${imageName}`;
+            loading.style.color = '#ff4444';
+        }
+
+        // Load images
         mapImage.onload = onImageLoad;
+        mapImage.onerror = () => onImageError('map.png');
+        mapImage.src = 'map.png';
+
         regionImage.onload = onImageLoad;
+        regionImage.onerror = () => onImageError('region_reference.png');
+        regionImage.src = 'region_reference.png';
+
+        console.log('Started loading images...');
 
         function initializeMap() {
-            // Set canvas dimensions to match the images
-            const width = regionImage.width;
-            const height = regionImage.height;
+            try {
+                console.log('Initializing map...');
 
-            mapCanvas.width = width;
-            mapCanvas.height = height;
-            regionCanvas.width = width;
-            regionCanvas.height = height;
-            overlayCanvas.width = width;
-            overlayCanvas.height = height;
+                // Set canvas dimensions to match the images
+                const width = regionImage.width;
+                const height = regionImage.height;
+                console.log(`Canvas dimensions: ${width}x${height}`);
 
-            // Draw the background map
-            mapCtx.drawImage(mapImage, 0, 0, width, height);
+                mapCanvas.width = width;
+                mapCanvas.height = height;
+                regionCanvas.width = width;
+                regionCanvas.height = height;
+                overlayCanvas.width = width;
+                overlayCanvas.height = height;
 
-            // Draw the region reference (hidden)
-            regionCtx.drawImage(regionImage, 0, 0, width, height);
+                console.log('Drawing background map...');
+                // Draw the background map
+                mapCtx.drawImage(mapImage, 0, 0, width, height);
 
-            // Analyze regions from reference image
-            analyzeRegions();
+                console.log('Drawing region reference...');
+                // Draw the region reference (hidden)
+                regionCtx.drawImage(regionImage, 0, 0, width, height);
 
-            // Show map and hide loading
-            loading.style.display = 'none';
-            mapWrapper.style.display = 'inline-block';
+                console.log('Analyzing regions...');
+                // Analyze regions from reference image
+                analyzeRegions();
 
-            // Add event listeners
-            mapCanvas.addEventListener('mousemove', handleMouseMove);
-            mapCanvas.addEventListener('click', handleClick);
-            mapCanvas.addEventListener('mouseleave', handleMouseLeave);
+                console.log('Map initialized successfully!');
+                // Show map and hide loading
+                loading.style.display = 'none';
+                mapWrapper.style.display = 'inline-block';
+
+                // Add event listeners
+                mapCanvas.addEventListener('mousemove', handleMouseMove);
+                mapCanvas.addEventListener('click', handleClick);
+                mapCanvas.addEventListener('mouseleave', handleMouseLeave);
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                loading.textContent = 'Error initializing map: ' + error.message;
+                loading.style.color = '#ff4444';
+            }
         }
 
         function analyzeRegions() {
+            console.log('Starting region analysis...');
             const imageData = regionCtx.getImageData(0, 0, regionCanvas.width, regionCanvas.height);
             const pixels = imageData.data;
             const processedColors = new Set();
+            console.log(`Analyzing ${pixels.length / 4} pixels...`);
 
-            // Sample pixels to find unique colors
-            for (let i = 0; i < pixels.length; i += 4) {
+            // Sample pixels to find unique colors (sample every 10th pixel for speed)
+            const step = 10; // Sample every 10th pixel
+            for (let i = 0; i < pixels.length; i += (4 * step)) {
                 const r = pixels[i];
                 const g = pixels[i + 1];
                 const b = pixels[i + 2];
@@ -237,6 +265,7 @@
             }
 
             console.log(`Found ${regionMap.size} regions`);
+            console.log('Region analysis complete');
         }
 
         function isBlackOrNearBlack(r, g, b) {
