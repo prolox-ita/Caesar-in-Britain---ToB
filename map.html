@@ -286,12 +286,12 @@
 
             // Draw selected region
             if (selectedRegion) {
-                drawRegionHighlight(selectedRegion, 'rgba(255, 255, 255, 0.3)', 'rgba(255, 255, 255, 0.9)', 3);
+                drawRegionHighlight(selectedRegion, 'rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 1.0)', 4);
             }
 
             // Draw hovered region (if different from selected)
             if (hoveredRegion && hoveredRegion !== selectedRegion) {
-                drawRegionHighlight(hoveredRegion, 'rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.7)', 2);
+                drawRegionHighlight(hoveredRegion, 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 1.0)', 3);
             }
         }
 
@@ -376,10 +376,6 @@
             infoPanel.classList.remove('empty');
             infoPanel.innerHTML = `
                 <h2>${region.name}</h2>
-                <div class="info-content">
-                    <p><strong>Region ID:</strong> ${region.id}</p>
-                    <p><strong>Color:</strong> RGB(${region.color.r}, ${region.color.g}, ${region.color.b})</p>
-                </div>
             `;
         }
     </script>
