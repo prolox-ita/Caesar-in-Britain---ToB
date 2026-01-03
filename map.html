@@ -14,7 +14,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background: #2c2416;
+            background: #1a1410;
         }
 
         .map-container {
@@ -27,34 +27,21 @@
         .map-area {
             flex: 1;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #1a1410;
+            padding: 20px;
         }
 
-        .map-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
-        #mapCanvas {
+        .map-image {
+            max-width: 90%;
+            max-height: 90vh;
             display: block;
-            cursor: pointer;
-            max-width: 100%;
-            max-height: 100vh;
-        }
-
-        #regionCanvas {
-            display: none;
-        }
-
-        #overlayCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 3px solid #d4af37;
+            border-radius: 8px;
         }
 
         .info-panel {
@@ -65,7 +52,6 @@
             padding: 30px;
             overflow-y: auto;
             border-left: 3px solid #d4af37;
-            transition: transform 0.3s ease;
         }
 
         .info-panel.empty {
@@ -115,330 +101,21 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
-
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            color: #d4af37;
-        }
     </style>
 </head>
 
 <body>
-    <a href="index.html" class="back-button">� Back to Home</a>
+    <a href="index.html" class="back-button">← Back to Home</a>
 
     <div class="map-container">
         <div class="map-area">
-            <div class="loading" id="loading">Loading map...</div>
-            <div class="map-wrapper" id="mapWrapper" style="display: none;">
-                <canvas id="mapCanvas"></canvas>
-                <canvas id="overlayCanvas"></canvas>
-            </div>
-            <canvas id="regionCanvas"></canvas>
+            <img src="map.png" alt="Campaign Map" class="map-image">
         </div>
         <div class="info-panel empty" id="infoPanel">
             <p>Click on a region to view information</p>
         </div>
     </div>
 
-    <script>
-        const mapCanvas = document.getElementById('mapCanvas');
-        const regionCanvas = document.getElementById('regionCanvas');
-        const overlayCanvas = document.getElementById('overlayCanvas');
-        const mapCtx = mapCanvas.getContext('2d');
-        const regionCtx = regionCanvas.getContext('2d', { willReadFrequently: true });
-        const overlayCtx = overlayCanvas.getContext('2d');
-        const infoPanel = document.getElementById('infoPanel');
-        const mapWrapper = document.getElementById('mapWrapper');
-        const loading = document.getElementById('loading');
-
-        let mapImage = new Image();
-        let regionImage = new Image();
-        let selectedRegion = null;
-        let hoveredRegion = null;
-        let regionMap = new Map(); // Maps color strings to region data
-        let regionCounter = 0;
-
-        let imagesLoaded = 0;
-        function onImageLoad() {
-            imagesLoaded++;
-            console.log(`Image loaded: ${imagesLoaded}/2`);
-            if (imagesLoaded === 2) {
-                console.log('Both images loaded, initializing map...');
-                initializeMap();
-            }
-        }
-
-        function onImageError(imageName) {
-            console.error(`Failed to load ${imageName}`);
-            loading.textContent = `Error loading ${imageName}`;
-            loading.style.color = '#ff4444';
-        }
-
-        // Load images with CORS support
-        mapImage.crossOrigin = "anonymous";
-        mapImage.onload = onImageLoad;
-        mapImage.onerror = () => onImageError('map.png');
-        mapImage.src = 'map.png';
-
-        regionImage.crossOrigin = "anonymous";
-        regionImage.onload = onImageLoad;
-        regionImage.onerror = () => onImageError('region_reference.png');
-        regionImage.src = 'region_reference.png';
-
-        console.log('Started loading images...');
-
-        function initializeMap() {
-            try {
-                console.log('Initializing map...');
-
-                // Set canvas dimensions to match the images
-                const width = regionImage.width;
-                const height = regionImage.height;
-                console.log(`Canvas dimensions: ${width}x${height}`);
-
-                mapCanvas.width = width;
-                mapCanvas.height = height;
-                regionCanvas.width = width;
-                regionCanvas.height = height;
-                overlayCanvas.width = width;
-                overlayCanvas.height = height;
-
-                console.log('Drawing background map...');
-                // Draw the background map
-                mapCtx.drawImage(mapImage, 0, 0, width, height);
-
-                console.log('Drawing region reference...');
-                // Draw the region reference (hidden)
-                regionCtx.drawImage(regionImage, 0, 0, width, height);
-
-                console.log('Analyzing regions...');
-                // Analyze regions from reference image
-                analyzeRegions();
-
-                console.log('Map initialized successfully!');
-                // Show map and hide loading
-                loading.style.display = 'none';
-                mapWrapper.style.display = 'inline-block';
-
-                // Add event listeners
-                mapCanvas.addEventListener('mousemove', handleMouseMove);
-                mapCanvas.addEventListener('click', handleClick);
-                mapCanvas.addEventListener('mouseleave', handleMouseLeave);
-            } catch (error) {
-                console.error('Error initializing map:', error);
-                loading.textContent = 'Error initializing map: ' + error.message;
-                loading.style.color = '#ff4444';
-            }
-        }
-
-        function analyzeRegions() {
-            console.log('Starting region analysis...');
-            const imageData = regionCtx.getImageData(0, 0, regionCanvas.width, regionCanvas.height);
-            const pixels = imageData.data;
-            const processedColors = new Set();
-            console.log(`Analyzing ${pixels.length / 4} pixels...`);
-
-            // Sample pixels to find unique colors (sample every 10th pixel for speed)
-            const step = 10; // Sample every 10th pixel
-            for (let i = 0; i < pixels.length; i += (4 * step)) {
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-                const a = pixels[i + 3];
-
-                if (a < 128) continue; // Skip transparent pixels
-
-                const colorKey = `${r},${g},${b}`;
-
-                if (!processedColors.has(colorKey) && !isBlackOrNearBlack(r, g, b)) {
-                    processedColors.add(colorKey);
-                    regionCounter++;
-                    regionMap.set(colorKey, {
-                        id: regionCounter,
-                        name: `Area ${regionCounter}`,
-                        color: { r, g, b }
-                    });
-                }
-            }
-
-            console.log(`Found ${regionMap.size} regions`);
-            console.log('Region analysis complete');
-        }
-
-        function isBlackOrNearBlack(r, g, b) {
-            // Consider very dark colors as black (borders)
-            return r < 30 && g < 30 && b < 30;
-        }
-
-        function getRegionAtPoint(x, y) {
-            const pixel = regionCtx.getImageData(x, y, 1, 1).data;
-            const r = pixel[0];
-            const g = pixel[1];
-            const b = pixel[2];
-            const a = pixel[3];
-
-            if (a < 128) return null;
-            if (isBlackOrNearBlack(r, g, b)) return null;
-
-            const colorKey = `${r},${g},${b}`;
-            return regionMap.get(colorKey) || null;
-        }
-
-        function handleMouseMove(e) {
-            const rect = mapCanvas.getBoundingClientRect();
-            const scaleX = mapCanvas.width / rect.width;
-            const scaleY = mapCanvas.height / rect.height;
-            const x = Math.floor((e.clientX - rect.left) * scaleX);
-            const y = Math.floor((e.clientY - rect.top) * scaleY);
-
-            const region = getRegionAtPoint(x, y);
-
-            if (region && region !== hoveredRegion && region !== selectedRegion) {
-                hoveredRegion = region;
-                drawOverlay();
-            } else if (!region && hoveredRegion) {
-                hoveredRegion = null;
-                drawOverlay();
-            }
-        }
-
-        function handleClick(e) {
-            const rect = mapCanvas.getBoundingClientRect();
-            const scaleX = mapCanvas.width / rect.width;
-            const scaleY = mapCanvas.height / rect.height;
-            const x = Math.floor((e.clientX - rect.left) * scaleX);
-            const y = Math.floor((e.clientY - rect.top) * scaleY);
-
-            const region = getRegionAtPoint(x, y);
-
-            if (region) {
-                selectedRegion = region;
-                showRegionInfo(region);
-                drawOverlay();
-            }
-        }
-
-        function handleMouseLeave() {
-            hoveredRegion = null;
-            drawOverlay();
-        }
-
-        function drawOverlay() {
-            // Clear overlay
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-
-            // Draw selected region
-            if (selectedRegion) {
-                drawRegionOverlay(selectedRegion, 'rgba(255, 255, 255, 0.3)', 'rgba(255, 255, 255, 0.8)', 3);
-            }
-
-            // Draw hovered region (if different from selected)
-            if (hoveredRegion && hoveredRegion !== selectedRegion) {
-                drawRegionOverlay(hoveredRegion, 'rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.6)', 2);
-            }
-        }
-
-        function drawRegionOverlay(region, fillStyle, strokeStyle, lineWidth) {
-            const imageData = regionCtx.getImageData(0, 0, regionCanvas.width, regionCanvas.height);
-            const pixels = imageData.data;
-            const width = regionCanvas.width;
-            const height = regionCanvas.height;
-
-            // Create a temporary canvas for this region
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = width;
-            tempCanvas.height = height;
-            const tempCtx = tempCanvas.getContext('2d');
-            const tempImageData = tempCtx.createImageData(width, height);
-
-            // Fill the region
-            for (let i = 0; i < pixels.length; i += 4) {
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-                const a = pixels[i + 3];
-
-                if (r === region.color.r && g === region.color.g && b === region.color.b && a >= 128) {
-                    tempImageData.data[i] = 255;
-                    tempImageData.data[i + 1] = 255;
-                    tempImageData.data[i + 2] = 255;
-                    tempImageData.data[i + 3] = 76; // 30% opacity for fill
-                }
-            }
-
-            tempCtx.putImageData(tempImageData, 0, 0);
-
-            // Draw fill
-            overlayCtx.globalCompositeOperation = 'source-over';
-            overlayCtx.drawImage(tempCanvas, 0, 0);
-
-            // Draw borders
-            overlayCtx.strokeStyle = strokeStyle;
-            overlayCtx.lineWidth = lineWidth;
-
-            // Find and draw borders
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    const idx = (y * width + x) * 4;
-                    const r = pixels[idx];
-                    const g = pixels[idx + 1];
-                    const b = pixels[idx + 2];
-                    const a = pixels[idx + 3];
-
-                    if (r === region.color.r && g === region.color.g && b === region.color.b && a >= 128) {
-                        // Check if this pixel is on a border
-                        if (isBorderPixel(x, y, region, pixels, width, height)) {
-                            overlayCtx.fillStyle = strokeStyle;
-                            overlayCtx.fillRect(x, y, 1, 1);
-                        }
-                    }
-                }
-            }
-        }
-
-        function isBorderPixel(x, y, region, pixels, width, height) {
-            const directions = [
-                [-1, 0], [1, 0], [0, -1], [0, 1]
-            ];
-
-            for (const [dx, dy] of directions) {
-                const nx = x + dx;
-                const ny = y + dy;
-
-                if (nx < 0 || nx >= width || ny < 0 || ny >= height) {
-                    return true;
-                }
-
-                const idx = (ny * width + nx) * 4;
-                const r = pixels[idx];
-                const g = pixels[idx + 1];
-                const b = pixels[idx + 2];
-                const a = pixels[idx + 3];
-
-                if (a < 128 || r !== region.color.r || g !== region.color.g || b !== region.color.b) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        function showRegionInfo(region) {
-            infoPanel.classList.remove('empty');
-            infoPanel.innerHTML = `
-                <h2>${region.name}</h2>
-                <div class="info-content">
-                    <p><strong>Region ID:</strong> ${region.id}</p>
-                    <p><strong>Color Code:</strong> RGB(${region.color.r}, ${region.color.g}, ${region.color.b})</p>
-                </div>
-            `;
-        }
-    </script>
 </body>
 
 </html>
