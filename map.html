@@ -49,16 +49,32 @@
             border-radius: 8px;
         }
 
-        #interactiveCanvas {
+        #interactiveSvg {
             position: absolute;
             top: 0;
             left: 0;
             cursor: pointer;
             border-radius: 8px;
+            pointer-events: all;
         }
 
-        #regionCanvas {
-            display: none;
+        .region-polygon {
+            fill: rgba(255, 255, 255, 0);
+            stroke: rgba(255, 255, 255, 0);
+            stroke-width: 0;
+            transition: fill 0.2s ease, stroke 0.2s ease;
+        }
+
+        .region-polygon:hover {
+            fill: rgba(255, 255, 255, 0.15);
+            stroke: rgba(255, 255, 255, 1.0);
+            stroke-width: 3;
+        }
+
+        .region-polygon.selected {
+            fill: rgba(255, 255, 255, 0.25);
+            stroke: rgba(255, 255, 255, 1.0);
+            stroke-width: 4;
         }
 
         .info-panel {
@@ -126,11 +142,10 @@
 
     <div class="map-container">
         <div class="map-area">
-            <div class="map-wrapper">
+            <div class="map-wrapper" id="mapWrapper">
                 <img src="map.png" alt="Campaign Map" class="map-image" id="mapImage">
-                <canvas id="interactiveCanvas"></canvas>
+                <svg id="interactiveSvg" xmlns="http://www.w3.org/2000/svg"></svg>
             </div>
-            <canvas id="regionCanvas"></canvas>
         </div>
         <div class="info-panel empty" id="infoPanel">
             <p>Click on a region to view information</p>
@@ -139,237 +154,68 @@
 
     <script>
         const mapImage = document.getElementById('mapImage');
-        const interactiveCanvas = document.getElementById('interactiveCanvas');
-        const regionCanvas = document.getElementById('regionCanvas');
-        const interactiveCtx = interactiveCanvas.getContext('2d');
-        const regionCtx = regionCanvas.getContext('2d', { willReadFrequently: true });
+        const interactiveSvg = document.getElementById('interactiveSvg');
         const infoPanel = document.getElementById('infoPanel');
 
-        let regionImage = new Image();
-        let regionMap = new Map();
-        let selectedRegion = null;
-        let hoveredRegion = null;
-        let regionCounter = 0;
-        let isInitialized = false;
+        // Region definitions (coordinates from region_reference.png which is 4800x3404)
+        const regions = [
+            {
+                name: "No-Go Region",
+                coords: "-6,2616,32,2590,138,2569,214,2476,651,2399,681,2408,973,2336,1236,2382,1427,2476,1758,2535,2033,2497,2135,2442,2428,2488,2500,2543,2500,2590,2483,2649,2500,2726,2563,2772,2584,2844,2601,2963,2648,3086,2763,3226,2860,3319,2945,3370,3064,3379,3136,3374,3369,3391,3420,3336,3670,3268,3717,3222,3751,3251,3763,3340,3725,3400,2,3400"
+            }
+        ];
+
+        const REFERENCE_WIDTH = 4800;
+        const REFERENCE_HEIGHT = 3404;
+
+        let selectedPolygon = null;
 
         // Wait for map image to load
         mapImage.onload = function() {
-            // Set canvas dimensions to match displayed image
-            const rect = mapImage.getBoundingClientRect();
-            interactiveCanvas.width = mapImage.naturalWidth;
-            interactiveCanvas.height = mapImage.naturalHeight;
-            interactiveCanvas.style.width = mapImage.width + 'px';
-            interactiveCanvas.style.height = mapImage.height + 'px';
-
-            regionCanvas.width = mapImage.naturalWidth;
-            regionCanvas.height = mapImage.naturalHeight;
-
-            // Load region reference
-            regionImage.crossOrigin = "anonymous";
-            regionImage.onload = initializeRegions;
-            regionImage.onerror = () => console.error('Failed to load region_reference.png');
-            regionImage.src = 'region_reference.png';
+            initializeRegions();
         };
 
         function initializeRegions() {
-            try {
-                // Draw region reference to hidden canvas
-                regionCtx.drawImage(regionImage, 0, 0, regionCanvas.width, regionCanvas.height);
+            const displayWidth = mapImage.width;
+            const displayHeight = mapImage.height;
 
-                // Analyze regions
-                analyzeRegions();
+            // Set SVG dimensions to match displayed image
+            interactiveSvg.setAttribute('width', displayWidth);
+            interactiveSvg.setAttribute('height', displayHeight);
+            interactiveSvg.setAttribute('viewBox', `0 0 ${REFERENCE_WIDTH} ${REFERENCE_HEIGHT}`);
 
-                isInitialized = true;
-                console.log(`Initialized ${regionMap.size} regions`);
+            // Create polygon elements
+            regions.forEach((region, index) => {
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                polygon.setAttribute('points', region.coords);
+                polygon.setAttribute('class', 'region-polygon');
+                polygon.setAttribute('data-region-name', region.name);
+                polygon.setAttribute('data-region-id', index);
 
                 // Add event listeners
-                interactiveCanvas.addEventListener('mousemove', handleMouseMove);
-                interactiveCanvas.addEventListener('click', handleClick);
-                interactiveCanvas.addEventListener('mouseleave', handleMouseLeave);
-            } catch (error) {
-                console.error('Error initializing regions:', error);
-            }
+                polygon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectRegion(this, region);
+                });
+
+                interactiveSvg.appendChild(polygon);
+            });
+
+            console.log(`Initialized ${regions.length} regions`);
         }
 
-        function analyzeRegions() {
-            const imageData = regionCtx.getImageData(0, 0, regionCanvas.width, regionCanvas.height);
-            const pixels = imageData.data;
-            const processedColors = new Set();
-
-            // Sample every 20th pixel for speed
-            for (let i = 0; i < pixels.length; i += (4 * 20)) {
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-                const a = pixels[i + 3];
-
-                if (a < 128 || isBlackOrNearBlack(r, g, b)) continue;
-
-                const colorKey = `${r},${g},${b}`;
-
-                if (!processedColors.has(colorKey)) {
-                    processedColors.add(colorKey);
-                    regionCounter++;
-                    regionMap.set(colorKey, {
-                        id: regionCounter,
-                        name: `Area ${regionCounter}`,
-                        color: { r, g, b }
-                    });
-                }
-            }
-        }
-
-        function isBlackOrNearBlack(r, g, b) {
-            return r < 30 && g < 30 && b < 30;
-        }
-
-        function getRegionAtPoint(x, y) {
-            // Scale coordinates to canvas size
-            const scaleX = regionCanvas.width / interactiveCanvas.offsetWidth;
-            const scaleY = regionCanvas.height / interactiveCanvas.offsetHeight;
-            const canvasX = Math.floor(x * scaleX);
-            const canvasY = Math.floor(y * scaleY);
-
-            const pixel = regionCtx.getImageData(canvasX, canvasY, 1, 1).data;
-            const r = pixel[0];
-            const g = pixel[1];
-            const b = pixel[2];
-            const a = pixel[3];
-
-            if (a < 128 || isBlackOrNearBlack(r, g, b)) return null;
-
-            const colorKey = `${r},${g},${b}`;
-            return regionMap.get(colorKey) || null;
-        }
-
-        function handleMouseMove(e) {
-            if (!isInitialized) return;
-
-            const rect = interactiveCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            const region = getRegionAtPoint(x, y);
-
-            if (region !== hoveredRegion) {
-                hoveredRegion = region;
-                drawOverlay();
-            }
-        }
-
-        function handleClick(e) {
-            if (!isInitialized) return;
-
-            const rect = interactiveCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            const region = getRegionAtPoint(x, y);
-
-            if (region) {
-                selectedRegion = region;
-                showRegionInfo(region);
-                drawOverlay();
-            }
-        }
-
-        function handleMouseLeave() {
-            if (hoveredRegion && hoveredRegion !== selectedRegion) {
-                hoveredRegion = null;
-                drawOverlay();
-            }
-        }
-
-        function drawOverlay() {
-            // Clear canvas
-            interactiveCtx.clearRect(0, 0, interactiveCanvas.width, interactiveCanvas.height);
-
-            // Draw selected region
-            if (selectedRegion) {
-                drawRegionHighlight(selectedRegion, 'rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 1.0)', 4);
+        function selectRegion(polygonElement, region) {
+            // Deselect previous region
+            if (selectedPolygon) {
+                selectedPolygon.classList.remove('selected');
             }
 
-            // Draw hovered region (if different from selected)
-            if (hoveredRegion && hoveredRegion !== selectedRegion) {
-                drawRegionHighlight(hoveredRegion, 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 1.0)', 3);
-            }
-        }
+            // Select new region
+            selectedPolygon = polygonElement;
+            polygonElement.classList.add('selected');
 
-        function drawRegionHighlight(region, fillColor, borderColor, borderWidth) {
-            const imageData = regionCtx.getImageData(0, 0, regionCanvas.width, regionCanvas.height);
-            const pixels = imageData.data;
-            const width = regionCanvas.width;
-            const height = regionCanvas.height;
-
-            // Create temporary canvas for this region
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = width;
-            tempCanvas.height = height;
-            const tempCtx = tempCanvas.getContext('2d');
-            const tempImageData = tempCtx.createImageData(width, height);
-
-            // Fill region pixels
-            for (let i = 0; i < pixels.length; i += 4) {
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-                const a = pixels[i + 3];
-
-                if (r === region.color.r && g === region.color.g && b === region.color.b && a >= 128) {
-                    tempImageData.data[i] = 255;
-                    tempImageData.data[i + 1] = 255;
-                    tempImageData.data[i + 2] = 255;
-                    tempImageData.data[i + 3] = 76; // Semi-transparent white
-                }
-            }
-
-            tempCtx.putImageData(tempImageData, 0, 0);
-            interactiveCtx.drawImage(tempCanvas, 0, 0);
-
-            // Draw borders
-            interactiveCtx.strokeStyle = borderColor;
-            interactiveCtx.lineWidth = borderWidth;
-
-            // Find border pixels
-            for (let y = 0; y < height; y += 2) { // Skip every other pixel for performance
-                for (let x = 0; x < width; x += 2) {
-                    const idx = (y * width + x) * 4;
-                    const r = pixels[idx];
-                    const g = pixels[idx + 1];
-                    const b = pixels[idx + 2];
-                    const a = pixels[idx + 3];
-
-                    if (r === region.color.r && g === region.color.g && b === region.color.b && a >= 128) {
-                        if (isBorderPixel(x, y, region, pixels, width, height)) {
-                            interactiveCtx.fillStyle = borderColor;
-                            interactiveCtx.fillRect(x, y, 2, 2);
-                        }
-                    }
-                }
-            }
-        }
-
-        function isBorderPixel(x, y, region, pixels, width, height) {
-            const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-
-            for (const [dx, dy] of directions) {
-                const nx = x + dx;
-                const ny = y + dy;
-
-                if (nx < 0 || nx >= width || ny < 0 || ny >= height) return true;
-
-                const idx = (ny * width + nx) * 4;
-                const r = pixels[idx];
-                const g = pixels[idx + 1];
-                const b = pixels[idx + 2];
-                const a = pixels[idx + 3];
-
-                if (a < 128 || r !== region.color.r || g !== region.color.g || b !== region.color.b) {
-                    return true;
-                }
-            }
-
-            return false;
+            // Show region info
+            showRegionInfo(region);
         }
 
         function showRegionInfo(region) {
