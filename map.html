@@ -62,19 +62,21 @@
             fill: rgba(255, 255, 255, 0);
             stroke: rgba(255, 255, 255, 0);
             stroke-width: 0;
+            stroke-linejoin: round;
+            stroke-linecap: round;
             transition: fill 0.2s ease, stroke 0.2s ease;
         }
 
         .region-polygon:hover {
             fill: rgba(255, 255, 255, 0.15);
             stroke: rgba(255, 255, 255, 1.0);
-            stroke-width: 3;
+            stroke-width: 8;
         }
 
         .region-polygon.selected {
             fill: rgba(255, 255, 255, 0.25);
             stroke: rgba(255, 255, 255, 1.0);
-            stroke-width: 4;
+            stroke-width: 12;
         }
 
         .info-panel {
@@ -176,13 +178,16 @@
         };
 
         function initializeRegions() {
-            const displayWidth = mapImage.width;
-            const displayHeight = mapImage.height;
+            const displayWidth = mapImage.offsetWidth;
+            const displayHeight = mapImage.offsetHeight;
 
-            // Set SVG dimensions to match displayed image
+            // Set SVG dimensions to match displayed image exactly
+            interactiveSvg.style.width = displayWidth + 'px';
+            interactiveSvg.style.height = displayHeight + 'px';
             interactiveSvg.setAttribute('width', displayWidth);
             interactiveSvg.setAttribute('height', displayHeight);
             interactiveSvg.setAttribute('viewBox', `0 0 ${REFERENCE_WIDTH} ${REFERENCE_HEIGHT}`);
+            interactiveSvg.setAttribute('preserveAspectRatio', 'none');
 
             // Create polygon elements
             regions.forEach((region, index) => {
@@ -202,6 +207,8 @@
             });
 
             console.log(`Initialized ${regions.length} regions`);
+            console.log(`SVG size: ${displayWidth}x${displayHeight}`);
+            console.log(`Image size: ${mapImage.offsetWidth}x${mapImage.offsetHeight}`);
         }
 
         function selectRegion(polygonElement, region) {
