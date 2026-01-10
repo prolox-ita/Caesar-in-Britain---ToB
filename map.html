@@ -170,17 +170,30 @@
             initializeRegions();
         };
 
+        // If image is already loaded (from cache), initialize immediately
+        if (mapImage.complete) {
+            initializeRegions();
+        }
+
         function initializeRegions() {
             const displayWidth = mapImage.offsetWidth;
             const displayHeight = mapImage.offsetHeight;
 
+            console.log(`Image dimensions: ${displayWidth}x${displayHeight}`);
+            console.log(`Regions loaded: ${typeof regions !== 'undefined' ? regions.length : 'NOT LOADED'}`);
+
+            if (typeof regions === 'undefined' || regions.length === 0) {
+                console.error('Regions data not loaded!');
+                return;
+            }
+
             // Set SVG dimensions to match displayed image exactly
-            interactiveSvg.style.width = displayWidth + 'px';
-            interactiveSvg.style.height = displayHeight + 'px';
             interactiveSvg.setAttribute('width', displayWidth);
             interactiveSvg.setAttribute('height', displayHeight);
             interactiveSvg.setAttribute('viewBox', `0 0 ${REFERENCE_WIDTH} ${REFERENCE_HEIGHT}`);
-            interactiveSvg.setAttribute('preserveAspectRatio', 'none');
+
+            // Clear any existing polygons
+            interactiveSvg.innerHTML = '';
 
             // Create polygon elements
             regions.forEach((region, index) => {
@@ -199,9 +212,11 @@
                 interactiveSvg.appendChild(polygon);
             });
 
-            console.log(`Initialized ${regions.length} regions`);
-            console.log(`SVG size: ${displayWidth}x${displayHeight}`);
-            console.log(`Image size: ${mapImage.offsetWidth}x${mapImage.offsetHeight}`);
+            console.log(`✓ Initialized ${regions.length} regions`);
+            console.log(`✓ SVG viewBox: 0 0 ${REFERENCE_WIDTH} ${REFERENCE_HEIGHT}`);
+            console.log(`✓ SVG display size: ${displayWidth}x${displayHeight}`);
+            console.log(`✓ Image size: ${mapImage.offsetWidth}x${mapImage.offsetHeight}`);
+            console.log(`✓ Polygons created: ${interactiveSvg.querySelectorAll('polygon').length}`);
         }
 
         function selectRegion(polygonElement, region) {
