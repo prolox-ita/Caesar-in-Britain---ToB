@@ -281,6 +281,13 @@
         }
 
         function showRegionInfo(region) {
+            // Helper function to format values
+            const formatValue = (value) => {
+                if (value === null || value === undefined) return '—';
+                if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+                return value;
+            };
+
             infoPanel.classList.remove('empty');
             infoPanel.innerHTML = `
                 <h2>${region.name}</h2>
@@ -295,35 +302,39 @@
                     <div class="region-details">
                         <div class="detail-row">
                             <span class="detail-label">Region Key:</span>
-                            <span class="detail-value">—</span>
+                            <span class="detail-value">${formatValue(region.regionKey)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Owner:</span>
-                            <span class="detail-value">—</span>
+                            <span class="detail-value">${formatValue(region.owner)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Number of Slots:</span>
-                            <span class="detail-value">—</span>
+                            <span class="detail-value">${formatValue(region.numberOfSlots)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Port:</span>
-                            <span class="detail-value">—</span>
+                            <span class="detail-value">${formatValue(region.port)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Sea:</span>
+                            <span class="detail-value">${formatValue(region.sea)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Rebel Faction:</span>
-                            <span class="detail-value">—</span>
+                            <span class="detail-value">${formatValue(region.rebelFaction)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Alternative Rebel Faction:</span>
-                            <span class="detail-value">—</span>
+                            <span class="detail-value">${formatValue(region.alternativeRebelFaction)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Religion:</span>
-                            <span class="detail-value">—</span>
+                            <span class="detail-value">${formatValue(region.religion)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Is Capital:</span>
-                            <span class="detail-value">—</span>
+                            <span class="detail-value">${formatValue(region.isCapital)}</span>
                         </div>
                     </div>
                 </div>
