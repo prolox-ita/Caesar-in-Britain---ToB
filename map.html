@@ -59,24 +59,27 @@
         }
 
         .region-polygon {
-            fill: rgba(255, 255, 255, 0);
-            stroke: rgba(255, 255, 255, 0);
+            fill: rgba(212, 175, 55, 0);
+            stroke: rgba(212, 175, 55, 0);
             stroke-width: 0;
             stroke-linejoin: round;
             stroke-linecap: round;
-            transition: fill 0.2s ease, stroke 0.2s ease;
+            transition: fill 0.3s ease, stroke 0.3s ease, filter 0.3s ease;
+            cursor: pointer;
         }
 
         .region-polygon:hover {
-            fill: rgba(255, 255, 255, 0.15);
-            stroke: rgba(255, 255, 255, 1.0);
+            fill: rgba(212, 175, 55, 0.3);
+            stroke: rgba(212, 175, 55, 1.0);
             stroke-width: 20;
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.8));
         }
 
         .region-polygon.selected {
-            fill: rgba(255, 255, 255, 0.25);
-            stroke: rgba(255, 255, 255, 1.0);
+            fill: rgba(212, 175, 55, 0.45);
+            stroke: rgba(212, 175, 55, 1.0);
             stroke-width: 28;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 1.0));
         }
 
         .info-panel {
@@ -220,6 +223,8 @@
         }
 
         function selectRegion(polygonElement, region) {
+            console.log(`🖱️ Region clicked: ${region.name}`);
+
             // Deselect previous region
             if (selectedPolygon) {
                 selectedPolygon.classList.remove('selected');
