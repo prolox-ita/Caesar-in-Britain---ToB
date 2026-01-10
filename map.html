@@ -69,10 +69,10 @@
         }
 
         .region-polygon:hover {
-            fill: rgba(212, 175, 55, 0.3);
-            stroke: rgba(212, 175, 55, 1.0);
+            fill: rgba(255, 255, 255, 0.3);
+            stroke: rgba(255, 255, 255, 1.0);
             stroke-width: 20;
-            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.8));
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
         }
 
         .region-polygon.selected {
@@ -198,41 +198,55 @@
             // Clear any existing polygons
             interactiveSvg.innerHTML = '';
 
-            // Create polygon elements
-            regions.forEach((region, index) => {
-                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                polygon.setAttribute('points', region.coords);
-                polygon.setAttribute('class', 'region-polygon');
-                polygon.setAttribute('data-region-name', region.name);
-                polygon.setAttribute('data-region-id', index);
+            let totalPolygons = 0;
 
-                // Add event listeners
-                polygon.addEventListener('click', function(e) {
+            // Create region groups with multiple polygons
+            regions.forEach((region, index) => {
+                // Create a group for this region (to handle multiple polygons as one)
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.setAttribute('class', 'region-group');
+                group.setAttribute('data-region-name', region.name);
+                group.setAttribute('data-region-color', region.color);
+                group.setAttribute('data-region-id', index);
+
+                // Create a polygon for each shape in this region
+                region.polygons.forEach((coords) => {
+                    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    polygon.setAttribute('points', coords);
+                    polygon.setAttribute('class', 'region-polygon');
+                    group.appendChild(polygon);
+                    totalPolygons++;
+                });
+
+                // Add event listeners to the group
+                group.addEventListener('click', function(e) {
                     e.stopPropagation();
                     selectRegion(this, region);
                 });
 
-                interactiveSvg.appendChild(polygon);
+                interactiveSvg.appendChild(group);
             });
 
-            console.log(`✓ Initialized ${regions.length} regions`);
+            console.log(`✓ Initialized ${regions.length} regions (${totalPolygons} polygons)`);
             console.log(`✓ SVG viewBox: 0 0 ${REFERENCE_WIDTH} ${REFERENCE_HEIGHT}`);
             console.log(`✓ SVG display size: ${displayWidth}x${displayHeight}`);
             console.log(`✓ Image size: ${mapImage.offsetWidth}x${mapImage.offsetHeight}`);
-            console.log(`✓ Polygons created: ${interactiveSvg.querySelectorAll('polygon').length}`);
+            console.log(`✓ Groups created: ${interactiveSvg.querySelectorAll('g').length}`);
         }
 
-        function selectRegion(polygonElement, region) {
-            console.log(`🖱️ Region clicked: ${region.name}`);
+        function selectRegion(groupElement, region) {
+            console.log(`🖱️ Region clicked: ${region.name} (${region.color})`);
 
             // Deselect previous region
             if (selectedPolygon) {
-                selectedPolygon.classList.remove('selected');
+                const previousPolygons = selectedPolygon.querySelectorAll('.region-polygon');
+                previousPolygons.forEach(p => p.classList.remove('selected'));
             }
 
-            // Select new region
-            selectedPolygon = polygonElement;
-            polygonElement.classList.add('selected');
+            // Select new region - add 'selected' class to all polygons in the group
+            selectedPolygon = groupElement;
+            const polygons = groupElement.querySelectorAll('.region-polygon');
+            polygons.forEach(p => p.classList.add('selected'));
 
             // Show region info
             showRegionInfo(region);
@@ -242,6 +256,12 @@
             infoPanel.classList.remove('empty');
             infoPanel.innerHTML = `
                 <h2>${region.name}</h2>
+                <div class="info-content">
+                    <p style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">
+                        <span style="display: inline-block; width: 40px; height: 40px; background: ${region.color}; border: 2px solid #8b7355; border-radius: 4px;"></span>
+                        <span style="font-family: monospace; font-size: 1.1rem;">${region.color}</span>
+                    </p>
+                </div>
             `;
         }
     </script>
