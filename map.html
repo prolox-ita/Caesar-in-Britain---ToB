@@ -154,18 +154,11 @@
         </div>
     </div>
 
+    <script src="regions_data.js"></script>
     <script>
         const mapImage = document.getElementById('mapImage');
         const interactiveSvg = document.getElementById('interactiveSvg');
         const infoPanel = document.getElementById('infoPanel');
-
-        // Region definitions (coordinates from region_reference.png which is 4800x3404)
-        const regions = [
-            {
-                name: "No-Go Region",
-                coords: "-6,2616,32,2590,138,2569,214,2476,651,2399,681,2408,973,2336,1236,2382,1427,2476,1758,2535,2033,2497,2135,2442,2428,2488,2500,2543,2500,2590,2483,2649,2500,2726,2563,2772,2584,2844,2601,2963,2648,3086,2763,3226,2860,3319,2945,3370,3064,3379,3136,3374,3369,3391,3420,3336,3670,3268,3717,3222,3751,3251,3763,3340,3725,3400,2,3400"
-            }
-        ];
 
         const REFERENCE_WIDTH = 4800;
         const REFERENCE_HEIGHT = 3404;
