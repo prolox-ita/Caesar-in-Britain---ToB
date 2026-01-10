@@ -115,6 +115,34 @@
             line-height: 1.8;
         }
 
+        .region-details {
+            margin-top: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #5a4a2f;
+            font-size: 0.95rem;
+        }
+
+        .detail-value {
+            color: #6a5a3f;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
         .back-button {
             position: absolute;
             top: 20px;
@@ -257,10 +285,47 @@
             infoPanel.innerHTML = `
                 <h2>${region.name}</h2>
                 <div class="info-content">
-                    <p style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">
-                        <span style="display: inline-block; width: 40px; height: 40px; background: ${region.color}; border: 2px solid #8b7355; border-radius: 4px;"></span>
-                        <span style="font-family: monospace; font-size: 1.1rem;">${region.color}</span>
-                    </p>
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="display: inline-block; width: 40px; height: 40px; background: ${region.color}; border: 2px solid #8b7355; border-radius: 4px;"></span>
+                            <span style="font-family: monospace; font-size: 1.1rem;">${region.color}</span>
+                        </div>
+                    </div>
+
+                    <div class="region-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Region Key:</span>
+                            <span class="detail-value">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Owner:</span>
+                            <span class="detail-value">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Number of Slots:</span>
+                            <span class="detail-value">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Port:</span>
+                            <span class="detail-value">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Rebel Faction:</span>
+                            <span class="detail-value">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Alternative Rebel Faction:</span>
+                            <span class="detail-value">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Religion:</span>
+                            <span class="detail-value">—</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Is Capital:</span>
+                            <span class="detail-value">—</span>
+                        </div>
+                    </div>
                 </div>
             `;
         }
