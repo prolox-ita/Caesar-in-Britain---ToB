@@ -418,11 +418,29 @@
                         polygon.setAttribute('points', coords);
                         polygon.setAttribute('class', 'region-polygon faction-mode');
                         polygon.setAttribute('fill', factionData.factionColor);
-                        polygon.setAttribute('fill-opacity', '0.6');
-                        polygon.setAttribute('stroke', factionData.factionColor);
-                        polygon.setAttribute('stroke-width', '2');
+                        polygon.setAttribute('fill-opacity', '0.7');
+                        // NO stroke - questo rimuove i bordi interni tra regioni della stessa fazione
+                        polygon.setAttribute('stroke', 'none');
+                        polygon.setAttribute('stroke-width', '0');
                         factionGroup.appendChild(polygon);
                     });
+                });
+
+                // Add hover effect to the group
+                factionGroup.addEventListener('mouseenter', function() {
+                    const polygons = this.querySelectorAll('.region-polygon');
+                    polygons.forEach(p => {
+                        p.setAttribute('fill-opacity', '0.85');
+                    });
+                });
+
+                factionGroup.addEventListener('mouseleave', function() {
+                    if (this !== selectedPolygon) {
+                        const polygons = this.querySelectorAll('.region-polygon');
+                        polygons.forEach(p => {
+                            p.setAttribute('fill-opacity', '0.7');
+                        });
+                    }
                 });
 
                 // Add event listener for faction click
@@ -462,17 +480,15 @@
             if (selectedPolygon) {
                 const previousPolygons = selectedPolygon.querySelectorAll('.region-polygon');
                 previousPolygons.forEach(p => {
-                    p.setAttribute('fill-opacity', '0.6');
-                    p.setAttribute('stroke-width', '2');
+                    p.setAttribute('fill-opacity', '0.7');
                 });
             }
 
-            // Select new faction - highlight all polygons
+            // Select new faction - highlight all polygons with higher opacity
             selectedPolygon = groupElement;
             const polygons = groupElement.querySelectorAll('.region-polygon');
             polygons.forEach(p => {
-                p.setAttribute('fill-opacity', '0.8');
-                p.setAttribute('stroke-width', '4');
+                p.setAttribute('fill-opacity', '0.95');
             });
 
             // Show faction info
