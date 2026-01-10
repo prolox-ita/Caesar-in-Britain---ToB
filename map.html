@@ -241,11 +241,18 @@
 
         /* Faction mode styles */
         .region-polygon.faction-mode {
-            stroke-width: 0;
+            stroke: rgba(255, 255, 255, 0.4);
+            stroke-width: 2;
+            stroke-linejoin: round;
+            stroke-linecap: round;
         }
 
-        .region-polygon.faction-mode.same-faction-neighbor {
-            stroke: none !important;
+        .faction-group {
+            filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+        }
+
+        .faction-group:hover {
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
         }
     </style>
 </head>
@@ -419,9 +426,8 @@
                         polygon.setAttribute('class', 'region-polygon faction-mode');
                         polygon.setAttribute('fill', factionData.factionColor);
                         polygon.setAttribute('fill-opacity', '0.7');
-                        // NO stroke - questo rimuove i bordi interni tra regioni della stessa fazione
-                        polygon.setAttribute('stroke', 'none');
-                        polygon.setAttribute('stroke-width', '0');
+                        // Il bordo è gestito tramite CSS - sarà visibile solo tra fazioni diverse
+                        // mentre le regioni della stessa fazione appariranno fuse insieme
                         factionGroup.appendChild(polygon);
                     });
                 });
