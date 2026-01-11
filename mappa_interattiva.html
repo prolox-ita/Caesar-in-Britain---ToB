@@ -87,13 +87,14 @@
             transition: all 0.3s ease;
         }
         
-        .regione:hover {
+        .regione:hover,
+        .regione.hovered {
             fill: rgba(212, 175, 55, 0.25);
             stroke: rgba(212, 175, 55, 0.8);
             stroke-width: 2;
             filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
         }
-        
+
         .regione.selezionata {
             fill: rgba(212, 175, 55, 0.35);
             stroke: rgba(212, 175, 55, 1);
@@ -2781,7 +2782,14 @@
                 const colore = e.target.dataset.colore;
                 const area = e.target.dataset.area;
                 const id = e.target.id;
-                
+
+                // Evidenzia tutte le aree della stessa regione (stesso ID)
+                regioni.forEach(r => {
+                    if (r.id === id) {
+                        r.classList.add('hovered');
+                    }
+                });
+
                 tooltipContent.innerHTML = `
                     <div style="font-weight: bold; margin-bottom: 5px;">
                         <span class="color-swatch" style="background: ${colore}"></span>
@@ -2793,37 +2801,55 @@
                 `;
                 tooltip.classList.add('visible');
             });
-            
+
             regione.addEventListener('mousemove', (e) => {
                 const rect = mapContainer.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
+
                 tooltip.style.left = x + 'px';
                 tooltip.style.top = y + 'px';
             });
-            
-            regione.addEventListener('mouseleave', () => {
+
+            regione.addEventListener('mouseleave', (e) => {
+                const id = e.target.id;
+
+                // Rimuovi evidenziazione da tutte le aree della stessa regione
+                regioni.forEach(r => {
+                    if (r.id === id) {
+                        r.classList.remove('hovered');
+                    }
+                });
+
                 tooltip.classList.remove('visible');
             });
             
             // Gestione click
             regione.addEventListener('click', (e) => {
                 e.stopPropagation();
-                
-                // Rimuovi selezione precedente
+
+                const id = e.target.id;
+
+                // Rimuovi selezione precedente da tutte le aree della regione precedente
                 if (regioneSelezionata) {
-                    regioneSelezionata.classList.remove('selezionata');
+                    regioni.forEach(r => {
+                        if (r.id === regioneSelezionata) {
+                            r.classList.remove('selezionata');
+                        }
+                    });
                 }
-                
-                // Seleziona nuova regione
-                e.target.classList.add('selezionata');
-                regioneSelezionata = e.target;
-                
+
+                // Seleziona tutte le aree della nuova regione (stesso ID)
+                regioni.forEach(r => {
+                    if (r.id === id) {
+                        r.classList.add('selezionata');
+                    }
+                });
+                regioneSelezionata = id; // Salva l'ID invece dell'elemento
+
                 const colore = e.target.dataset.colore;
                 const area = e.target.dataset.area;
                 const punti = e.target.dataset.punti;
-                const id = e.target.id;
                 const centroX = e.target.dataset.centroX;
                 const centroY = e.target.dataset.centroY;
                 
@@ -2858,7 +2884,12 @@
         document.addEventListener('click', (e) => {
             if (e.target.id === 'mappa' || e.target.id === 'mapContainer') {
                 if (regioneSelezionata) {
-                    regioneSelezionata.classList.remove('selezionata');
+                    // Rimuovi selezione da tutte le aree della regione
+                    regioni.forEach(r => {
+                        if (r.id === regioneSelezionata) {
+                            r.classList.remove('selezionata');
+                        }
+                    });
                     regioneSelezionata = null;
                     regioneInfo.innerHTML = '<div class="nessuna-selezione">Nessuna regione selezionata. Clicca su una regione per vedere i dettagli.</div>';
                 }
