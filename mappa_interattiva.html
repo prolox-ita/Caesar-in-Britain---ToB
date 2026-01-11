@@ -2767,7 +2767,8 @@
             </div>
         </div>
     </div>
-    
+
+    <script src="regions_data.js"></script>
     <script>
         const tooltip = document.getElementById('tooltip');
         const tooltipContent = document.getElementById('tooltipContent');
@@ -2775,7 +2776,14 @@
         const regioneInfo = document.getElementById('regioneInfo');
         const mapContainer = document.getElementById('mapContainer');
         let regioneSelezionata = null;
-        
+
+        // Funzione per trovare la regione in base al colore
+        function findRegionByColor(color) {
+            // Normalizza il colore (rimuovi spazi e converti in lowercase)
+            const normalizedColor = color.toLowerCase().trim();
+            return regions.find(r => r.color.toLowerCase() === normalizedColor);
+        }
+
         regioni.forEach((regione, index) => {
             // Gestione hover
             regione.addEventListener('mouseenter', (e) => {
@@ -2790,10 +2798,14 @@
                     }
                 });
 
+                // Trova la regione corrispondente in base al colore
+                const regionData = findRegionByColor(colore);
+                const regionName = regionData ? regionData.name : id;
+
                 tooltipContent.innerHTML = `
                     <div style="font-weight: bold; margin-bottom: 5px;">
                         <span class="color-swatch" style="background: ${colore}"></span>
-                        ${id}
+                        ${regionName}
                     </div>
                     <div style="font-size: 12px; color: #b8956a;">
                         Area: ${parseInt(area).toLocaleString('it-IT')} px²
@@ -2852,31 +2864,78 @@
                 const punti = e.target.dataset.punti;
                 const centroX = e.target.dataset.centroX;
                 const centroY = e.target.dataset.centroY;
-                
-                regioneInfo.innerHTML = `
-                    <div style="margin-bottom: 10px;">
-                        <strong style="color: #d4af37; font-size: 1.2em;">${id}</strong>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Colore:</span>
-                        <span class="stat-value">
-                            <span class="color-swatch" style="background: ${colore}"></span>
-                            ${colore}
-                        </span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Area:</span>
-                        <span class="stat-value">${parseInt(area).toLocaleString('it-IT')} px²</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Punti contorno:</span>
-                        <span class="stat-value">${punti}</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Centro:</span>
-                        <span class="stat-value">(${centroX}, ${centroY})</span>
-                    </div>
-                `;
+
+                // Trova la regione corrispondente in base al colore
+                const regionData = findRegionByColor(colore);
+
+                if (regionData) {
+                    // Mostra informazioni complete dalla regione
+                    regioneInfo.innerHTML = `
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #d4af37; font-size: 1.2em;">${regionData.name.toUpperCase()}</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Colore:</span>
+                            <span class="stat-value">
+                                <span class="color-swatch" style="background: ${colore}"></span>
+                                ${colore}
+                            </span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Owner:</span>
+                            <span class="stat-value">${regionData.owner || 'N/A'}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Faction Color:</span>
+                            <span class="stat-value">
+                                <span class="color-swatch" style="background: ${regionData.factionColor}"></span>
+                                ${regionData.factionColor || 'N/A'}
+                            </span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Port:</span>
+                            <span class="stat-value">${regionData.port ? 'Yes' : 'No'}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Area (mappa):</span>
+                            <span class="stat-value">${parseInt(area).toLocaleString('it-IT')} px²</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Punti contorno:</span>
+                            <span class="stat-value">${punti}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Centro:</span>
+                            <span class="stat-value">(${centroX}, ${centroY})</span>
+                        </div>
+                    `;
+                } else {
+                    // Fallback se non trova la regione
+                    regioneInfo.innerHTML = `
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #d4af37; font-size: 1.2em;">${id}</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Colore:</span>
+                            <span class="stat-value">
+                                <span class="color-swatch" style="background: ${colore}"></span>
+                                ${colore}
+                            </span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Area:</span>
+                            <span class="stat-value">${parseInt(area).toLocaleString('it-IT')} px²</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Punti contorno:</span>
+                            <span class="stat-value">${punti}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Centro:</span>
+                            <span class="stat-value">(${centroX}, ${centroY})</span>
+                        </div>
+                    `;
+                }
             });
         });
         
