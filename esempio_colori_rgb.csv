@@ -1,0 +1,9 @@
+id,nome,r,g,b,descrizione
+1,Rosso,255,0,0,Colore rosso puro
+2,Verde,0,255,0,Colore verde puro
+3,Blu,0,0,255,Colore blu puro
+4,Giallo,255,255,0,Colore giallo
+5,Magenta,255,0,255,Colore magenta
+6,Ciano,0,255,255,Colore ciano
+7,Nero,0,0,0,Nero
+8,Bianco,255,255,255,Bianco

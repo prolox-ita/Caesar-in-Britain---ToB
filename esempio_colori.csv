@@ -1,0 +1,9 @@
+id,nome,colore_hex,descrizione
+1,Rosso,#FF0000,Colore rosso puro
+2,Verde,#00FF00,Colore verde puro
+3,Blu,#0000FF,Colore blu puro
+4,Giallo,#FFFF00,Colore giallo
+5,Magenta,#FF00FF,Colore magenta
+6,Ciano,#00FFFF,Colore ciano
+7,Nero,#000000,Nero
+8,Bianco,#FFFFFF,Bianco
