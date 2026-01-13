@@ -300,6 +300,87 @@
         .export-button:active {
             transform: translateY(0);
         }
+
+        /* Action box in info panel */
+        .action-box {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 350px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(184, 150, 46, 0.95));
+            backdrop-filter: blur(10px);
+            border-top: 3px solid #d4af37;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .action-box.collapsed {
+            transform: translateY(calc(100% - 50px));
+        }
+
+        .action-box-toggle {
+            width: 100%;
+            background: linear-gradient(135deg, #d4af37, #b8962e);
+            border: none;
+            padding: 15px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .action-box-toggle:hover {
+            background: linear-gradient(135deg, #b8962e, #d4af37);
+        }
+
+        .action-box-toggle .toggle-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .action-box.collapsed .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .action-box-content {
+            padding: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .action-button {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(245, 241, 232, 0.98), rgba(232, 220, 196, 0.98));
+            border: 2px solid #8b7355;
+            border-radius: 8px;
+            padding: 15px 10px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: #5a4a2f;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(135deg, rgba(232, 220, 196, 0.98), rgba(212, 175, 55, 0.98));
+            border-color: #d4af37;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 
@@ -331,6 +412,21 @@
         </div>
         <div class="info-panel empty" id="infoPanel">
             <p>Click on a region to view information</p>
+        </div>
+    </div>
+
+    <!-- Action box -->
+    <div class="action-box collapsed" id="actionBox">
+        <button class="action-box-toggle" id="actionBoxToggle">
+            <span>Actions</span>
+            <span class="toggle-icon">▼</span>
+        </button>
+        <div class="action-box-content">
+            <div class="action-buttons">
+                <button class="action-button" id="actionButton1">Button 1</button>
+                <button class="action-button" id="actionButton2">Button 2</button>
+                <button class="action-button" id="actionButton3">Button 3</button>
+            </div>
         </div>
     </div>
 
@@ -713,6 +809,27 @@
 
         // Add event listener to export button
         document.getElementById('exportButton').addEventListener('click', exportToExcel);
+
+        // Action box toggle functionality
+        const actionBox = document.getElementById('actionBox');
+        const actionBoxToggle = document.getElementById('actionBoxToggle');
+
+        actionBoxToggle.addEventListener('click', function() {
+            actionBox.classList.toggle('collapsed');
+        });
+
+        // Action button event listeners (placeholder for future functionality)
+        document.getElementById('actionButton1').addEventListener('click', function() {
+            console.log('Action Button 1 clicked');
+        });
+
+        document.getElementById('actionButton2').addEventListener('click', function() {
+            console.log('Action Button 2 clicked');
+        });
+
+        document.getElementById('actionButton3').addEventListener('click', function() {
+            console.log('Action Button 3 clicked');
+        });
     </script>
 
 </body>
