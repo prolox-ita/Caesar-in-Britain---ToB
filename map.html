@@ -242,10 +242,21 @@
 
         /* Faction mode styles */
         .region-polygon.faction-mode {
+            /* Il fill viene impostato via JavaScript con il colore della fazione */
+            /* Non sovrascrivere il fill qui, lascia che JS gestisca il colore */
             stroke: rgba(255, 255, 255, 0.4);
             stroke-width: 2;
             stroke-linejoin: round;
             stroke-linecap: round;
+        }
+
+        /* Assicura che l'hover non sovrascriva il colore della fazione */
+        .region-polygon.faction-mode:hover,
+        .region-polygon.faction-mode.hovered {
+            /* Mantieni il fill esistente, aumenta solo l'opacità */
+            stroke: rgba(255, 255, 255, 0.8);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
         }
 
         .faction-group {
@@ -439,7 +450,7 @@
                         polygon.setAttribute('points', coords);
                         polygon.setAttribute('class', 'region-polygon faction-mode');
                         polygon.setAttribute('fill', factionData.factionColor);
-                        polygon.setAttribute('fill-opacity', '0.7');
+                        polygon.setAttribute('fill-opacity', '0.85'); // Increased from 0.7 for better visibility
                         polygon.setAttribute('data-region-color', region.color); // Store region color
                         // Il bordo è gestito tramite CSS - sarà visibile solo tra fazioni diverse
                         // mentre le regioni della stessa fazione appariranno fuse insieme
@@ -449,7 +460,7 @@
                             const regionColor = this.getAttribute('data-region-color');
                             const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
                             allPolygonsOfRegion.forEach(p => {
-                                p.setAttribute('fill-opacity', '0.85');
+                                p.setAttribute('fill-opacity', '1.0'); // Full opacity on hover
                                 p.classList.add('hovered');
                             });
                         });
@@ -459,7 +470,7 @@
                             const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
                             if (factionGroup !== selectedPolygon) {
                                 allPolygonsOfRegion.forEach(p => {
-                                    p.setAttribute('fill-opacity', '0.7');
+                                    p.setAttribute('fill-opacity', '0.85'); // Back to default
                                     p.classList.remove('hovered');
                                 });
                             }
@@ -506,7 +517,7 @@
             if (selectedPolygon) {
                 const previousPolygons = selectedPolygon.querySelectorAll('.region-polygon');
                 previousPolygons.forEach(p => {
-                    p.setAttribute('fill-opacity', '0.7');
+                    p.setAttribute('fill-opacity', '0.85'); // Back to default
                 });
             }
 
