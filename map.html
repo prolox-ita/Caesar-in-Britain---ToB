@@ -68,7 +68,8 @@
             cursor: pointer;
         }
 
-        .region-polygon:hover {
+        .region-polygon:hover,
+        .region-polygon.hovered {
             fill: rgba(255, 255, 255, 0.3);
             stroke: rgba(255, 255, 255, 1.0);
             stroke-width: 20;
@@ -381,6 +382,19 @@
                     totalPolygons++;
                 });
 
+                // Add hover effect to highlight all polygons in the region
+                group.addEventListener('mouseenter', function() {
+                    const polygons = this.querySelectorAll('.region-polygon');
+                    polygons.forEach(p => p.classList.add('hovered'));
+                });
+
+                group.addEventListener('mouseleave', function() {
+                    if (this !== selectedPolygon) {
+                        const polygons = this.querySelectorAll('.region-polygon');
+                        polygons.forEach(p => p.classList.remove('hovered'));
+                    }
+                });
+
                 // Add event listeners to the group
                 group.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -426,27 +440,33 @@
                         polygon.setAttribute('class', 'region-polygon faction-mode');
                         polygon.setAttribute('fill', factionData.factionColor);
                         polygon.setAttribute('fill-opacity', '0.7');
+                        polygon.setAttribute('data-region-color', region.color); // Store region color
                         // Il bordo è gestito tramite CSS - sarà visibile solo tra fazioni diverse
                         // mentre le regioni della stessa fazione appariranno fuse insieme
+
+                        // Add hover effect to highlight all polygons of the same region
+                        polygon.addEventListener('mouseenter', function() {
+                            const regionColor = this.getAttribute('data-region-color');
+                            const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
+                            allPolygonsOfRegion.forEach(p => {
+                                p.setAttribute('fill-opacity', '0.85');
+                                p.classList.add('hovered');
+                            });
+                        });
+
+                        polygon.addEventListener('mouseleave', function() {
+                            const regionColor = this.getAttribute('data-region-color');
+                            const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
+                            if (factionGroup !== selectedPolygon) {
+                                allPolygonsOfRegion.forEach(p => {
+                                    p.setAttribute('fill-opacity', '0.7');
+                                    p.classList.remove('hovered');
+                                });
+                            }
+                        });
+
                         factionGroup.appendChild(polygon);
                     });
-                });
-
-                // Add hover effect to the group
-                factionGroup.addEventListener('mouseenter', function() {
-                    const polygons = this.querySelectorAll('.region-polygon');
-                    polygons.forEach(p => {
-                        p.setAttribute('fill-opacity', '0.85');
-                    });
-                });
-
-                factionGroup.addEventListener('mouseleave', function() {
-                    if (this !== selectedPolygon) {
-                        const polygons = this.querySelectorAll('.region-polygon');
-                        polygons.forEach(p => {
-                            p.setAttribute('fill-opacity', '0.7');
-                        });
-                    }
                 });
 
                 // Add event listener for faction click
