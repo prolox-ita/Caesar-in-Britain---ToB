@@ -9,6 +9,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Merriweather:wght@300;400;700&display=swap"
         rel="stylesheet">
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -64,11 +66,12 @@
             stroke-width: 0;
             stroke-linejoin: round;
             stroke-linecap: round;
-            transition: fill 0.3s ease, stroke 0.3s ease, filter 0.3s ease;
+            transition: stroke 0.3s ease, filter 0.3s ease; /* Removed fill transition */
             cursor: pointer;
         }
 
-        .region-polygon:hover {
+        .region-polygon:hover:not(.faction-mode),
+        .region-polygon.hovered:not(.faction-mode) {
             fill: rgba(255, 255, 255, 0.3);
             stroke: rgba(255, 255, 255, 1.0);
             stroke-width: 20;
@@ -241,10 +244,22 @@
 
         /* Faction mode styles */
         .region-polygon.faction-mode {
-            stroke: rgba(255, 255, 255, 0.4);
+            /* IMPORTANT: fill e fill-opacity vengono impostati via inline style in JavaScript */
+            /* Non sovrascrivere fill qui - inline styles hanno priorità */
+            stroke: rgba(255, 255, 255, 0.7); /* Increased from 0.4 for better border visibility */
             stroke-width: 2;
             stroke-linejoin: round;
             stroke-linecap: round;
+            transition: stroke 0.3s ease, filter 0.3s ease; /* No fill transition */
+        }
+
+        /* Assicura che l'hover non sovrascriva il colore della fazione */
+        .region-polygon.faction-mode:hover,
+        .region-polygon.faction-mode.hovered {
+            /* Mantieni il fill esistente, aumenta solo l'opacità */
+            stroke: rgba(255, 255, 255, 0.9); /* Increased from 0.8 for clearer hover */
+            stroke-width: 3;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
         }
 
         .faction-group {
@@ -254,11 +269,47 @@
         .faction-group:hover {
             filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
         }
+
+        /* Export button */
+        .export-button {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .export-button:hover {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .export-button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 
 <body>
     <a href="index.html" class="back-button">← Back to Home</a>
+
+    <button class="export-button" id="exportButton">
+        <span>📊</span>
+        <span>Export to Excel</span>
+    </button>
 
     <div class="view-toggle">
         <span class="view-toggle-label">View Mode</span>
@@ -381,6 +432,19 @@
                     totalPolygons++;
                 });
 
+                // Add hover effect to highlight all polygons in the region
+                group.addEventListener('mouseenter', function() {
+                    const polygons = this.querySelectorAll('.region-polygon');
+                    polygons.forEach(p => p.classList.add('hovered'));
+                });
+
+                group.addEventListener('mouseleave', function() {
+                    if (this !== selectedPolygon) {
+                        const polygons = this.querySelectorAll('.region-polygon');
+                        polygons.forEach(p => p.classList.remove('hovered'));
+                    }
+                });
+
                 // Add event listeners to the group
                 group.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -424,29 +488,36 @@
                         const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
                         polygon.setAttribute('points', coords);
                         polygon.setAttribute('class', 'region-polygon faction-mode');
-                        polygon.setAttribute('fill', factionData.factionColor);
-                        polygon.setAttribute('fill-opacity', '0.7');
+                        polygon.setAttribute('data-region-color', region.color); // Store region color
+                        // Use inline style to override CSS - this has higher priority!
+                        polygon.style.fill = factionData.factionColor;
+                        polygon.style.fillOpacity = '0.6'; // More transparency for better map visibility
                         // Il bordo è gestito tramite CSS - sarà visibile solo tra fazioni diverse
                         // mentre le regioni della stessa fazione appariranno fuse insieme
+
+                        // Add hover effect to highlight all polygons of the same region
+                        polygon.addEventListener('mouseenter', function() {
+                            const regionColor = this.getAttribute('data-region-color');
+                            const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
+                            allPolygonsOfRegion.forEach(p => {
+                                p.style.fillOpacity = '0.8'; // Increased opacity on hover
+                                p.classList.add('hovered');
+                            });
+                        });
+
+                        polygon.addEventListener('mouseleave', function() {
+                            const regionColor = this.getAttribute('data-region-color');
+                            const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
+                            if (factionGroup !== selectedPolygon) {
+                                allPolygonsOfRegion.forEach(p => {
+                                    p.style.fillOpacity = '0.6'; // Back to default transparency
+                                    p.classList.remove('hovered');
+                                });
+                            }
+                        });
+
                         factionGroup.appendChild(polygon);
                     });
-                });
-
-                // Add hover effect to the group
-                factionGroup.addEventListener('mouseenter', function() {
-                    const polygons = this.querySelectorAll('.region-polygon');
-                    polygons.forEach(p => {
-                        p.setAttribute('fill-opacity', '0.85');
-                    });
-                });
-
-                factionGroup.addEventListener('mouseleave', function() {
-                    if (this !== selectedPolygon) {
-                        const polygons = this.querySelectorAll('.region-polygon');
-                        polygons.forEach(p => {
-                            p.setAttribute('fill-opacity', '0.7');
-                        });
-                    }
                 });
 
                 // Add event listener for faction click
@@ -486,7 +557,7 @@
             if (selectedPolygon) {
                 const previousPolygons = selectedPolygon.querySelectorAll('.region-polygon');
                 previousPolygons.forEach(p => {
-                    p.setAttribute('fill-opacity', '0.7');
+                    p.style.fillOpacity = '0.6'; // Back to default transparency
                 });
             }
 
@@ -494,7 +565,7 @@
             selectedPolygon = groupElement;
             const polygons = groupElement.querySelectorAll('.region-polygon');
             polygons.forEach(p => {
-                p.setAttribute('fill-opacity', '0.95');
+                p.style.fillOpacity = '0.85'; // Highlighted but still transparent
             });
 
             // Show faction info
@@ -590,6 +661,58 @@
                 </div>
             `;
         }
+
+        // Excel export functionality
+        function generateFactionKey(factionName) {
+            if (!factionName || factionName === '—') return '';
+
+            // Convert faction name to a key format (lowercase, replace spaces with underscores)
+            return 'mk_fac_' + factionName
+                .toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9_]/g, '');
+        }
+
+        function exportToExcel() {
+            console.log('Generating Excel export...');
+
+            // Prepare data for Excel
+            const exportData = regions.map(region => ({
+                'Region Key': region.regionKey || '',
+                'Hex Color': region.color || '',
+                'Faction Key': region.owner ? generateFactionKey(region.owner) : '',
+                'Faction Name': region.owner || ''
+            }));
+
+            // Create a new workbook
+            const wb = XLSX.utils.book_new();
+
+            // Convert data to worksheet
+            const ws = XLSX.utils.json_to_sheet(exportData);
+
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 25 }, // Region Key
+                { wch: 12 }, // Hex Color
+                { wch: 30 }, // Faction Key
+                { wch: 30 }  // Faction Name
+            ];
+
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Regions');
+
+            // Generate file name with current date
+            const date = new Date().toISOString().split('T')[0];
+            const fileName = `mk1212_regions_export_${date}.xlsx`;
+
+            // Trigger download
+            XLSX.writeFile(wb, fileName);
+
+            console.log(`✓ Excel file exported: ${fileName}`);
+        }
+
+        // Add event listener to export button
+        document.getElementById('exportButton').addEventListener('click', exportToExcel);
     </script>
 
 </body>
