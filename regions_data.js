@@ -2115,13 +2115,13 @@ const regions = [
         ]
     },
     {
-        name: "Region_#40B6BF",
-        regionKey: "mk_reg_unknown",
+        name: "Edinburgh",
+        regionKey: "mk_reg_edinburgh",
         color: "#40B6BF",
         sea: false,
         port: false,
-        owner: null,
-        factionColor: null,
+        owner: "Kingdom of Scotland",
+        factionColor: "#CCCC00",
         numberOfSlots: null,
         rebelFaction: null,
         alternativeRebelFaction: null,
