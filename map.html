@@ -64,12 +64,12 @@
             stroke-width: 0;
             stroke-linejoin: round;
             stroke-linecap: round;
-            transition: fill 0.3s ease, stroke 0.3s ease, filter 0.3s ease;
+            transition: stroke 0.3s ease, filter 0.3s ease; /* Removed fill transition */
             cursor: pointer;
         }
 
-        .region-polygon:hover,
-        .region-polygon.hovered {
+        .region-polygon:hover:not(.faction-mode),
+        .region-polygon.hovered:not(.faction-mode) {
             fill: rgba(255, 255, 255, 0.3);
             stroke: rgba(255, 255, 255, 1.0);
             stroke-width: 20;
@@ -242,12 +242,13 @@
 
         /* Faction mode styles */
         .region-polygon.faction-mode {
-            /* Il fill viene impostato via JavaScript con il colore della fazione */
-            /* Non sovrascrivere il fill qui, lascia che JS gestisca il colore */
+            /* IMPORTANT: fill e fill-opacity vengono impostati via inline style in JavaScript */
+            /* Non sovrascrivere fill qui - inline styles hanno priorità */
             stroke: rgba(255, 255, 255, 0.4);
             stroke-width: 2;
             stroke-linejoin: round;
             stroke-linecap: round;
+            transition: stroke 0.3s ease, filter 0.3s ease; /* No fill transition */
         }
 
         /* Assicura che l'hover non sovrascriva il colore della fazione */
@@ -449,9 +450,10 @@
                         const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
                         polygon.setAttribute('points', coords);
                         polygon.setAttribute('class', 'region-polygon faction-mode');
-                        polygon.setAttribute('fill', factionData.factionColor);
-                        polygon.setAttribute('fill-opacity', '0.85'); // Increased from 0.7 for better visibility
                         polygon.setAttribute('data-region-color', region.color); // Store region color
+                        // Use inline style to override CSS - this has higher priority!
+                        polygon.style.fill = factionData.factionColor;
+                        polygon.style.fillOpacity = '0.85';
                         // Il bordo è gestito tramite CSS - sarà visibile solo tra fazioni diverse
                         // mentre le regioni della stessa fazione appariranno fuse insieme
 
@@ -460,7 +462,7 @@
                             const regionColor = this.getAttribute('data-region-color');
                             const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
                             allPolygonsOfRegion.forEach(p => {
-                                p.setAttribute('fill-opacity', '1.0'); // Full opacity on hover
+                                p.style.fillOpacity = '1.0'; // Full opacity on hover
                                 p.classList.add('hovered');
                             });
                         });
@@ -470,7 +472,7 @@
                             const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
                             if (factionGroup !== selectedPolygon) {
                                 allPolygonsOfRegion.forEach(p => {
-                                    p.setAttribute('fill-opacity', '0.85'); // Back to default
+                                    p.style.fillOpacity = '0.85'; // Back to default
                                     p.classList.remove('hovered');
                                 });
                             }
@@ -517,7 +519,7 @@
             if (selectedPolygon) {
                 const previousPolygons = selectedPolygon.querySelectorAll('.region-polygon');
                 previousPolygons.forEach(p => {
-                    p.setAttribute('fill-opacity', '0.85'); // Back to default
+                    p.style.fillOpacity = '0.85'; // Back to default
                 });
             }
 
@@ -525,7 +527,7 @@
             selectedPolygon = groupElement;
             const polygons = groupElement.querySelectorAll('.region-polygon');
             polygons.forEach(p => {
-                p.setAttribute('fill-opacity', '0.95');
+                p.style.fillOpacity = '0.95';
             });
 
             // Show faction info
