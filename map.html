@@ -9,6 +9,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Merriweather:wght@300;400;700&display=swap"
         rel="stylesheet">
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -267,11 +269,47 @@
         .faction-group:hover {
             filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
         }
+
+        /* Export button */
+        .export-button {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .export-button:hover {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .export-button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 
 <body>
     <a href="index.html" class="back-button">← Back to Home</a>
+
+    <button class="export-button" id="exportButton">
+        <span>📊</span>
+        <span>Export to Excel</span>
+    </button>
 
     <div class="view-toggle">
         <span class="view-toggle-label">View Mode</span>
@@ -623,6 +661,58 @@
                 </div>
             `;
         }
+
+        // Excel export functionality
+        function generateFactionKey(factionName) {
+            if (!factionName || factionName === '—') return '';
+
+            // Convert faction name to a key format (lowercase, replace spaces with underscores)
+            return 'mk_fac_' + factionName
+                .toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9_]/g, '');
+        }
+
+        function exportToExcel() {
+            console.log('Generating Excel export...');
+
+            // Prepare data for Excel
+            const exportData = regions.map(region => ({
+                'Region Key': region.regionKey || '',
+                'Hex Color': region.color || '',
+                'Faction Key': region.owner ? generateFactionKey(region.owner) : '',
+                'Faction Name': region.owner || ''
+            }));
+
+            // Create a new workbook
+            const wb = XLSX.utils.book_new();
+
+            // Convert data to worksheet
+            const ws = XLSX.utils.json_to_sheet(exportData);
+
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 25 }, // Region Key
+                { wch: 12 }, // Hex Color
+                { wch: 30 }, // Faction Key
+                { wch: 30 }  // Faction Name
+            ];
+
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Regions');
+
+            // Generate file name with current date
+            const date = new Date().toISOString().split('T')[0];
+            const fileName = `mk1212_regions_export_${date}.xlsx`;
+
+            // Trigger download
+            XLSX.writeFile(wb, fileName);
+
+            console.log(`✓ Excel file exported: ${fileName}`);
+        }
+
+        // Add event listener to export button
+        document.getElementById('exportButton').addEventListener('click', exportToExcel);
     </script>
 
 </body>
