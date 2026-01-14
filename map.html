@@ -306,7 +306,8 @@
             position: fixed;
             bottom: 30px;
             left: 30px;
-            width: 900px;
+            width: 1000px;
+            max-height: 80vh;
             background: linear-gradient(135deg, rgba(245, 241, 232, 0.98), rgba(232, 220, 196, 0.98));
             backdrop-filter: blur(10px);
             padding: 20px;
@@ -314,12 +315,99 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             border: 2px solid #d4af37;
             z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modifications-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modification-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            border: 1px solid #d4af37;
         }
 
         .buttons-row {
             display: flex;
             gap: 15px;
             align-items: stretch;
+            flex: 1;
+        }
+
+        .remove-row-btn {
+            width: 40px;
+            height: auto;
+            background: linear-gradient(135deg, #d4534d, #b33a34);
+            border: 2px solid #8b2e28;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .remove-row-btn:hover {
+            background: linear-gradient(135deg, #b33a34, #8b2e28);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+
+        .add-modification-btn,
+        .apply-changes-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid #8b7355;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-modification-btn {
+            background: linear-gradient(135deg, rgba(245, 241, 232, 0.98), rgba(232, 220, 196, 0.98));
+            color: #5a4a2f;
+        }
+
+        .add-modification-btn:hover {
+            background: linear-gradient(135deg, rgba(232, 220, 196, 0.98), rgba(212, 175, 55, 0.98));
+            border-color: #d4af37;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .apply-changes-btn {
+            background: linear-gradient(135deg, #5cb85c, #449d44);
+            color: white;
+            border-color: #398439;
+        }
+
+        .apply-changes-btn:hover {
+            background: linear-gradient(135deg, #449d44, #398439);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .apply-changes-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .button-wrapper {
@@ -488,49 +576,13 @@
 
     <!-- Region Selector Box -->
     <div class="region-selector-box">
-        <div class="buttons-row">
-            <!-- First Button: Region Selector -->
-            <div class="button-wrapper">
-                <div class="region-dropdown" id="regionDropdown">
-                    <div class="region-search-box">
-                        <input type="text" class="region-search-input" id="regionSearchInput" placeholder="Search regions...">
-                    </div>
-                    <div class="region-dropdown-list" id="regionDropdownList">
-                        <!-- Regions will be populated by JavaScript -->
-                    </div>
-                </div>
-                <button class="region-selector-button" id="regionSelectorButton">
-                    <span>Select Region</span>
-                    <span class="dropdown-arrow">▼</span>
-                </button>
-            </div>
+        <div class="modifications-container" id="modificationsContainer">
+            <!-- Modification rows will be added here by JavaScript -->
+        </div>
 
-            <!-- Second Button: Property Selector -->
-            <div class="button-wrapper">
-                <div class="region-dropdown" id="propertyDropdown">
-                    <div class="region-dropdown-list" id="propertyDropdownList">
-                        <div class="region-dropdown-item" data-property="has_port">Has port?</div>
-                        <div class="region-dropdown-item" data-property="owner">Owner</div>
-                    </div>
-                </div>
-                <button class="region-selector-button" id="propertyButton" disabled>
-                    <span>Select Property</span>
-                    <span class="dropdown-arrow">▼</span>
-                </button>
-            </div>
-
-            <!-- Third Button: Value Selector -->
-            <div class="button-wrapper hidden" id="valueButtonWrapper">
-                <div class="region-dropdown" id="valueDropdown">
-                    <div class="region-dropdown-list" id="valueDropdownList">
-                        <!-- Values will be populated by JavaScript -->
-                    </div>
-                </div>
-                <button class="region-selector-button" id="valueButton">
-                    <span>Select Value</span>
-                    <span class="dropdown-arrow">▼</span>
-                </button>
-            </div>
+        <div class="action-buttons">
+            <button class="add-modification-btn" id="addModificationBtn">+ Add Modification</button>
+            <button class="apply-changes-btn" id="applyChangesBtn" disabled>Apply Changes</button>
         </div>
     </div>
 
@@ -914,29 +966,18 @@
         // Add event listener to export button
         document.getElementById('exportButton').addEventListener('click', exportToExcel);
 
-        // Region selector functionality
-        const regionSelectorButton = document.getElementById('regionSelectorButton');
-        const regionDropdown = document.getElementById('regionDropdown');
-        const regionSearchInput = document.getElementById('regionSearchInput');
-        const regionDropdownList = document.getElementById('regionDropdownList');
-
-        // Property selector
-        const propertyButton = document.getElementById('propertyButton');
-        const propertyDropdown = document.getElementById('propertyDropdown');
-        const propertyDropdownList = document.getElementById('propertyDropdownList');
-
-        // Value selector
-        const valueButton = document.getElementById('valueButton');
-        const valueButtonWrapper = document.getElementById('valueButtonWrapper');
-        const valueDropdown = document.getElementById('valueDropdown');
-        const valueDropdownList = document.getElementById('valueDropdownList');
+        // Multi-row modification system
+        const modificationsContainer = document.getElementById('modificationsContainer');
+        const addModificationBtn = document.getElementById('addModificationBtn');
+        const applyChangesBtn = document.getElementById('applyChangesBtn');
 
         let allNonSeaRegions = [];
-        let selectedRegionIndex = null;
-        let selectedProperty = null;
+        let allFactions = [];
+        let rowCounter = 0;
+        let modifications = {}; // Store modifications by rowId
 
-        // Initialize regions list
-        function initializeRegionSelector() {
+        // Initialize regions and factions lists
+        function initializeModificationSystem() {
             // Get all non-sea regions and sort alphabetically
             allNonSeaRegions = regions
                 .filter(r => !r.sea)
@@ -946,14 +987,167 @@
                 }))
                 .sort((a, b) => a.name.localeCompare(b.name));
 
-            console.log(`Region selector loaded ${allNonSeaRegions.length} non-sea regions`);
+            // Get all unique factions
+            allFactions = [...new Set(regions
+                .filter(r => !r.sea && r.owner)
+                .map(r => r.owner)
+            )].sort();
 
-            // Populate initial list
-            populateRegionDropdown();
+            console.log(`Modification system loaded: ${allNonSeaRegions.length} regions, ${allFactions.length} factions`);
+
+            // Add first row
+            addModificationRow();
         }
 
-        // Populate region dropdown with optional filter
-        function populateRegionDropdown(filterText = '') {
+        // Create a new modification row
+        function addModificationRow() {
+            const rowId = rowCounter++;
+
+            const rowHTML = `
+                <div class="modification-row" id="modRow${rowId}">
+                    <div class="buttons-row">
+                        <!-- Region Selector -->
+                        <div class="button-wrapper">
+                            <div class="region-dropdown" id="regionDropdown${rowId}">
+                                <div class="region-search-box">
+                                    <input type="text" class="region-search-input" id="regionSearchInput${rowId}" placeholder="Search regions...">
+                                </div>
+                                <div class="region-dropdown-list" id="regionDropdownList${rowId}">
+                                    <!-- Regions populated by JS -->
+                                </div>
+                            </div>
+                            <button class="region-selector-button" id="regionSelectorButton${rowId}">
+                                <span>Select Region</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </button>
+                        </div>
+
+                        <!-- Property Selector -->
+                        <div class="button-wrapper">
+                            <div class="region-dropdown" id="propertyDropdown${rowId}">
+                                <div class="region-dropdown-list" id="propertyDropdownList${rowId}">
+                                    <div class="region-dropdown-item" data-property="has_port">Has port?</div>
+                                    <div class="region-dropdown-item" data-property="owner">Owner</div>
+                                </div>
+                            </div>
+                            <button class="region-selector-button" id="propertyButton${rowId}" disabled>
+                                <span>Select Property</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </button>
+                        </div>
+
+                        <!-- Value Selector -->
+                        <div class="button-wrapper hidden" id="valueButtonWrapper${rowId}">
+                            <div class="region-dropdown" id="valueDropdown${rowId}">
+                                <div class="region-dropdown-list" id="valueDropdownList${rowId}">
+                                    <!-- Values populated by JS -->
+                                </div>
+                            </div>
+                            <button class="region-selector-button" id="valueButton${rowId}">
+                                <span>Select Value</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="remove-row-btn" id="removeRowBtn${rowId}">×</button>
+                </div>
+            `;
+
+            modificationsContainer.insertAdjacentHTML('beforeend', rowHTML);
+
+            // Initialize this row after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                initializeRow(rowId);
+            }, 0);
+
+            console.log(`Added modification row ${rowId}`);
+        }
+
+        // Initialize a specific row
+        function initializeRow(rowId) {
+            const regionButton = document.getElementById(`regionSelectorButton${rowId}`);
+            const regionDropdown = document.getElementById(`regionDropdown${rowId}`);
+            const regionSearchInput = document.getElementById(`regionSearchInput${rowId}`);
+            const regionDropdownList = document.getElementById(`regionDropdownList${rowId}`);
+
+            const propertyButton = document.getElementById(`propertyButton${rowId}`);
+            const propertyDropdown = document.getElementById(`propertyDropdown${rowId}`);
+            const propertyDropdownList = document.getElementById(`propertyDropdownList${rowId}`);
+
+            const valueButton = document.getElementById(`valueButton${rowId}`);
+            const valueButtonWrapper = document.getElementById(`valueButtonWrapper${rowId}`);
+            const valueDropdown = document.getElementById(`valueDropdown${rowId}`);
+            const valueDropdownList = document.getElementById(`valueDropdownList${rowId}`);
+
+            const removeRowBtn = document.getElementById(`removeRowBtn${rowId}`);
+
+            // Initialize modification data for this row
+            modifications[rowId] = {
+                regionIndex: null,
+                property: null,
+                value: null
+            };
+
+            // Populate region dropdown
+            populateRegionDropdown(rowId, regionDropdownList);
+
+            // Region button click
+            regionButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeAllDropdownsExcept(rowId, 'region');
+                regionDropdown.classList.toggle('active');
+                if (regionDropdown.classList.contains('active')) {
+                    setTimeout(() => regionSearchInput.focus(), 100);
+                }
+            });
+
+            // Region search
+            regionSearchInput.addEventListener('input', function() {
+                populateRegionDropdown(rowId, regionDropdownList, this.value);
+            });
+
+            // Property button click
+            propertyButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (!this.disabled) {
+                    closeAllDropdownsExcept(rowId, 'property');
+                    propertyDropdown.classList.toggle('active');
+                }
+            });
+
+            // Property selection
+            propertyDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const property = this.getAttribute('data-property');
+                    modifications[rowId].property = property;
+                    modifications[rowId].value = null;
+
+                    propertyButton.querySelector('span:first-child').textContent = this.textContent;
+                    propertyDropdown.classList.remove('active');
+
+                    valueButton.querySelector('span:first-child').textContent = 'Select Value';
+                    valueButtonWrapper.classList.remove('hidden');
+                    populateValueDropdown(rowId, valueDropdownList, property);
+
+                    updateApplyButtonState();
+                });
+            });
+
+            // Value button click
+            valueButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeAllDropdownsExcept(rowId, 'value');
+                valueDropdown.classList.toggle('active');
+            });
+
+            // Remove row button
+            removeRowBtn.addEventListener('click', function() {
+                removeModificationRow(rowId);
+            });
+        }
+
+        // Populate region dropdown for a specific row
+        function populateRegionDropdown(rowId, dropdownList, filterText = '') {
             const filteredRegions = allNonSeaRegions.filter(region => {
                 if (!filterText) return true;
                 return region.name.toLowerCase().includes(filterText.toLowerCase()) ||
@@ -961,11 +1155,11 @@
             });
 
             if (filteredRegions.length === 0) {
-                regionDropdownList.innerHTML = '<div style="padding: 20px; text-align: center; color: #8a7a5f; font-style: italic;">No regions found</div>';
+                dropdownList.innerHTML = '<div style="padding: 20px; text-align: center; color: #8a7a5f; font-style: italic;">No regions found</div>';
                 return;
             }
 
-            regionDropdownList.innerHTML = filteredRegions.map(region => `
+            dropdownList.innerHTML = filteredRegions.map(region => `
                 <div class="region-dropdown-item" data-region-index="${region.originalIndex}">
                     <div class="region-dropdown-color" style="background: ${region.color}"></div>
                     <span>${region.name}</span>
@@ -973,184 +1167,158 @@
             `).join('');
 
             // Add click handlers
-            regionDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
+            dropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
                 item.addEventListener('click', function() {
                     const regionIndex = parseInt(this.getAttribute('data-region-index'));
-                    selectRegionFromSelector(regionIndex);
+                    selectRegionForRow(rowId, regionIndex);
                 });
             });
         }
 
-        // Select region from dropdown
-        function selectRegionFromSelector(regionIndex) {
+        // Select region for a specific row
+        function selectRegionForRow(rowId, regionIndex) {
             const region = regions[regionIndex];
+            modifications[rowId].regionIndex = regionIndex;
 
-            // Save selected region
-            selectedRegionIndex = regionIndex;
+            const regionButton = document.getElementById(`regionSelectorButton${rowId}`);
+            const regionDropdown = document.getElementById(`regionDropdown${rowId}`);
+            const regionSearchInput = document.getElementById(`regionSearchInput${rowId}`);
+            const propertyButton = document.getElementById(`propertyButton${rowId}`);
 
-            // Update button text
-            regionSelectorButton.querySelector('span:first-child').textContent = region.name;
-
-            // Enable property button
+            regionButton.querySelector('span:first-child').textContent = region.name;
             propertyButton.disabled = false;
 
-            // Reset property and value selections
-            propertyButton.querySelector('span:first-child').textContent = 'Select Property';
-            selectedProperty = null;
-            valueButtonWrapper.classList.add('hidden');
-
-            // Close dropdown
             regionDropdown.classList.remove('active');
             regionSearchInput.value = '';
-            populateRegionDropdown();
+            populateRegionDropdown(rowId, document.getElementById(`regionDropdownList${rowId}`));
 
-            // Switch to region mode if in faction mode
-            if (currentViewMode === 'faction') {
-                currentViewMode = 'region';
-                viewModeSwitch.classList.remove('active');
-                regionModeLabel.classList.add('active');
-                factionModeLabel.classList.remove('active');
-                initializeRegions();
-            }
-
-            // Find and select the region group on map
-            const regionGroups = document.querySelectorAll('.region-group');
-            regionGroups.forEach(group => {
-                const groupIndex = parseInt(group.getAttribute('data-region-id'));
-                if (groupIndex === regionIndex) {
-                    selectRegion(group, region);
-                }
-            });
-
-            console.log(`Selected region from selector: ${region.name}`);
+            updateApplyButtonState();
+            console.log(`Row ${rowId}: Selected region ${region.name}`);
         }
 
-        // Toggle dropdown
-        regionSelectorButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            regionDropdown.classList.toggle('active');
-            if (regionDropdown.classList.contains('active')) {
-                setTimeout(() => regionSearchInput.focus(), 100);
-            }
-        });
-
-        // Search functionality
-        regionSearchInput.addEventListener('input', function() {
-            populateRegionDropdown(this.value);
-        });
-
-        // Property button toggle
-        propertyButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (!this.disabled) {
-                propertyDropdown.classList.toggle('active');
-            }
-        });
-
-        // Property selection
-        propertyDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const property = this.getAttribute('data-property');
-                selectedProperty = property;
-
-                // Update button text
-                propertyButton.querySelector('span:first-child').textContent = this.textContent;
-
-                // Close property dropdown
-                propertyDropdown.classList.remove('active');
-
-                // Reset value button text
-                valueButton.querySelector('span:first-child').textContent = 'Select Value';
-
-                // Show value button and populate based on property
-                if (property === 'has_port' || property === 'owner') {
-                    valueButtonWrapper.classList.remove('hidden');
-                    populateValueDropdown();
-                }
-
-                console.log(`Selected property: ${property}`);
-            });
-        });
-
-        // Populate value dropdown based on selected property
-        function populateValueDropdown() {
-            if (selectedProperty === 'has_port') {
-                valueDropdownList.innerHTML = `
+        // Populate value dropdown based on property
+        function populateValueDropdown(rowId, dropdownList, property) {
+            if (property === 'has_port') {
+                dropdownList.innerHTML = `
                     <div class="region-dropdown-item" data-value="yes">Yes</div>
                     <div class="region-dropdown-item" data-value="no">No</div>
                 `;
+            } else if (property === 'owner') {
+                const currentOwner = modifications[rowId].regionIndex !== null
+                    ? regions[modifications[rowId].regionIndex].owner
+                    : null;
 
-                // Add click handlers for values
-                valueDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        const value = this.getAttribute('data-value');
-
-                        // Update button text
-                        valueButton.querySelector('span:first-child').textContent = this.textContent;
-
-                        // Close dropdown
-                        valueDropdown.classList.remove('active');
-
-                        console.log(`Selected value: ${value} for property: ${selectedProperty}`);
-                    });
-                });
-            } else if (selectedProperty === 'owner') {
-                // Get all unique factions
-                const factions = [...new Set(regions
-                    .filter(r => !r.sea && r.owner)
-                    .map(r => r.owner)
-                )].sort();
-
-                // Get current region's owner to exclude it
-                const currentOwner = selectedRegionIndex !== null ? regions[selectedRegionIndex].owner : null;
-
-                valueDropdownList.innerHTML = factions
+                dropdownList.innerHTML = allFactions
                     .filter(faction => faction !== currentOwner)
                     .map(faction => `
                         <div class="region-dropdown-item" data-value="${faction}">${faction}</div>
                     `).join('');
+            }
 
-                // Add click handlers for values
-                valueDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        const value = this.getAttribute('data-value');
+            // Add click handlers
+            dropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    modifications[rowId].value = value;
 
-                        // Update button text
-                        valueButton.querySelector('span:first-child').textContent = this.textContent;
+                    const valueButton = document.getElementById(`valueButton${rowId}`);
+                    const valueDropdown = document.getElementById(`valueDropdown${rowId}`);
 
-                        // Close dropdown
-                        valueDropdown.classList.remove('active');
+                    valueButton.querySelector('span:first-child').textContent = this.textContent;
+                    valueDropdown.classList.remove('active');
 
-                        console.log(`Selected value: ${value} for property: ${selectedProperty}`);
-                    });
+                    updateApplyButtonState();
+                    console.log(`Row ${rowId}: Selected value ${value} for property ${property}`);
                 });
+            });
+        }
+
+        // Close all dropdowns except the specified one
+        function closeAllDropdownsExcept(rowId, except) {
+            const allRows = Object.keys(modifications);
+            allRows.forEach(rId => {
+                if (except !== 'region') {
+                    const dropdown = document.getElementById(`regionDropdown${rId}`);
+                    if (dropdown) dropdown.classList.remove('active');
+                }
+                if (except !== 'property') {
+                    const dropdown = document.getElementById(`propertyDropdown${rId}`);
+                    if (dropdown) dropdown.classList.remove('active');
+                }
+                if (except !== 'value') {
+                    const dropdown = document.getElementById(`valueDropdown${rId}`);
+                    if (dropdown) dropdown.classList.remove('active');
+                }
+            });
+        }
+
+        // Remove a modification row
+        function removeModificationRow(rowId) {
+            const row = document.getElementById(`modRow${rowId}`);
+            if (row) {
+                row.remove();
+                delete modifications[rowId];
+                updateApplyButtonState();
+                console.log(`Removed modification row ${rowId}`);
             }
         }
 
-        // Value button toggle
-        valueButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            valueDropdown.classList.toggle('active');
-        });
+        // Update Apply button state
+        function updateApplyButtonState() {
+            const validModifications = Object.values(modifications).filter(mod =>
+                mod.regionIndex !== null && mod.property !== null && mod.value !== null
+            );
+            applyChangesBtn.disabled = validModifications.length === 0;
+        }
+
+        // Apply all modifications
+        function applyModifications() {
+            const validModifications = Object.entries(modifications).filter(([rowId, mod]) =>
+                mod.regionIndex !== null && mod.property !== null && mod.value !== null
+            );
+
+            if (validModifications.length === 0) {
+                console.log('No valid modifications to apply');
+                return;
+            }
+
+            console.log(`Applying ${validModifications.length} modifications...`);
+
+            validModifications.forEach(([rowId, mod]) => {
+                const region = regions[mod.regionIndex];
+
+                if (mod.property === 'has_port') {
+                    // Note: This would need backend integration to actually save
+                    console.log(`Applied: ${region.name} - Has port: ${mod.value}`);
+                } else if (mod.property === 'owner') {
+                    // Note: This would need backend integration to actually save
+                    console.log(`Applied: ${region.name} - New owner: ${mod.value}`);
+                }
+            });
+
+            alert(`Successfully applied ${validModifications.length} modification(s) to the map!\n\nNote: Changes are logged to console. Backend integration needed for persistence.`);
+        }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.region-selector-box')) {
-                regionDropdown.classList.remove('active');
-                propertyDropdown.classList.remove('active');
-                valueDropdown.classList.remove('active');
-                regionSearchInput.value = '';
-                populateRegionDropdown();
+                closeAllDropdownsExcept(null, null);
             }
         });
 
+        // Add modification button
+        addModificationBtn.addEventListener('click', addModificationRow);
+
+        // Apply changes button
+        applyChangesBtn.addEventListener('click', applyModifications);
+
         // Initialize when page loads
         if (mapImage.complete && typeof regions !== 'undefined') {
-            initializeRegionSelector();
+            initializeModificationSystem();
         } else {
             mapImage.addEventListener('load', function() {
                 if (typeof regions !== 'undefined') {
-                    initializeRegionSelector();
+                    initializeModificationSystem();
                 }
             });
         }
