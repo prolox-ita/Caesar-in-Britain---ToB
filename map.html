@@ -382,6 +382,18 @@
             transform: translateY(0);
         }
 
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, rgba(200, 200, 200, 0.5), rgba(180, 180, 180, 0.5));
+        }
+
+        .action-button:disabled:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #8b7355;
+        }
+
         /* Dropdown menu for regions */
         .dropdown-container {
             position: relative;
@@ -499,6 +511,46 @@
             border-color: #d4af37;
             font-weight: 600;
         }
+
+        /* Value selection styles */
+        .value-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            font-family: 'Merriweather', serif;
+            font-size: 0.95rem;
+            color: #5a4a2f;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid #8b7355;
+        }
+
+        .value-item:hover:not(.disabled) {
+            background: rgba(212, 175, 55, 0.4);
+            border-color: #d4af37;
+            transform: translateX(5px);
+        }
+
+        .value-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(150, 150, 150, 0.3);
+        }
+
+        .faction-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .faction-color-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #8b7355;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 
@@ -561,7 +613,17 @@
                         </div>
                     </div>
                 </div>
-                <button class="action-button" id="actionButton3">Button 3</button>
+                <div class="dropdown-container">
+                    <button class="action-button" id="actionButton3" disabled>Select Value</button>
+                    <div class="dropdown-menu" id="valueDropdown">
+                        <div class="search-box" id="valueSearchBox" style="display: none;">
+                            <input type="text" class="search-input" id="valueSearch" placeholder="Search...">
+                        </div>
+                        <div class="regions-list" id="valuesList">
+                            <!-- Values will be populated dynamically based on selected property -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1063,6 +1125,7 @@
         // Property dropdown functionality
         const propertyDropdown = document.getElementById('propertyDropdown');
         let selectedProperty = null;
+        let selectedRegion = null;
 
         // Toggle property dropdown
         document.getElementById('actionButton2').addEventListener('click', function(e) {
@@ -1085,6 +1148,9 @@
                 // Close dropdown
                 propertyDropdown.classList.remove('active');
 
+                // Update value dropdown based on selected property
+                updateValueDropdown();
+
                 console.log(`Selected property to modify: ${property}`);
             });
         });
@@ -1096,10 +1162,199 @@
             }
         });
 
-        // Action button 3 (placeholder for future functionality)
-        document.getElementById('actionButton3').addEventListener('click', function() {
-            console.log('Action Button 3 clicked');
+        // Value dropdown functionality
+        const valueDropdown = document.getElementById('valueDropdown');
+        const valueSearch = document.getElementById('valueSearch');
+        const valueSearchBox = document.getElementById('valueSearchBox');
+        const valuesList = document.getElementById('valuesList');
+        const actionButton3 = document.getElementById('actionButton3');
+        let allFactions = [];
+
+        // Extract all unique factions from regions
+        function initializeFactionsList() {
+            const factionsSet = new Set();
+            regions.forEach(region => {
+                if (region.owner && !region.sea) {
+                    factionsSet.add(JSON.stringify({
+                        name: region.owner,
+                        color: region.factionColor
+                    }));
+                }
+            });
+
+            allFactions = Array.from(factionsSet)
+                .map(f => JSON.parse(f))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            console.log(`Loaded ${allFactions.length} unique factions`);
+        }
+
+        // Update value dropdown based on selected property
+        function updateValueDropdown() {
+            // Enable button 3 if both property and region are selected
+            if (selectedProperty && selectedRegion) {
+                actionButton3.disabled = false;
+            }
+
+            if (!selectedProperty) return;
+
+            if (selectedProperty === 'port') {
+                // Show Yes/No options
+                valueSearchBox.style.display = 'none';
+                valuesList.innerHTML = `
+                    <div class="value-item" data-value="true">Yes</div>
+                    <div class="value-item" data-value="false">No</div>
+                `;
+            } else if (selectedProperty === 'owner') {
+                // Show factions list with search
+                valueSearchBox.style.display = 'block';
+                populateFactionsList();
+            }
+
+            // Add click handlers to value items
+            attachValueItemHandlers();
+        }
+
+        // Populate factions list with optional filter
+        function populateFactionsList(filterText = '') {
+            const currentOwner = selectedRegion ? selectedRegion.owner : null;
+
+            const filteredFactions = allFactions.filter(faction => {
+                if (!filterText) return true;
+                return faction.name.toLowerCase().includes(filterText.toLowerCase());
+            });
+
+            if (filteredFactions.length === 0) {
+                valuesList.innerHTML = '<div class="no-results">No factions found</div>';
+                return;
+            }
+
+            valuesList.innerHTML = filteredFactions.map(faction => {
+                const isCurrentOwner = faction.name === currentOwner;
+                return `
+                    <div class="value-item faction-item ${isCurrentOwner ? 'disabled' : ''}"
+                         data-value="${faction.name}"
+                         data-faction-color="${faction.color}"
+                         ${isCurrentOwner ? 'title="Current owner"' : ''}>
+                        <div class="faction-color-indicator" style="background: ${faction.color}"></div>
+                        <span>${faction.name}${isCurrentOwner ? ' (Current)' : ''}</span>
+                    </div>
+                `;
+            }).join('');
+
+            attachValueItemHandlers();
+        }
+
+        // Attach click handlers to value items
+        function attachValueItemHandlers() {
+            document.querySelectorAll('.value-item:not(.disabled)').forEach(item => {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+
+                    // Close dropdown
+                    valueDropdown.classList.remove('active');
+                    valueSearch.value = '';
+
+                    console.log(`Selected value: ${value} for property: ${selectedProperty}`);
+
+                    // Apply the change to the selected region
+                    if (selectedRegion) {
+                        applyPropertyChange(selectedRegion, selectedProperty, value);
+                    }
+                });
+            });
+        }
+
+        // Apply property change to selected region
+        function applyPropertyChange(region, property, value) {
+            const regionIndex = regions.indexOf(region);
+
+            if (property === 'port') {
+                const newPortStatus = value === 'true';
+                regions[regionIndex].port = newPortStatus;
+                console.log(`✓ Updated ${region.name}: port = ${newPortStatus}`);
+            } else if (property === 'owner') {
+                const newOwner = value;
+                const newFaction = allFactions.find(f => f.name === newOwner);
+                regions[regionIndex].owner = newOwner;
+                if (newFaction) {
+                    regions[regionIndex].factionColor = newFaction.color;
+                }
+                console.log(`✓ Updated ${region.name}: owner = ${newOwner}`);
+            }
+
+            // Refresh the info panel if this region is currently selected
+            if (currentViewMode === 'region') {
+                showRegionInfo(regions[regionIndex]);
+            }
+
+            // Refresh the map if in faction mode to show new colors
+            if (currentViewMode === 'faction' && property === 'owner') {
+                initializeRegions();
+            }
+        }
+
+        // Toggle value dropdown
+        actionButton3.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!this.disabled) {
+                valueDropdown.classList.toggle('active');
+                if (valueDropdown.classList.contains('active') && selectedProperty === 'owner') {
+                    valueSearch.focus();
+                }
+            }
         });
+
+        // Search functionality for values
+        valueSearch.addEventListener('input', function() {
+            if (selectedProperty === 'owner') {
+                populateFactionsList(this.value);
+            }
+        });
+
+        // Close value dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                valueDropdown.classList.remove('active');
+                valueSearch.value = '';
+                if (selectedProperty === 'owner') {
+                    populateFactionsList();
+                }
+            }
+        });
+
+        // Initialize factions list when page loads
+        if (mapImage.complete) {
+            initializeFactionsList();
+        } else {
+            mapImage.addEventListener('load', initializeFactionsList);
+        }
+
+        // Update selectRegion function to store selected region
+        const originalSelectRegion = selectRegion;
+        selectRegion = function(groupElement, region) {
+            originalSelectRegion(groupElement, region);
+            selectedRegion = region;
+
+            // Enable button 3 if property is also selected
+            if (selectedProperty) {
+                actionButton3.disabled = false;
+                updateValueDropdown();
+            }
+        };
+
+        // Update selectRegionFromDropdown to store selected region
+        const originalSelectRegionFromDropdown = selectRegionFromDropdown;
+        selectRegionFromDropdown = function(regionIndex) {
+            originalSelectRegionFromDropdown(regionIndex);
+            selectedRegion = regions[regionIndex];
+
+            // Enable button 3 if property is also selected
+            if (selectedProperty) {
+                actionButton3.disabled = false;
+                updateValueDropdown();
+            }
+        };
     </script>
 
 </body>
