@@ -1147,13 +1147,16 @@
                 selectedValue: null
             };
 
-            // Setup event listeners for this row
-            setupRowEventListeners(rowId);
+            // Wait for DOM to update before setting up listeners
+            setTimeout(() => {
+                // Setup event listeners for this row
+                setupRowEventListeners(rowId);
 
-            // Populate regions list for this row
-            populateRegionsList(rowId);
+                // Populate regions list for this row
+                populateRegionsList(rowId);
 
-            console.log(`Created action row #${rowId}`);
+                console.log(`Created action row #${rowId}`);
+            }, 0);
         }
 
         // Remove an action row
