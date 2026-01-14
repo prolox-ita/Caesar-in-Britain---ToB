@@ -1185,9 +1185,10 @@
             // Region button toggle
             regionBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
+                const wasActive = regionDropdown.classList.contains('active');
                 closeAllDropdowns(rowId);
-                regionDropdown.classList.toggle('active');
-                if (regionDropdown.classList.contains('active')) {
+                if (!wasActive) {
+                    regionDropdown.classList.add('active');
                     regionSearch.focus();
                 }
             });
@@ -1200,8 +1201,11 @@
             // Property button toggle
             propertyBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
+                const wasActive = propertyDropdown.classList.contains('active');
                 closeAllDropdowns(rowId);
-                propertyDropdown.classList.toggle('active');
+                if (!wasActive) {
+                    propertyDropdown.classList.add('active');
+                }
             });
 
             // Property selection
@@ -1230,10 +1234,13 @@
             valueBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 if (!this.disabled) {
+                    const wasActive = valueDropdown.classList.contains('active');
                     closeAllDropdowns(rowId);
-                    valueDropdown.classList.toggle('active');
-                    if (valueDropdown.classList.contains('active') && actionRowsData[rowId].selectedProperty === 'owner') {
-                        valueSearch.focus();
+                    if (!wasActive) {
+                        valueDropdown.classList.add('active');
+                        if (actionRowsData[rowId].selectedProperty === 'owner') {
+                            valueSearch.focus();
+                        }
                     }
                 }
             });
