@@ -349,12 +349,14 @@
 
         .action-box-content {
             padding: 20px;
+            overflow: visible;
         }
 
         .action-rows {
             display: flex;
             flex-direction: column;
             gap: 15px;
+            overflow: visible;
         }
 
         .action-row {
@@ -365,12 +367,14 @@
             background: rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             border: 1px solid rgba(139, 115, 85, 0.3);
+            overflow: visible;
         }
 
         .action-buttons {
             display: flex;
             gap: 10px;
             justify-content: space-between;
+            overflow: visible;
         }
 
         .row-header {
@@ -462,6 +466,7 @@
         /* Dropdown menu for regions */
         .dropdown-container {
             position: relative;
+            overflow: visible;
         }
 
         .dropdown-menu {
@@ -477,7 +482,7 @@
             display: none;
             flex-direction: column;
             box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 200;
+            z-index: 9999;
         }
 
         .dropdown-menu.active {
