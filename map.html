@@ -381,6 +381,98 @@
         .action-button:active {
             transform: translateY(0);
         }
+
+        /* Dropdown menu for regions */
+        .dropdown-container {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, rgba(245, 241, 232, 0.98), rgba(232, 220, 196, 0.98));
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            max-height: 400px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 200;
+        }
+
+        .dropdown-menu.active {
+            display: flex;
+        }
+
+        .search-box {
+            padding: 15px;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #8b7355;
+            border-radius: 6px;
+            font-family: 'Merriweather', serif;
+            font-size: 0.95rem;
+            color: #5a4a2f;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #d4af37;
+        }
+
+        .search-input::placeholder {
+            color: #8a7a5f;
+            font-style: italic;
+        }
+
+        .regions-list {
+            overflow-y: auto;
+            max-height: 320px;
+            padding: 10px;
+        }
+
+        .region-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Merriweather', serif;
+            font-size: 0.9rem;
+            color: #5a4a2f;
+        }
+
+        .region-item:hover {
+            background: rgba(212, 175, 55, 0.3);
+            transform: translateX(5px);
+        }
+
+        .region-color-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #8b7355;
+            flex-shrink: 0;
+        }
+
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #8a7a5f;
+            font-style: italic;
+        }
     </style>
 </head>
 
@@ -423,7 +515,17 @@
         </button>
         <div class="action-box-content">
             <div class="action-buttons">
-                <button class="action-button" id="actionButton1">Button 1</button>
+                <div class="dropdown-container">
+                    <button class="action-button" id="actionButton1">Select Region</button>
+                    <div class="dropdown-menu" id="regionDropdown">
+                        <div class="search-box">
+                            <input type="text" class="search-input" id="regionSearch" placeholder="Search regions...">
+                        </div>
+                        <div class="regions-list" id="regionsList">
+                            <!-- Regions will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
                 <button class="action-button" id="actionButton2">Button 2</button>
                 <button class="action-button" id="actionButton3">Button 3</button>
             </div>
@@ -818,11 +920,113 @@
             actionBox.classList.toggle('collapsed');
         });
 
-        // Action button event listeners (placeholder for future functionality)
-        document.getElementById('actionButton1').addEventListener('click', function() {
-            console.log('Action Button 1 clicked');
+        // Region dropdown functionality
+        const regionDropdown = document.getElementById('regionDropdown');
+        const regionSearch = document.getElementById('regionSearch');
+        const regionsList = document.getElementById('regionsList');
+        let allRegions = [];
+
+        // Populate regions list
+        function populateRegionsList(filterText = '') {
+            const filteredRegions = allRegions.filter(region => {
+                if (!filterText) return true;
+                return region.name.toLowerCase().includes(filterText.toLowerCase()) ||
+                       (region.regionKey && region.regionKey.toLowerCase().includes(filterText.toLowerCase()));
+            });
+
+            if (filteredRegions.length === 0) {
+                regionsList.innerHTML = '<div class="no-results">No regions found</div>';
+                return;
+            }
+
+            regionsList.innerHTML = filteredRegions.map(region => `
+                <div class="region-item" data-region-index="${region.index}">
+                    <div class="region-color-indicator" style="background: ${region.color}"></div>
+                    <span>${region.name}</span>
+                </div>
+            `).join('');
+
+            // Add click handlers to region items
+            document.querySelectorAll('.region-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const regionIndex = parseInt(this.getAttribute('data-region-index'));
+                    selectRegionFromDropdown(regionIndex);
+                    regionDropdown.classList.remove('active');
+                    regionSearch.value = '';
+                    populateRegionsList();
+                });
+            });
+        }
+
+        // Initialize regions list
+        function initializeRegionsList() {
+            allRegions = regions
+                .filter(r => !r.sea) // Exclude sea regions
+                .map((r, idx) => ({
+                    ...r,
+                    index: regions.indexOf(r) // Store original index
+                }))
+                .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+
+            populateRegionsList();
+        }
+
+        // Select region from dropdown
+        function selectRegionFromDropdown(regionIndex) {
+            const region = regions[regionIndex];
+
+            // Switch to region mode if in faction mode
+            if (currentViewMode === 'faction') {
+                currentViewMode = 'region';
+                viewModeSwitch.classList.remove('active');
+                regionModeLabel.classList.add('active');
+                factionModeLabel.classList.remove('active');
+                initializeRegions();
+            }
+
+            // Find and select the region group
+            const regionGroups = document.querySelectorAll('.region-group');
+            regionGroups.forEach(group => {
+                const groupIndex = parseInt(group.getAttribute('data-region-id'));
+                if (groupIndex === regionIndex) {
+                    selectRegion(group, region);
+                }
+            });
+
+            console.log(`Selected region from dropdown: ${region.name}`);
+        }
+
+        // Toggle dropdown
+        document.getElementById('actionButton1').addEventListener('click', function(e) {
+            e.stopPropagation();
+            regionDropdown.classList.toggle('active');
+            if (regionDropdown.classList.contains('active')) {
+                regionSearch.focus();
+            }
         });
 
+        // Search functionality
+        regionSearch.addEventListener('input', function() {
+            populateRegionsList(this.value);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                regionDropdown.classList.remove('active');
+                regionSearch.value = '';
+                populateRegionsList();
+            }
+        });
+
+        // Initialize regions dropdown when page loads
+        if (mapImage.complete) {
+            initializeRegionsList();
+        } else {
+            mapImage.addEventListener('load', initializeRegionsList);
+        }
+
+        // Action button event listeners (placeholder for future functionality)
         document.getElementById('actionButton2').addEventListener('click', function() {
             console.log('Action Button 2 clicked');
         });
