@@ -473,6 +473,32 @@
             color: #8a7a5f;
             font-style: italic;
         }
+
+        /* Property selection styles */
+        .property-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            font-family: 'Merriweather', serif;
+            font-size: 0.95rem;
+            color: #5a4a2f;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid #8b7355;
+        }
+
+        .property-item:hover {
+            background: rgba(212, 175, 55, 0.4);
+            border-color: #d4af37;
+            transform: translateX(5px);
+        }
+
+        .property-item.selected {
+            background: rgba(212, 175, 55, 0.6);
+            border-color: #d4af37;
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -526,7 +552,15 @@
                         </div>
                     </div>
                 </div>
-                <button class="action-button" id="actionButton2">Button 2</button>
+                <div class="dropdown-container">
+                    <button class="action-button" id="actionButton2">Select Property</button>
+                    <div class="dropdown-menu" id="propertyDropdown">
+                        <div class="regions-list" id="propertiesList">
+                            <div class="property-item" data-property="port">Port Status</div>
+                            <div class="property-item" data-property="owner">Owner</div>
+                        </div>
+                    </div>
+                </div>
                 <button class="action-button" id="actionButton3">Button 3</button>
             </div>
         </div>
@@ -1026,11 +1060,43 @@
             mapImage.addEventListener('load', initializeRegionsList);
         }
 
-        // Action button event listeners (placeholder for future functionality)
-        document.getElementById('actionButton2').addEventListener('click', function() {
-            console.log('Action Button 2 clicked');
+        // Property dropdown functionality
+        const propertyDropdown = document.getElementById('propertyDropdown');
+        let selectedProperty = null;
+
+        // Toggle property dropdown
+        document.getElementById('actionButton2').addEventListener('click', function(e) {
+            e.stopPropagation();
+            propertyDropdown.classList.toggle('active');
         });
 
+        // Property selection handlers
+        document.querySelectorAll('.property-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const property = this.getAttribute('data-property');
+
+                // Remove previous selection
+                document.querySelectorAll('.property-item').forEach(p => p.classList.remove('selected'));
+
+                // Mark this property as selected
+                this.classList.add('selected');
+                selectedProperty = property;
+
+                // Close dropdown
+                propertyDropdown.classList.remove('active');
+
+                console.log(`Selected property to modify: ${property}`);
+            });
+        });
+
+        // Close property dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                propertyDropdown.classList.remove('active');
+            }
+        });
+
+        // Action button 3 (placeholder for future functionality)
         document.getElementById('actionButton3').addEventListener('click', function() {
             console.log('Action Button 3 clicked');
         });
