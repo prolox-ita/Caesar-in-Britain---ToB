@@ -1182,14 +1182,28 @@
             const valueDropdown = document.getElementById(`valueDropdown_${rowId}`);
             const valueSearch = document.getElementById(`valueSearch_${rowId}`);
 
+            console.log(`Setting up row #${rowId}:`, {
+                regionBtn: !!regionBtn,
+                regionDropdown: !!regionDropdown,
+                propertyBtn: !!propertyBtn,
+                valueBtn: !!valueBtn
+            });
+
+            if (!regionBtn || !regionDropdown || !propertyBtn || !propertyDropdown || !valueBtn || !valueDropdown) {
+                console.error(`Failed to find elements for row #${rowId}`);
+                return;
+            }
+
             // Region button toggle
             regionBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
+                console.log(`Region button clicked for row #${rowId}`);
                 const wasActive = regionDropdown.classList.contains('active');
                 closeAllDropdowns(rowId);
                 if (!wasActive) {
                     regionDropdown.classList.add('active');
-                    regionSearch.focus();
+                    console.log(`Opened region dropdown for row #${rowId}`);
+                    setTimeout(() => regionSearch.focus(), 100);
                 }
             });
 
@@ -1266,13 +1280,20 @@
         // Populate regions list for a specific row
         function populateRegionsList(rowId, filterText = '') {
             const regionsList = document.getElementById(`regionsList_${rowId}`);
-            if (!regionsList) return;
+            if (!regionsList) {
+                console.error(`regionsList not found for row #${rowId}`);
+                return;
+            }
+
+            console.log(`Populating regions list for row #${rowId}, allRegions count: ${allRegions.length}`);
 
             const filteredRegions = allRegions.filter(region => {
                 if (!filterText) return true;
                 return region.name.toLowerCase().includes(filterText.toLowerCase()) ||
                        (region.regionKey && region.regionKey.toLowerCase().includes(filterText.toLowerCase()));
             });
+
+            console.log(`Filtered ${filteredRegions.length} regions for row #${rowId}`);
 
             if (filteredRegions.length === 0) {
                 regionsList.innerHTML = '<div class="no-results">No regions found</div>';
@@ -1293,6 +1314,8 @@
                     selectRegionForRow(rowId, regionIndex);
                 });
             });
+
+            console.log(`Populated ${filteredRegions.length} regions in row #${rowId}`);
         }
 
         // Select region for a specific row
@@ -1487,14 +1510,25 @@
         });
 
         // Initialize on page load
-        if (mapImage.complete) {
+        function initializeActionSystem() {
+            console.log('Initializing action system...');
+            console.log('Regions available:', typeof regions !== 'undefined', regions ? regions.length : 0);
+
+            if (typeof regions === 'undefined' || !regions || regions.length === 0) {
+                console.error('Regions data not loaded yet!');
+                setTimeout(initializeActionSystem, 100); // Retry after 100ms
+                return;
+            }
+
             initializeGlobalData();
             createActionRow(); // Create first row
+            console.log('Action system initialized');
+        }
+
+        if (mapImage.complete) {
+            initializeActionSystem();
         } else {
-            mapImage.addEventListener('load', function() {
-                initializeGlobalData();
-                createActionRow(); // Create first row
-            });
+            mapImage.addEventListener('load', initializeActionSystem);
         }
     </script>
 
