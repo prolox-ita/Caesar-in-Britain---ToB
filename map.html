@@ -306,7 +306,7 @@
             position: fixed;
             bottom: 30px;
             left: 30px;
-            width: 390px;
+            width: 900px;
             background: linear-gradient(135deg, rgba(245, 241, 232, 0.98), rgba(232, 220, 196, 0.98));
             backdrop-filter: blur(10px);
             padding: 20px;
@@ -314,6 +314,21 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             border: 2px solid #d4af37;
             z-index: 1000;
+        }
+
+        .buttons-row {
+            display: flex;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .button-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .button-wrapper.hidden {
+            display: none;
         }
 
         .region-selector-button {
@@ -333,7 +348,12 @@
             align-items: center;
         }
 
-        .region-selector-button:hover {
+        .region-selector-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .region-selector-button:not(:disabled):hover {
             background: linear-gradient(135deg, rgba(232, 220, 196, 0.98), rgba(212, 175, 55, 0.98));
             border-color: #d4af37;
             transform: translateY(-2px);
@@ -468,19 +488,48 @@
 
     <!-- Region Selector Box -->
     <div class="region-selector-box">
-        <div style="position: relative;">
-            <div class="region-dropdown" id="regionDropdown">
-                <div class="region-search-box">
-                    <input type="text" class="region-search-input" id="regionSearchInput" placeholder="Search regions...">
+        <div class="buttons-row">
+            <!-- First Button: Region Selector -->
+            <div class="button-wrapper">
+                <div class="region-dropdown" id="regionDropdown">
+                    <div class="region-search-box">
+                        <input type="text" class="region-search-input" id="regionSearchInput" placeholder="Search regions...">
+                    </div>
+                    <div class="region-dropdown-list" id="regionDropdownList">
+                        <!-- Regions will be populated by JavaScript -->
+                    </div>
                 </div>
-                <div class="region-dropdown-list" id="regionDropdownList">
-                    <!-- Regions will be populated by JavaScript -->
-                </div>
+                <button class="region-selector-button" id="regionSelectorButton">
+                    <span>Select Region</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
             </div>
-            <button class="region-selector-button" id="regionSelectorButton">
-                <span>Select Region</span>
-                <span class="dropdown-arrow">▼</span>
-            </button>
+
+            <!-- Second Button: Property Selector -->
+            <div class="button-wrapper">
+                <div class="region-dropdown" id="propertyDropdown">
+                    <div class="region-dropdown-list" id="propertyDropdownList">
+                        <div class="region-dropdown-item" data-property="has_port">Has port?</div>
+                    </div>
+                </div>
+                <button class="region-selector-button" id="propertyButton" disabled>
+                    <span>Select Property</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+            </div>
+
+            <!-- Third Button: Value Selector -->
+            <div class="button-wrapper hidden" id="valueButtonWrapper">
+                <div class="region-dropdown" id="valueDropdown">
+                    <div class="region-dropdown-list" id="valueDropdownList">
+                        <!-- Values will be populated by JavaScript -->
+                    </div>
+                </div>
+                <button class="region-selector-button" id="valueButton">
+                    <span>Select Value</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -870,7 +919,20 @@
         const regionSearchInput = document.getElementById('regionSearchInput');
         const regionDropdownList = document.getElementById('regionDropdownList');
 
+        // Property selector
+        const propertyButton = document.getElementById('propertyButton');
+        const propertyDropdown = document.getElementById('propertyDropdown');
+        const propertyDropdownList = document.getElementById('propertyDropdownList');
+
+        // Value selector
+        const valueButton = document.getElementById('valueButton');
+        const valueButtonWrapper = document.getElementById('valueButtonWrapper');
+        const valueDropdown = document.getElementById('valueDropdown');
+        const valueDropdownList = document.getElementById('valueDropdownList');
+
         let allNonSeaRegions = [];
+        let selectedRegionIndex = null;
+        let selectedProperty = null;
 
         // Initialize regions list
         function initializeRegionSelector() {
@@ -922,8 +984,19 @@
         function selectRegionFromSelector(regionIndex) {
             const region = regions[regionIndex];
 
+            // Save selected region
+            selectedRegionIndex = regionIndex;
+
             // Update button text
             regionSelectorButton.querySelector('span:first-child').textContent = region.name;
+
+            // Enable property button
+            propertyButton.disabled = false;
+
+            // Reset property and value selections
+            propertyButton.querySelector('span:first-child').textContent = 'Select Property';
+            selectedProperty = null;
+            valueButtonWrapper.classList.add('hidden');
 
             // Close dropdown
             regionDropdown.classList.remove('active');
@@ -965,10 +1038,73 @@
             populateRegionDropdown(this.value);
         });
 
-        // Close dropdown when clicking outside
+        // Property button toggle
+        propertyButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!this.disabled) {
+                propertyDropdown.classList.toggle('active');
+            }
+        });
+
+        // Property selection
+        propertyDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const property = this.getAttribute('data-property');
+                selectedProperty = property;
+
+                // Update button text
+                propertyButton.querySelector('span:first-child').textContent = this.textContent;
+
+                // Close property dropdown
+                propertyDropdown.classList.remove('active');
+
+                // Show value button and populate with Yes/No for "has_port"
+                if (property === 'has_port') {
+                    valueButtonWrapper.classList.remove('hidden');
+                    populateValueDropdown();
+                }
+
+                console.log(`Selected property: ${property}`);
+            });
+        });
+
+        // Populate value dropdown based on selected property
+        function populateValueDropdown() {
+            if (selectedProperty === 'has_port') {
+                valueDropdownList.innerHTML = `
+                    <div class="region-dropdown-item" data-value="yes">Yes</div>
+                    <div class="region-dropdown-item" data-value="no">No</div>
+                `;
+
+                // Add click handlers for values
+                valueDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const value = this.getAttribute('data-value');
+
+                        // Update button text
+                        valueButton.querySelector('span:first-child').textContent = this.textContent;
+
+                        // Close dropdown
+                        valueDropdown.classList.remove('active');
+
+                        console.log(`Selected value: ${value} for property: ${selectedProperty}`);
+                    });
+                });
+            }
+        }
+
+        // Value button toggle
+        valueButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            valueDropdown.classList.toggle('active');
+        });
+
+        // Close dropdowns when clicking outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.region-selector-box')) {
                 regionDropdown.classList.remove('active');
+                propertyDropdown.classList.remove('active');
+                valueDropdown.classList.remove('active');
                 regionSearchInput.value = '';
                 populateRegionDropdown();
             }
