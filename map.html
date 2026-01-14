@@ -510,6 +510,7 @@
                 <div class="region-dropdown" id="propertyDropdown">
                     <div class="region-dropdown-list" id="propertyDropdownList">
                         <div class="region-dropdown-item" data-property="has_port">Has port?</div>
+                        <div class="region-dropdown-item" data-property="owner">Owner</div>
                     </div>
                 </div>
                 <button class="region-selector-button" id="propertyButton" disabled>
@@ -1058,8 +1059,11 @@
                 // Close property dropdown
                 propertyDropdown.classList.remove('active');
 
-                // Show value button and populate with Yes/No for "has_port"
-                if (property === 'has_port') {
+                // Reset value button text
+                valueButton.querySelector('span:first-child').textContent = 'Select Value';
+
+                // Show value button and populate based on property
+                if (property === 'has_port' || property === 'owner') {
                     valueButtonWrapper.classList.remove('hidden');
                     populateValueDropdown();
                 }
@@ -1075,6 +1079,36 @@
                     <div class="region-dropdown-item" data-value="yes">Yes</div>
                     <div class="region-dropdown-item" data-value="no">No</div>
                 `;
+
+                // Add click handlers for values
+                valueDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const value = this.getAttribute('data-value');
+
+                        // Update button text
+                        valueButton.querySelector('span:first-child').textContent = this.textContent;
+
+                        // Close dropdown
+                        valueDropdown.classList.remove('active');
+
+                        console.log(`Selected value: ${value} for property: ${selectedProperty}`);
+                    });
+                });
+            } else if (selectedProperty === 'owner') {
+                // Get all unique factions
+                const factions = [...new Set(regions
+                    .filter(r => !r.sea && r.owner)
+                    .map(r => r.owner)
+                )].sort();
+
+                // Get current region's owner to exclude it
+                const currentOwner = selectedRegionIndex !== null ? regions[selectedRegionIndex].owner : null;
+
+                valueDropdownList.innerHTML = factions
+                    .filter(faction => faction !== currentOwner)
+                    .map(faction => `
+                        <div class="region-dropdown-item" data-value="${faction}">${faction}</div>
+                    `).join('');
 
                 // Add click handlers for values
                 valueDropdownList.querySelectorAll('.region-dropdown-item').forEach(item => {
