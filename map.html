@@ -266,10 +266,6 @@
             filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
         }
 
-        .faction-group:hover {
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
-        }
-
         /* Export button */
         .export-button {
             position: absolute;
@@ -496,27 +492,6 @@
                         // Il bordo è gestito tramite CSS - sarà visibile solo tra fazioni diverse
                         // mentre le regioni della stessa fazione appariranno fuse insieme
 
-                        // Add hover effect to highlight all polygons of the same region
-                        polygon.addEventListener('mouseenter', function() {
-                            const regionColor = this.getAttribute('data-region-color');
-                            const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
-                            allPolygonsOfRegion.forEach(p => {
-                                p.style.fillOpacity = '0.8'; // Increased opacity on hover
-                                p.classList.add('hovered');
-                            });
-                        });
-
-                        polygon.addEventListener('mouseleave', function() {
-                            const regionColor = this.getAttribute('data-region-color');
-                            const allPolygonsOfRegion = factionGroup.querySelectorAll(`[data-region-color="${regionColor}"]`);
-                            if (factionGroup !== selectedPolygon) {
-                                allPolygonsOfRegion.forEach(p => {
-                                    p.style.fillOpacity = '0.6'; // Back to default transparency
-                                    p.classList.remove('hovered');
-                                });
-                            }
-                        });
-
                         factionGroup.appendChild(polygon);
                     });
                 });
@@ -554,19 +529,21 @@
         function selectFaction(groupElement, factionData) {
             console.log(`🖱️ Faction clicked: ${factionData.owner}`);
 
-            // Deselect previous selection
+            // Deselect previous selection - remove borders
             if (selectedPolygon) {
                 const previousPolygons = selectedPolygon.querySelectorAll('.region-polygon');
                 previousPolygons.forEach(p => {
-                    p.style.fillOpacity = '0.6'; // Back to default transparency
+                    p.style.stroke = '';
+                    p.style.strokeWidth = '';
                 });
             }
 
-            // Select new faction - highlight all polygons with higher opacity
+            // Select new faction - add yellow border to all polygons
             selectedPolygon = groupElement;
             const polygons = groupElement.querySelectorAll('.region-polygon');
             polygons.forEach(p => {
-                p.style.fillOpacity = '0.85'; // Highlighted but still transparent
+                p.style.stroke = '#FFD700'; // Gold/yellow border
+                p.style.strokeWidth = '3';
             });
 
             // Show faction info
