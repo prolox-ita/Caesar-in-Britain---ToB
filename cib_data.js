@@ -1,6 +1,6 @@
 const regions = [
     {
-        name: "vik_reg_abberdeon",
+        name: "Aber Don",
         regionKey: "vik_reg_abberdeon",
         color: "#B8B8B8",
         sea: false,
@@ -17,7 +17,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_aberffro",
+        name: "Din Lligwy",
         regionKey: "vik_reg_aberffro",
         color: "#8B6914",
         sea: false,
@@ -35,7 +35,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_aberteifi",
+        name: "Aberteifi",
         regionKey: "vik_reg_aberteifi",
         color: "#E664B9",
         sea: false,
@@ -69,7 +69,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_aebburcurnig",
+        name: "Carmore",
         regionKey: "vik_reg_aebburcurnig",
         color: "#C0FF3E",
         sea: false,
@@ -86,7 +86,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_aelmham",
+        name: "Brannodunion",
         regionKey: "vik_reg_aelmham",
         color: "#5E5E5E",
         sea: false,
@@ -103,7 +103,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_aethelingaeg",
+        name: "Dun Co Abon Granta",
         regionKey: "vik_reg_aethelingaeg",
         color: "#C7C7C7",
         sea: false,
@@ -120,7 +120,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_airchardan",
+        name: "Lochduin",
         regionKey: "vik_reg_airchardan",
         color: "#104E8B",
         sea: false,
@@ -137,7 +137,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_alclyt",
+        name: "Skipton",
         regionKey: "vik_reg_alclyt",
         color: "#F08080",
         sea: false,
@@ -154,7 +154,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_alt_clut",
+        name: "Alauna",
         regionKey: "vik_reg_alt_clut",
         color: "#00FF00",
         sea: false,
@@ -188,7 +188,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_aporcrosan",
+        name: "Aporcrosan",
         regionKey: "vik_reg_aporcrosan",
         color: "#969696",
         sea: false,
@@ -222,7 +222,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ard_macha",
+        name: "Emain Macha",
         regionKey: "vik_reg_ard_macha",
         color: "#BBFFFF",
         sea: false,
@@ -290,7 +290,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_axanbrycg",
+        name: "Axanbryc",
         regionKey: "vik_reg_axanbrycg",
         color: "#3CB371",
         sea: false,
@@ -307,7 +307,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_balla",
+        name: "Ceathair Maol",
         regionKey: "vik_reg_balla",
         color: "#D6D6D6",
         sea: false,
@@ -327,7 +327,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_basengas",
+        name: "Rǵos Dun",
         regionKey: "vik_reg_basengas",
         color: "#262626",
         sea: false,
@@ -344,7 +344,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_bathanceaster",
+        name: "Caere Badon",
         regionKey: "vik_reg_bathanceaster",
         color: "#878787",
         sea: false,
@@ -361,7 +361,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_bebbanburg",
+        name: "Din Gefron",
         regionKey: "vik_reg_bebbanburg",
         color: "#EEE0E5",
         sea: false,
@@ -378,7 +378,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_bedanford",
+        name: "An Toot",
         regionKey: "vik_reg_bedanford",
         color: "#FAFAFA",
         sea: false,
@@ -395,7 +395,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_beoferlic",
+        name: "Tig ar Hul",
         regionKey: "vik_reg_beoferlic",
         color: "#00EEEE",
         sea: false,
@@ -412,7 +412,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_blascona",
+        name: "Gurnbrough",
         regionKey: "vik_reg_blascona",
         color: "#B5B5B5",
         sea: false,
@@ -442,7 +442,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_bodmine",
+        name: "Karn Briga",
         regionKey: "vik_reg_bodmine",
         color: "#CDBE70",
         sea: false,
@@ -459,7 +459,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_bornais",
+        name: "Dùn Mhùlan",
         regionKey: "vik_reg_bornais",
         color: "#FF6347",
         sea: false,
@@ -481,7 +481,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_brechin",
+        name: "Rerigon",
         regionKey: "vik_reg_brechin",
         color: "#424242",
         sea: false,
@@ -498,7 +498,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_brideport",
+        name: "Mai Dun",
         regionKey: "vik_reg_brideport",
         color: "#FFE7BA",
         sea: false,
@@ -515,7 +515,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_brug",
+        name: "Caer Caradog",
         regionKey: "vik_reg_brug",
         color: "#EE7621",
         sea: false,
@@ -532,7 +532,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_buccingahamm",
+        name: "Durocobrivis",
         regionKey: "vik_reg_buccingahamm",
         color: "#912CEE",
         sea: false,
@@ -549,7 +549,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cair_gwent",
+        name: "Caer Venta",
         regionKey: "vik_reg_cair_gwent",
         color: "#CD5B45",
         sea: false,
@@ -566,7 +566,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cair_mirddin",
+        name: "Caer Myrddin",
         regionKey: "vik_reg_cair_mirddin",
         color: "#4EEE94",
         sea: false,
@@ -583,7 +583,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cair_segeint",
+        name: "Tre'r Cewri",
         regionKey: "vik_reg_cair_segeint",
         color: "#9C9C9C",
         sea: false,
@@ -634,7 +634,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cantwaraburg",
+        name: "Durou̯ernon",
         regionKey: "vik_reg_cantwaraburg",
         color: "#707070",
         sea: false,
@@ -651,7 +651,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_carleol",
+        name: "Luguwalion",
         regionKey: "vik_reg_carleol",
         color: "#ADADAD",
         sea: false,
@@ -668,7 +668,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_casteltoun",
+        name: "Dun Alt",
         regionKey: "vik_reg_casteltoun",
         color: "#F8F8FF",
         sea: false,
@@ -724,7 +724,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ceaster",
+        name: "Gunia",
         regionKey: "vik_reg_ceaster",
         color: "#FFE4B5",
         sea: false,
@@ -759,7 +759,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cell_cainning",
+        name: "Drom an Iarainn",
         regionKey: "vik_reg_cell_cainning",
         color: "#9A32CD",
         sea: false,
@@ -776,7 +776,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cell_daltain",
+        name: "Dun Knaus-borg",
         regionKey: "vik_reg_cell_daltain",
         color: "#EEDD82",
         sea: false,
@@ -829,7 +829,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_celmeresfort",
+        name: "Tre uwch Baddow",
         regionKey: "vik_reg_celmeresfort",
         color: "#88CEFF",
         sea: false,
@@ -847,7 +847,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cenannas",
+        name: "Teamhair",
         regionKey: "vik_reg_cenannas",
         color: "#FF8C00",
         sea: false,
@@ -864,7 +864,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cetretha",
+        name: "Cataractonion",
         regionKey: "vik_reg_cetretha",
         color: "#FF4040",
         sea: false,
@@ -881,7 +881,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cherchebi",
+        name: "Keer-ford",
         regionKey: "vik_reg_cherchebi",
         color: "#FFF8DC",
         sea: false,
@@ -898,7 +898,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cippanhamm",
+        name: "Dūno uper Abona",
         regionKey: "vik_reg_cippanhamm",
         color: "#EEA964",
         sea: false,
@@ -915,7 +915,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cirenceaster",
+        name: "Burg lgas",
         regionKey: "vik_reg_cirenceaster",
         color: "#4169E1",
         sea: false,
@@ -932,7 +932,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cissanbyrig",
+        name: "Triker",
         regionKey: "vik_reg_cissanbyrig",
         color: "#0000FF",
         sea: false,
@@ -983,7 +983,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cluain_eoais",
+        name: "Ráth an Draoí",
         regionKey: "vik_reg_cluain_eoais",
         color: "#EE7942",
         sea: false,
@@ -1051,7 +1051,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cnodba",
+        name: "Sligeach",
         regionKey: "vik_reg_cnodba",
         color: "#458B00",
         sea: false,
@@ -1085,7 +1085,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_coldingaham",
+        name: "Din pelydr",
         regionKey: "vik_reg_coldingaham",
         color: "#F4F4F4",
         sea: false,
@@ -1102,7 +1102,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_colneceaster",
+        name: "Camulodunon",
         regionKey: "vik_reg_colneceaster",
         color: "#8FBC8F",
         sea: false,
@@ -1137,7 +1137,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_cridiatune",
+        name: "Bodfford",
         regionKey: "vik_reg_cridiatune",
         color: "#E0669B",
         sea: false,
@@ -1154,7 +1154,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dacor",
+        name: "Allt Dun",
         regionKey: "vik_reg_dacor",
         color: "#FF1493",
         sea: false,
@@ -1172,7 +1172,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dear",
+        name: "Touesis",
         regionKey: "vik_reg_dear",
         color: "#8EE5EE",
         sea: false,
@@ -1189,7 +1189,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_deoraby",
+        name: "Dervention",
         regionKey: "vik_reg_deoraby",
         color: "#EED5B7",
         sea: false,
@@ -1206,7 +1206,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_din_prys",
+        name: "Dun Prys",
         regionKey: "vik_reg_din_prys",
         color: "#8A8A8A",
         sea: false,
@@ -1223,7 +1223,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dinas_powis",
+        name: "Caer Taff",
         regionKey: "vik_reg_dinas_powis",
         color: "#575757",
         sea: false,
@@ -1240,7 +1240,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dinefwr",
+        name: "Y Gaer Fawr",
         regionKey: "vik_reg_dinefwr",
         color: "#9DB6CD",
         sea: false,
@@ -1257,7 +1257,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dofere",
+        name: "Dwfr ker",
         regionKey: "vik_reg_dofere",
         color: "#76EEC6",
         sea: false,
@@ -1274,7 +1274,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_alauna",
+        name: "Alauna",
         regionKey: "cib_reg_alauna",
         color: "#BC8F8F",
         sea: false,
@@ -1291,7 +1291,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_doneceaster",
+        name: "Cair Daun",
         regionKey: "vik_reg_doneceaster",
         color: "#FF0000",
         sea: false,
@@ -1308,7 +1308,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dor",
+        name: "Sefeldion",
         regionKey: "vik_reg_dor",
         color: "#242424",
         sea: false,
@@ -1325,7 +1325,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_doreceaster",
+        name: "Dun Dwfr",
         regionKey: "vik_reg_doreceaster",
         color: "#8B008B",
         sea: false,
@@ -1342,7 +1342,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_drayton",
+        name: "Mwd Din",
         regionKey: "vik_reg_drayton",
         color: "#CAE1FF",
         sea: false,
@@ -1393,7 +1393,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dugannu",
+        name: "Dun Cawn",
         regionKey: "vik_reg_dugannu",
         color: "#080808",
         sea: false,
@@ -1410,7 +1410,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_aberte",
+        name: "Rauatonion",
         regionKey: "vik_reg_dun_aberte",
         color: "#9AC0CD",
         sea: false,
@@ -1429,7 +1429,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_att",
+        name: "Dun Ad",
         regionKey: "vik_reg_dun_att",
         color: "#CD1076",
         sea: false,
@@ -1446,7 +1446,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_beccan",
+        name: "Dùn Bheccáin",
         regionKey: "vik_reg_dun_beccan",
         color: "#8B7500",
         sea: false,
@@ -1469,7 +1469,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_cailden",
+        name: "Inis Tulach",
         regionKey: "vik_reg_dun_cailden",
         color: "#8B8378",
         sea: false,
@@ -1486,7 +1486,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_domnaill",
+        name: "Drochaidh",
         regionKey: "vik_reg_dun_domnaill",
         color: "#CDB38B",
         sea: false,
@@ -1504,7 +1504,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_duirn",
+        name: "Caleto Dubro",
         regionKey: "vik_reg_dun_duirn",
         color: "#F5F5DC",
         sea: false,
@@ -1521,7 +1521,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_eachainn",
+        name: "Dun De",
         regionKey: "vik_reg_dun_eachainn",
         color: "#FFFACD",
         sea: false,
@@ -1538,7 +1538,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_foither",
+        name: "Men Aber",
         regionKey: "vik_reg_dun_foither",
         color: "#B0E0E6",
         sea: false,
@@ -1572,7 +1572,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_nechtain",
+        name: "Derdriun",
         regionKey: "vik_reg_dun_nechtain",
         color: "#B23AEE",
         sea: false,
@@ -1589,7 +1589,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_ollaig",
+        name: "Oban",
         regionKey: "vik_reg_dun_ollaig",
         color: "#8B8970",
         sea: false,
@@ -1609,7 +1609,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dun_patraic",
+        name: "Dun Droma",
         regionKey: "vik_reg_dun_patraic",
         color: "#8B4726",
         sea: false,
@@ -1661,7 +1661,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dyflin",
+        name: "Eblana",
         regionKey: "vik_reg_dyflin",
         color: "#E68AE6",
         sea: false,
@@ -1679,7 +1679,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_dynbaer",
+        name: "Din Bar",
         regionKey: "vik_reg_dynbaer",
         color: "#D2B48C",
         sea: false,
@@ -1696,7 +1696,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_bibrax",
+        name: "Bibrax",
         regionKey: "cib_reg_bibrax",
         color: "#836FFF",
         sea: false,
@@ -1713,7 +1713,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_bratus",
+        name: "Bratus",
         regionKey: "cib_reg_bratus",
         color: "#B0D8E6",
         sea: false,
@@ -1730,7 +1730,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_eidenburg",
+        name: "Caer Eidyn",
         regionKey: "vik_reg_eidenburg",
         color: "#813626",
         sea: false,
@@ -1747,7 +1747,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_elig",
+        name: "Elge",
         regionKey: "vik_reg_elig",
         color: "#BCD2EE",
         sea: false,
@@ -1764,7 +1764,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_eoferwic",
+        name: "Eburākon",
         regionKey: "vik_reg_eoferwic",
         color: "#48D1CC",
         sea: false,
@@ -1781,7 +1781,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_caracotinum",
+        name: "Caracotinum",
         regionKey: "cib_reg_caracotinum",
         color: "#EE3B3B",
         sea: false,
@@ -1798,7 +1798,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ethandun",
+        name: "Durtun",
         regionKey: "vik_reg_ethandun",
         color: "#F0E68C",
         sea: false,
@@ -1815,7 +1815,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_exanceaster",
+        name: "Bodun",
         regionKey: "vik_reg_exanceaster",
         color: "#8B668B",
         sea: false,
@@ -1849,7 +1849,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_flichesburg",
+        name: "Tig ar y Aber",
         regionKey: "vik_reg_flichesburg",
         color: "#BA55D3",
         sea: false,
@@ -1866,7 +1866,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_forais",
+        name: "Fofaras",
         regionKey: "vik_reg_forais",
         color: "#FFDEAD",
         sea: false,
@@ -1883,7 +1883,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_gipeswic",
+        name: "Gipesbae",
         regionKey: "vik_reg_gipeswic",
         color: "#D1EEEE",
         sea: false,
@@ -1900,7 +1900,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_crociatonum",
+        name: "Crociatonum",
         regionKey: "cib_reg_crociatonum",
         color: "#F5F5F5",
         sea: false,
@@ -1934,7 +1934,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_gleawceaster",
+        name: "Cilta",
         regionKey: "vik_reg_gleawceaster",
         color: "#826EFA",
         sea: false,
@@ -1951,7 +1951,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_grantabrycg",
+        name: "Dina Briwa",
         regionKey: "vik_reg_grantabrycg",
         color: "#BF3EFF",
         sea: false,
@@ -1987,7 +1987,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_guldeford",
+        name: "Dun Firth",
         regionKey: "vik_reg_guldeford",
         color: "#B3EE3A",
         sea: false,
@@ -2004,7 +2004,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_guvan",
+        name: "Cathures",
         regionKey: "vik_reg_guvan",
         color: "#EEB422",
         sea: false,
@@ -2021,7 +2021,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_gyruum",
+        name: "Caer Wear",
         regionKey: "vik_reg_gyruum",
         color: "#CDCDB4",
         sea: false,
@@ -2038,7 +2038,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_haestingas",
+        name: "Loch in aice bá",
         regionKey: "vik_reg_haestingas",
         color: "#4D4D4D",
         sea: false,
@@ -2055,7 +2055,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_hagustaldes",
+        name: "Brocolition",
         regionKey: "vik_reg_hagustaldes",
         color: "#FA8072",
         sea: false,
@@ -2072,7 +2072,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_haverfordia",
+        name: "Hæferfordd",
         regionKey: "vik_reg_haverfordia",
         color: "#EE5C42",
         sea: false,
@@ -2089,7 +2089,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_hereford",
+        name: "Dunmore ring",
         regionKey: "vik_reg_hereford",
         color: "#82616E",
         sea: false,
@@ -2106,7 +2106,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_herutford",
+        name: "Lle ffynnon",
         regionKey: "vik_reg_herutford",
         color: "#828282",
         sea: false,
@@ -2123,7 +2123,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_heslerton",
+        name: "Cilurnum",
         regionKey: "vik_reg_heslerton",
         color: "#7CFC00",
         sea: false,
@@ -2140,7 +2140,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_hlymrekr",
+        name: "Inis Sibhtonn",
         regionKey: "vik_reg_hlymrekr",
         color: "#595959",
         sea: false,
@@ -2157,7 +2157,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_hripum",
+        name: "Inhrypum",
         regionKey: "vik_reg_hripum",
         color: "#EEE5DE",
         sea: false,
@@ -2174,7 +2174,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_nemetocenna",
+        name: "Nemetocenna",
         regionKey: "cib_reg_nemetocenna",
         color: "#EED5D2",
         sea: false,
@@ -2191,7 +2191,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_hwitan_aerne",
+        name: "Rhwospen",
         regionKey: "vik_reg_hwitan_aerne",
         color: "#B03060",
         sea: false,
@@ -2225,7 +2225,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_inber_nise",
+        name: "Aberness",
         regionKey: "vik_reg_inber_nise",
         color: "#A3A3A3",
         sea: false,
@@ -2259,7 +2259,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_inis_faithlenn",
+        name: "Dun Loch",
         regionKey: "vik_reg_inis_faithlenn",
         color: "#00CED1",
         sea: false,
@@ -2276,7 +2276,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_inis_patraic",
+        name: "Colen Bryn",
         regionKey: "vik_reg_inis_patraic",
         color: "#EE799F",
         sea: false,
@@ -2293,7 +2293,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ioua",
+        name: "Dun Nan Gall",
         regionKey: "vik_reg_ioua",
         color: "#CFCFCF",
         sea: false,
@@ -2315,7 +2315,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_laewe",
+        name: "Læwe",
         regionKey: "vik_reg_laewe",
         color: "#696B69",
         sea: false,
@@ -2332,7 +2332,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_lann_afan",
+        name: "Cwm Bran",
         regionKey: "vik_reg_lann_afan",
         color: "#BCEE68",
         sea: false,
@@ -2383,7 +2383,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_lann_idloes",
+        name: "Llwyn y Brain",
         regionKey: "vik_reg_lann_idloes",
         color: "#8B1A1A",
         sea: false,
@@ -2417,7 +2417,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_lann_padarn",
+        name: "Dinas Maelor",
         regionKey: "vik_reg_lann_padarn",
         color: "#E0EEEE",
         sea: false,
@@ -2434,7 +2434,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_latharn",
+        name: "Càrn Smeart",
         regionKey: "vik_reg_latharn",
         color: "#EEAD0E",
         sea: false,
@@ -2468,7 +2468,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_licetfelda",
+        name: "Lētocaiton",
         regionKey: "vik_reg_licetfelda",
         color: "#7B68EE",
         sea: false,
@@ -2489,7 +2489,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ligeraceaster",
+        name: "Ratae",
         regionKey: "vik_reg_ligeraceaster",
         color: "#B0B0B0",
         sea: false,
@@ -2506,7 +2506,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_lindcylne",
+        name: "Lindon",
         regionKey: "vik_reg_lindcylne",
         color: "#00EE00",
         sea: false,
@@ -2557,7 +2557,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_liwtune",
+        name: "Dun Tamor",
         regionKey: "vik_reg_liwtune",
         color: "#CD3700",
         sea: false,
@@ -2608,7 +2608,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_loidis",
+        name: "Lātēnses",
         regionKey: "vik_reg_loidis",
         color: "#DDA0DD",
         sea: false,
@@ -2625,7 +2625,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_lonceaster",
+        name: "Dun Moricambe",
         regionKey: "vik_reg_lonceaster",
         color: "#E3E3E3",
         sea: false,
@@ -2642,7 +2642,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_lude",
+        name: "Isurium",
         regionKey: "vik_reg_lude",
         color: "#8B8682",
         sea: false,
@@ -2659,7 +2659,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_lunden",
+        name: "Londonjon",
         regionKey: "vik_reg_lunden",
         color: "#2E8B57",
         sea: false,
@@ -2676,7 +2676,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_noviodunum",
+        name: "Noviodunum",
         regionKey: "cib_reg_noviodunum",
         color: "#CD9B9B",
         sea: false,
@@ -2693,7 +2693,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_mailros",
+        name: "Eil Dun",
         regionKey: "vik_reg_mailros",
         color: "#FAF0E6",
         sea: false,
@@ -2710,7 +2710,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_mameceaster",
+        name: "Mamnos",
         regionKey: "vik_reg_mameceaster",
         color: "#CD0000",
         sea: false,
@@ -2727,7 +2727,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_mathrafal",
+        name: "Caersws",
         regionKey: "vik_reg_mathrafal",
         color: "#8B8878",
         sea: false,
@@ -2744,7 +2744,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_menevia",
+        name: "Mynyw",
         regionKey: "vik_reg_menevia",
         color: "#8B8B00",
         sea: false,
@@ -2761,7 +2761,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_middeherst",
+        name: "Mowdacch",
         regionKey: "vik_reg_middeherst",
         color: "#CD3278",
         sea: false,
@@ -2795,7 +2795,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_na_seciri",
+        name: "Droim Menaich",
         regionKey: "vik_reg_na_seciri",
         color: "#CDC1C5",
         sea: false,
@@ -2812,7 +2812,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_nas",
+        name: "Dun Ailinne",
         regionKey: "vik_reg_nas",
         color: "#7A8B8B",
         sea: false,
@@ -2829,7 +2829,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_nedd",
+        name: "Nedd",
         regionKey: "vik_reg_nedd",
         color: "#C71585",
         sea: false,
@@ -2846,7 +2846,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_northhamtun",
+        name: "Neen Din",
         regionKey: "vik_reg_northhamtun",
         color: "#008B45",
         sea: false,
@@ -2863,7 +2863,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_northwic",
+        name: "Tas Din",
         regionKey: "vik_reg_northwic",
         color: "#EECFA1",
         sea: false,
@@ -2881,7 +2881,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_oswaldestroe",
+        name: "Caer Ogyrfan",
         regionKey: "vik_reg_oswaldestroe",
         color: "#CDC5BF",
         sea: false,
@@ -2898,7 +2898,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_otergimele",
+        name: "Lifer Pol",
         regionKey: "vik_reg_otergimele",
         color: "#FFEFD5",
         sea: false,
@@ -2915,7 +2915,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_oxnaforda",
+        name: "Caer Cunobelinos",
         regionKey: "vik_reg_oxnaforda",
         color: "#FFEBCD",
         sea: false,
@@ -2949,7 +2949,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_poclintun",
+        name: "Tig yn cors",
         regionKey: "vik_reg_poclintun",
         color: "#000080",
         sea: false,
@@ -2966,7 +2966,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_porteceaster",
+        name: "Dún na Ramhainn Aon",
         regionKey: "vik_reg_porteceaster",
         color: "#EE64AD",
         sea: false,
@@ -3017,7 +3017,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_rendlesham",
+        name: "Coed agos traeth",
         regionKey: "vik_reg_rendlesham",
         color: "#9AFF9A",
         sea: false,
@@ -3034,7 +3034,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_rinnin",
+        name: "Bealach Dair",
         regionKey: "vik_reg_rinnin",
         color: "#FF4500",
         sea: false,
@@ -3051,7 +3051,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_rocheberie",
+        name: "Droche-brig",
         regionKey: "vik_reg_rocheberie",
         color: "#CD7054",
         sea: false,
@@ -3068,7 +3068,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_rofeceaster",
+        name: "Dourbruf",
         regionKey: "vik_reg_rofeceaster",
         color: "#00CD66",
         sea: false,
@@ -3086,7 +3086,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ros",
+        name: "Cuan Modha",
         regionKey: "vik_reg_ros",
         color: "#8B6969",
         sea: false,
@@ -3104,7 +3104,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ros_ailithir",
+        name: "Ivernia",
         regionKey: "vik_reg_ros_ailithir",
         color: "#FFD39B",
         sea: false,
@@ -3122,7 +3122,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ros_cuissine",
+        name: "Caerbron",
         regionKey: "vik_reg_ros_cuissine",
         color: "#333333",
         sea: false,
@@ -3139,7 +3139,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_ros_maircind",
+        name: "Ros Mhaircnidh",
         regionKey: "vik_reg_ros_maircind",
         color: "#DEB887",
         sea: false,
@@ -3190,7 +3190,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_sancte_albanes",
+        name: "Verlamion",
         regionKey: "vik_reg_sancte_albanes",
         color: "#6495ED",
         sea: false,
@@ -3207,7 +3207,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_sancte_eadmundes",
+        name: "Tre ar Sturr",
         regionKey: "vik_reg_sancte_eadmundes",
         color: "#698B22",
         sea: false,
@@ -3224,7 +3224,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_noviomagos",
+        name: "Noviomagos",
         regionKey: "cib_reg_noviomagos",
         color: "#CD69C9",
         sea: false,
@@ -3241,7 +3241,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_sancte_ye",
+        name: "Bodweryn",
         regionKey: "vik_reg_sancte_ye",
         color: "#00EE76",
         sea: false,
@@ -3258,7 +3258,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_sceaftesburg",
+        name: "Dun Menez",
         regionKey: "vik_reg_sceaftesburg",
         color: "#8B3A62",
         sea: false,
@@ -3275,7 +3275,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_scireburnan",
+        name: "Hamdon",
         regionKey: "vik_reg_scireburnan",
         color: "#A0522D",
         sea: false,
@@ -3292,7 +3292,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_sconnin",
+        name: "Gortomagos",
         regionKey: "vik_reg_sconnin",
         color: "#B4CDCD",
         sea: false,
@@ -3309,7 +3309,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_scrobbesburg",
+        name: "Uriconion",
         regionKey: "vik_reg_scrobbesburg",
         color: "#FF3030",
         sea: false,
@@ -3326,7 +3326,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_seolesigge",
+        name: "Cuala",
         regionKey: "vik_reg_seolesigge",
         color: "#9B30FF",
         sea: false,
@@ -3344,7 +3344,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_snotingaham",
+        name: "Tig Guocobauc",
         regionKey: "vik_reg_snotingaham",
         color: "#EED2EE",
         sea: false,
@@ -3361,7 +3361,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_sreth_belin",
+        name: "Striveling",
         regionKey: "vik_reg_sreth_belin",
         color: "#303030",
         sea: false,
@@ -3378,7 +3378,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_portus_itius",
+        name: "Portus Itius",
         regionKey: "cib_reg_portus_itius",
         color: "#54FF9F",
         sea: false,
@@ -3395,7 +3395,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_ratumacos",
+        name: "Ratumacos",
         regionKey: "cib_reg_ratumacos",
         color: "#5CACEE",
         sea: false,
@@ -3412,7 +3412,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_steanford",
+        name: "Pont war Weolud",
         regionKey: "vik_reg_steanford",
         color: "#7AC5CD",
         sea: false,
@@ -3429,7 +3429,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_samarobriva",
+        name: "Samarobriva",
         regionKey: "cib_reg_samarobriva",
         color: "#8B475D",
         sea: false,
@@ -3446,7 +3446,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_stornochway",
+        name: "Ebudes",
         regionKey: "vik_reg_stornochway",
         color: "#D4D4D4",
         sea: false,
@@ -3463,7 +3463,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_stutfall",
+        name: "Lemanae",
         regionKey: "vik_reg_stutfall",
         color: "#FF3E96",
         sea: false,
@@ -3480,7 +3480,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_suthhamtun",
+        name: "Ictinovium",
         regionKey: "vik_reg_suthhamtun",
         color: "#F5DEB3",
         sea: false,
@@ -3497,7 +3497,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_tamworthige",
+        name: "Cair Tamas",
         regionKey: "vik_reg_tamworthige",
         color: "#5C5C5C",
         sea: false,
@@ -3514,7 +3514,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_tanet",
+        name: "Tanet",
         regionKey: "vik_reg_tanet",
         color: "#CD8500",
         sea: false,
@@ -3531,7 +3531,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_theodford",
+        name: "Din Usa",
         regionKey: "vik_reg_theodford",
         color: "#8B2500",
         sea: false,
@@ -3548,7 +3548,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_thursa",
+        name: "Inbhir Theòrsa",
         regionKey: "vik_reg_thursa",
         color: "#EE9A49",
         sea: false,
@@ -3565,7 +3565,7 @@ const regions = [
         ]
     },
     {
-        name: "cib_reg_corda",
+        name: "Corda",
         regionKey: "cib_reg_corda",
         color: "#121212",
         sea: false,
@@ -3582,7 +3582,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_tintagol",
+        name: "Dun Tagel",
         regionKey: "vik_reg_tintagol",
         color: "#7A67EE",
         sea: false,
@@ -3601,7 +3601,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_tor_in_duine",
+        name: "Abernanton",
         regionKey: "vik_reg_tor_in_duine",
         color: "#008B00",
         sea: false,
@@ -3618,7 +3618,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_torfness",
+        name: "Bun Ilidh",
         regionKey: "vik_reg_torfness",
         color: "#787878",
         sea: false,
@@ -3635,7 +3635,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_totanes",
+        name: "Caer Penhallgot",
         regionKey: "vik_reg_totanes",
         color: "#00B2EE",
         sea: false,
@@ -3652,7 +3652,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_tuaim",
+        name: "Tuaim da Ghualann",
         regionKey: "vik_reg_tuaim",
         color: "#006400",
         sea: false,
@@ -3686,7 +3686,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_tureceseig",
+        name: "Sceap Dun",
         regionKey: "vik_reg_tureceseig",
         color: "#A020F0",
         sea: false,
@@ -3737,7 +3737,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_waecet",
+        name: "Wogoced",
         regionKey: "vik_reg_waecet",
         color: "#FF7F00",
         sea: false,
@@ -3754,7 +3754,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_waerincwicum",
+        name: "Tre Weir",
         regionKey: "vik_reg_waerincwicum",
         color: "#B9D3EE",
         sea: false,
@@ -3771,7 +3771,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_werham",
+        name: "Dun Kerc'h",
         regionKey: "vik_reg_werham",
         color: "#8B7B8B",
         sea: false,
@@ -3788,7 +3788,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_wigingamere",
+        name: "Cors Crin",
         regionKey: "vik_reg_wigingamere",
         color: "#FF7256",
         sea: false,
@@ -3805,7 +3805,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_wigracestre",
+        name: "Moel Byrn",
         regionKey: "vik_reg_wigracestre",
         color: "#050505",
         sea: false,
@@ -3822,7 +3822,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_wiht",
+        name: "Wextsetla",
         regionKey: "vik_reg_wiht",
         color: "#CCCCCC",
         sea: false,
@@ -3839,7 +3839,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_wiltun",
+        name: "Broc'h lec'h",
         regionKey: "vik_reg_wiltun",
         color: "#CDAF95",
         sea: false,
@@ -3856,7 +3856,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_wintanceaster",
+        name: "Venta",
         regionKey: "vik_reg_wintanceaster",
         color: "#66CDAA",
         sea: false,
@@ -3873,7 +3873,7 @@ const regions = [
         ]
     },
     {
-        name: "vik_reg_wyrcesuuyrthe",
+        name: "Ffyn y Nant",
         regionKey: "vik_reg_wyrcesuuyrthe",
         color: "#4F94CD",
         sea: false,
