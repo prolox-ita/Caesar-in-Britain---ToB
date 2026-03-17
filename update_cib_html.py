@@ -76,6 +76,17 @@ for region_key, region_data in cib_regions.items():
 
 print(f"✓ Creati {len(new_regions)} oggetti region")
 
+# Helper function to convert Python values to JavaScript
+def to_js_value(value):
+    if value is None:
+        return 'null'
+    elif isinstance(value, bool):
+        return str(value).lower()
+    elif isinstance(value, str):
+        return f'"{value}"'
+    else:
+        return str(value)
+
 # Converte new_regions in stringa JavaScript
 regions_js = "const regions = [\n"
 for i, region in enumerate(new_regions):
@@ -84,14 +95,14 @@ for i, region in enumerate(new_regions):
     regions_js += f"        regionKey: \"{region['regionKey']}\",\n"
     regions_js += f"        color: \"{region['color']}\",\n"
     regions_js += f"        sea: {str(region['sea']).lower()},\n"
-    regions_js += f"        owner: {region['owner']},\n"
-    regions_js += f"        factionColor: {region['factionColor']},\n"
-    regions_js += f"        port: {region['port']},\n"
-    regions_js += f"        numberOfSlots: {region['numberOfSlots']},\n"
-    regions_js += f"        rebelFaction: {region['rebelFaction']},\n"
-    regions_js += f"        alternativeRebelFaction: {region['alternativeRebelFaction']},\n"
-    regions_js += f"        religion: {region['religion']},\n"
-    regions_js += f"        isCapital: {region['isCapital']},\n"
+    regions_js += f"        owner: {to_js_value(region['owner'])},\n"
+    regions_js += f"        factionColor: {to_js_value(region['factionColor'])},\n"
+    regions_js += f"        port: {to_js_value(region['port'])},\n"
+    regions_js += f"        numberOfSlots: {to_js_value(region['numberOfSlots'])},\n"
+    regions_js += f"        rebelFaction: {to_js_value(region['rebelFaction'])},\n"
+    regions_js += f"        alternativeRebelFaction: {to_js_value(region['alternativeRebelFaction'])},\n"
+    regions_js += f"        religion: {to_js_value(region['religion'])},\n"
+    regions_js += f"        isCapital: {to_js_value(region['isCapital'])},\n"
     regions_js += f"        polygons: [\n"
     regions_js += f"            \"{region['polygons'][0]}\",\n"
     regions_js += f"        ]\n"
