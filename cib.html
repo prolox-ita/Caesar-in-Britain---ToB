@@ -394,7 +394,13 @@ let currentSelectedIdx = -1;
 function resizeCanvases() {
     const w = mapImage.offsetWidth;
     const h = mapImage.offsetHeight;
-    if (w === 0 || h === 0) return;
+    if (w === 0 || h === 0) {
+        // Layout not ready yet — retry next frame
+        requestAnimationFrame(resizeCanvases);
+        return;
+    }
+    // Only resize if dimensions actually changed (avoids unnecessary redraws)
+    if (interactiveCanvas.width === w && interactiveCanvas.height === h) return;
     overlayCanvas.width = w; overlayCanvas.height = h;
     overlayCanvas.style.width = w + "px"; overlayCanvas.style.height = h + "px";
     interactiveCanvas.width = w; interactiveCanvas.height = h;
@@ -557,9 +563,23 @@ interactiveCanvas.addEventListener("click", function(e) {
     }
 });
 
-window.addEventListener("resize", function() { resizeCanvases(); });
-mapImage.addEventListener("load", resizeCanvases);
-if (mapImage.complete && mapImage.naturalWidth > 0) resizeCanvases();
+window.addEventListener("resize", resizeCanvases);
+
+// ResizeObserver: fires whenever the image element gets/changes size
+// This is the most reliable way to catch layout completion (cache, network, resize)
+if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(function() { resizeCanvases(); }).observe(mapImage);
+}
+
+// Also hook load event + rAF for browsers without ResizeObserver
+mapImage.addEventListener("load", function() {
+    requestAnimationFrame(resizeCanvases);
+});
+
+// If already loaded from cache, defer to next frame so layout is ready
+if (mapImage.complete && mapImage.naturalWidth > 0) {
+    requestAnimationFrame(resizeCanvases);
+}
 </script>
 </body>
 </html>
