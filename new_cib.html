@@ -35,28 +35,38 @@
             border-left:3px solid #d4af37;
         }
         .search-box {
-            padding:18px 20px 14px;
+            padding:16px 20px 12px;
             border-bottom:2px solid rgba(212,175,55,0.4);
             background:rgba(255,252,245,0.7);
+            position:relative;
         }
         .search-box label {
             display:block; font-family:'Cinzel',serif; font-size:0.8rem;
             color:#5a4a2f; font-weight:700; margin-bottom:8px; letter-spacing:0.05em;
         }
-        .search-row { display:flex; gap:8px; }
-        .search-row input {
-            flex:1; padding:8px 12px; border:1.5px solid #c8a84b;
-            border-radius:6px; font-family:monospace; font-size:0.9rem;
-            background:rgba(255,255,255,0.9); color:#3a2a10; outline:none;
+        #searchInput {
+            width:100%; box-sizing:border-box;
+            padding:9px 12px; border:1.5px solid #c8a84b;
+            border-radius:6px; font-family:monospace; font-size:0.88rem;
+            background:rgba(255,255,255,0.95); color:#3a2a10; outline:none;
         }
-        .search-row input:focus { border-color:#8b6914; box-shadow:0 0 0 2px rgba(212,175,55,0.25); }
-        .search-row button {
-            padding:8px 14px; background:linear-gradient(135deg,#d4af37,#b8962e);
-            border:none; border-radius:6px; color:white; font-family:'Cinzel',serif;
-            font-size:0.85rem; cursor:pointer; white-space:nowrap;
+        #searchInput:focus { border-color:#8b6914; box-shadow:0 0 0 2px rgba(212,175,55,0.25); }
+        #searchDropdown {
+            display:none; position:absolute; left:20px; right:20px;
+            background:#fffdf5; border:1.5px solid #c8a84b; border-top:none;
+            border-radius:0 0 8px 8px; max-height:260px; overflow-y:auto;
+            z-index:2000; box-shadow:0 6px 20px rgba(0,0,0,0.18);
         }
-        .search-row button:hover { background:linear-gradient(135deg,#b8962e,#d4af37); }
-        #searchFeedback { font-size:0.8rem; margin-top:6px; min-height:1em; }
+        #searchDropdown.open { display:block; }
+        .drop-item {
+            padding:9px 14px; cursor:pointer; border-bottom:1px solid rgba(212,175,55,0.15);
+            transition:background 0.1s;
+        }
+        .drop-item:last-child { border-bottom:none; }
+        .drop-item:hover, .drop-item.active { background:rgba(212,175,55,0.18); }
+        .drop-item-name { font-size:0.9rem; color:#3a2a10; font-weight:600; }
+        .drop-item-key  { font-family:monospace; font-size:0.75rem; color:#7a6a4f; margin-top:1px; }
+        .drop-match { background:rgba(212,175,55,0.45); border-radius:2px; }
         .info-body {
             flex:1; overflow-y:auto; padding:25px 30px;
         }
@@ -105,12 +115,9 @@
         </div>
         <div class="info-panel" id="infoPanel">
             <div class="search-box">
-                <label for="searchInput">Cerca region key</label>
-                <div class="search-row">
-                    <input type="text" id="searchInput" placeholder="es. cib_reg_londinium" spellcheck="false">
-                    <button id="searchBtn">Cerca</button>
-                </div>
-                <div id="searchFeedback"></div>
+                <label>Cerca regione</label>
+                <input type="text" id="searchInput" placeholder="nome, new key, old key..." spellcheck="false" autocomplete="off">
+                <div id="searchDropdown"></div>
             </div>
             <div class="info-body empty" id="infoBody">
                 <p>Click on a region to view information</p>
@@ -418,13 +425,19 @@ try {
     console.error("Decode failed:", e);
 }
 
-// --- Build reverse lookup: key string -> hexIdx ---
-const KEY_TO_IDX = {};
+// --- Build autocomplete index ---
+// SEARCH_ENTRIES: [{idx, name, new_key, old_key, searchText}, ...]
+const SEARCH_ENTRIES = [];
 HEX_LIST.forEach((hex, idx) => {
     const r = COLOR_MAP[hex];
     if (!r) return;
-    if (r.new_key) KEY_TO_IDX[r.new_key.toLowerCase()] = idx;
-    if (r.old_key && r.old_key !== "nuova regione") KEY_TO_IDX[r.old_key.toLowerCase()] = idx;
+    SEARCH_ENTRIES.push({
+        idx,
+        name:     r.name    || "",
+        new_key:  r.new_key || "",
+        old_key:  r.old_key || "",
+        searchText: ((r.name || "") + " " + (r.new_key || "") + " " + (r.old_key || "")).toLowerCase()
+    });
 });
 
 // --- Lavorata state ---
@@ -462,8 +475,7 @@ const overlayCanvas  = document.getElementById("overlayCanvas");
 const interactiveCanvas = document.getElementById("interactiveCanvas");
 const infoPanel      = document.getElementById("infoBody");
 const searchInput    = document.getElementById("searchInput");
-const searchBtn      = document.getElementById("searchBtn");
-const searchFeedback = document.getElementById("searchFeedback");
+const searchDropdown = document.getElementById("searchDropdown");
 
 let currentHoverIdx    = -1;
 let currentSelectedIdx = -1;
@@ -588,27 +600,96 @@ function clearInfoPanel() {
     infoPanel.innerHTML = "<p>Click on a region to view information</p>";
 }
 
-// --- Search ---
-function doSearch() {
-    const query = searchInput.value.trim().toLowerCase();
-    searchFeedback.textContent = "";
-    if (!query) return;
-    const idx = KEY_TO_IDX[query];
-    if (idx === undefined) {
-        searchFeedback.textContent = "Regione non trovata";
-        searchFeedback.style.color = "#b22222";
-        return;
-    }
-    searchFeedback.textContent = "Trovata!";
-    searchFeedback.style.color = "#3a6a3a";
-    currentSelectedIdx = idx;
-    drawHighlight(idx, true);
-    showRegionInfo(idx);
+// --- Autocomplete search ---
+let dropActiveIdx = -1;
+
+function escapeHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-searchBtn.addEventListener("click", doSearch);
+function highlight(text, query) {
+    if (!query) return escapeHtml(text);
+    const lo = text.toLowerCase();
+    const qi = lo.indexOf(query);
+    if (qi < 0) return escapeHtml(text);
+    return escapeHtml(text.slice(0, qi))
+         + '<span class="drop-match">' + escapeHtml(text.slice(qi, qi + query.length)) + '</span>'
+         + escapeHtml(text.slice(qi + query.length));
+}
+
+function selectDropItem(entry) {
+    searchInput.value = entry.name;
+    closeDropdown();
+    currentSelectedIdx = entry.idx;
+    drawHighlight(entry.idx, true);
+    showRegionInfo(entry.idx);
+}
+
+function closeDropdown() {
+    searchDropdown.classList.remove("open");
+    searchDropdown.innerHTML = "";
+    dropActiveIdx = -1;
+}
+
+function updateDropdown() {
+    const query = searchInput.value.trim().toLowerCase();
+    if (!query) { closeDropdown(); return; }
+
+    const matches = SEARCH_ENTRIES.filter(e => e.searchText.includes(query));
+    if (!matches.length) {
+        searchDropdown.innerHTML = '<div class="drop-item" style="color:#888;cursor:default;">Nessun risultato</div>';
+        searchDropdown.classList.add("open");
+        dropActiveIdx = -1;
+        return;
+    }
+
+    const MAX = 15;
+    const shown = matches.slice(0, MAX);
+    searchDropdown.innerHTML = shown.map((e, i) =>
+        `<div class="drop-item" data-i="${i}">
+            <div class="drop-item-name">${highlight(e.name, query)}</div>
+            <div class="drop-item-key">${highlight(e.new_key, query)}</div>
+        </div>`
+    ).join("");
+    if (matches.length > MAX) {
+        searchDropdown.innerHTML += `<div class="drop-item" style="color:#888;cursor:default;font-size:0.8rem;">...e altri ${matches.length - MAX}</div>`;
+    }
+    searchDropdown.classList.add("open");
+    dropActiveIdx = -1;
+
+    // Attach click handlers
+    searchDropdown.querySelectorAll(".drop-item[data-i]").forEach(el => {
+        el.addEventListener("mousedown", function(e) {
+            e.preventDefault();
+            selectDropItem(shown[parseInt(this.dataset.i)]);
+        });
+    });
+}
+
+searchInput.addEventListener("input", updateDropdown);
+
 searchInput.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") doSearch();
+    const items = searchDropdown.querySelectorAll(".drop-item[data-i]");
+    if (!items.length) return;
+    if (e.key === "ArrowDown") {
+        e.preventDefault();
+        dropActiveIdx = Math.min(dropActiveIdx + 1, items.length - 1);
+    } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        dropActiveIdx = Math.max(dropActiveIdx - 1, 0);
+    } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (dropActiveIdx >= 0) items[dropActiveIdx].dispatchEvent(new MouseEvent("mousedown"));
+        return;
+    } else if (e.key === "Escape") {
+        closeDropdown(); return;
+    } else { return; }
+    items.forEach((el, i) => el.classList.toggle("active", i === dropActiveIdx));
+    if (dropActiveIdx >= 0) items[dropActiveIdx].scrollIntoView({block:"nearest"});
+});
+
+searchInput.addEventListener("blur", function() {
+    setTimeout(closeDropdown, 150);
 });
 
 // --- Mouse events ---
