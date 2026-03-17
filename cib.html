@@ -53,6 +53,8 @@
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
             cursor: pointer;
             border-radius: 8px;
             pointer-events: all;
@@ -4328,9 +4330,7 @@ const regions = [
                 return;
             }
 
-            // Set SVG dimensions to match displayed image exactly
-            interactiveSvg.setAttribute('width', displayWidth);
-            interactiveSvg.setAttribute('height', displayHeight);
+            // Set SVG viewBox to match reference dimensions
             interactiveSvg.setAttribute('viewBox', `0 0 ${REFERENCE_WIDTH} ${REFERENCE_HEIGHT}`);
 
             // Clear any existing polygons
