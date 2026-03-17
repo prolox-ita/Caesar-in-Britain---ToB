@@ -469,27 +469,27 @@ function showRegionInfo(hexIdx) {
     const region = COLOR_MAP[hex];
     if (!region) return;
     infoPanel.classList.remove("empty");
-    infoPanel.innerHTML = \`
-        <h2>\${region.name}</h2>
+    infoPanel.innerHTML = `
+        <h2>${region.name}</h2>
         <div class="info-content">
             <div style="margin-bottom:20px;">
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="display:inline-block;width:40px;height:40px;background:#\${hex};border:2px solid #8b7355;border-radius:4px;"></span>
-                    <span style="font-family:monospace;font-size:1.1rem;">#\${hex}</span>
+                    <span style="display:inline-block;width:40px;height:40px;background:#${hex};border:2px solid #8b7355;border-radius:4px;"></span>
+                    <span style="font-family:monospace;font-size:1.1rem;">#${hex}</span>
                 </div>
             </div>
             <div class="region-details">
                 <div class="detail-row">
                     <span class="detail-label">Region Key:</span>
-                    <span class="detail-value">\${region.key}</span>
+                    <span class="detail-value">${region.key}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Sea Region:</span>
-                    <span class="detail-value">\${region.sea ? "Yes" : "No"}</span>
+                    <span class="detail-value">${region.sea ? "Yes" : "No"}</span>
                 </div>
             </div>
         </div>
-    \`;
+    `;
 }
 
 function clearInfoPanel() {
