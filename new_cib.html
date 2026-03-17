@@ -21,47 +21,74 @@
             border:3px solid #d4af37; border-radius:8px;
             -webkit-user-select:none; user-select:none;
         }
-        #overlayCanvas, #interactiveCanvas {
+        #lavorataCanvas, #overlayCanvas, #interactiveCanvas {
             position:absolute; top:3px; left:3px; border-radius:5px;
         }
-        #overlayCanvas { pointer-events:none; }
+        #lavorataCanvas, #overlayCanvas { pointer-events:none; }
         #interactiveCanvas { cursor:crosshair; }
         .info-panel {
-            width:350px;
+            width:350px; min-width:350px;
             background:linear-gradient(135deg,rgba(245,241,232,0.98),rgba(232,220,196,0.98));
             backdrop-filter:blur(10px);
             box-shadow:-5px 0 20px rgba(0,0,0,0.3);
-            padding:30px; overflow-y:auto; border-left:3px solid #d4af37;
+            display:flex; flex-direction:column;
+            border-left:3px solid #d4af37;
         }
-        .info-panel.empty {
+        .search-box {
+            padding:18px 20px 14px;
+            border-bottom:2px solid rgba(212,175,55,0.4);
+            background:rgba(255,252,245,0.7);
+        }
+        .search-box label {
+            display:block; font-family:'Cinzel',serif; font-size:0.8rem;
+            color:#5a4a2f; font-weight:700; margin-bottom:8px; letter-spacing:0.05em;
+        }
+        .search-row { display:flex; gap:8px; }
+        .search-row input {
+            flex:1; padding:8px 12px; border:1.5px solid #c8a84b;
+            border-radius:6px; font-family:monospace; font-size:0.9rem;
+            background:rgba(255,255,255,0.9); color:#3a2a10; outline:none;
+        }
+        .search-row input:focus { border-color:#8b6914; box-shadow:0 0 0 2px rgba(212,175,55,0.25); }
+        .search-row button {
+            padding:8px 14px; background:linear-gradient(135deg,#d4af37,#b8962e);
+            border:none; border-radius:6px; color:white; font-family:'Cinzel',serif;
+            font-size:0.85rem; cursor:pointer; white-space:nowrap;
+        }
+        .search-row button:hover { background:linear-gradient(135deg,#b8962e,#d4af37); }
+        #searchFeedback { font-size:0.8rem; margin-top:6px; min-height:1em; }
+        .info-body {
+            flex:1; overflow-y:auto; padding:25px 30px;
+        }
+        .info-body.empty {
             display:flex; align-items:center; justify-content:center;
             color:#8a7a5f; font-style:italic;
         }
         .info-panel h2 {
-            font-family:'Cinzel',serif; font-size:2rem; color:#5a4a2f;
-            margin-bottom:20px; padding-bottom:15px; border-bottom:2px solid #d4af37;
+            font-family:'Cinzel',serif; font-size:1.8rem; color:#5a4a2f;
+            margin:0 0 18px; padding-bottom:14px; border-bottom:2px solid #d4af37;
             word-break:break-word;
         }
-        .info-content { font-size:1.1rem; color:#4a3a25; line-height:1.8; }
-        .region-details { margin-top:20px; }
+        .info-content { font-size:1rem; color:#4a3a25; line-height:1.8; }
+        .region-details { margin-top:16px; }
         .detail-row {
             display:flex; justify-content:space-between; align-items:flex-start;
-            padding:12px 0; border-bottom:1px solid rgba(212,175,55,0.2); gap:10px;
+            padding:10px 0; border-bottom:1px solid rgba(212,175,55,0.2); gap:10px;
         }
         .detail-row:last-child { border-bottom:none; }
-        .detail-label { font-weight:600; color:#5a4a2f; font-size:0.95rem; white-space:nowrap; }
-        .detail-value { color:#6a5a3f; font-size:0.95rem; font-style:italic; text-align:right; word-break:break-all; }
+        .detail-label { font-weight:600; color:#5a4a2f; font-size:0.9rem; white-space:nowrap; }
+        .detail-value { color:#6a5a3f; font-size:0.9rem; font-style:italic; text-align:right; word-break:break-all; }
         .back-button {
             position:absolute; top:20px; left:20px;
             background:linear-gradient(135deg,#d4af37,#b8962e);
-            color:white; padding:12px 25px; border:none; border-radius:8px;
-            font-family:'Cinzel',serif; font-size:1rem; cursor:pointer;
+            color:white; padding:10px 20px; border:none; border-radius:8px;
+            font-family:'Cinzel',serif; font-size:0.9rem; cursor:pointer;
             box-shadow:0 4px 15px rgba(0,0,0,0.3); transition:all 0.3s ease;
             z-index:1000; text-decoration:none; display:inline-block;
         }
         .back-button:hover {
             background:linear-gradient(135deg,#b8962e,#d4af37);
-            transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.4);
+            transform:translateY(-2px);
         }
     </style>
 </head>
@@ -71,15 +98,27 @@
         <div class="map-area">
             <div class="map-wrapper" id="mapWrapper">
                 <img src="background_cib_scaled.jpg" alt="New CIB Campaign Map" class="map-image" id="mapImage">
+                <canvas id="lavorataCanvas"></canvas>
                 <canvas id="overlayCanvas"></canvas>
                 <canvas id="interactiveCanvas"></canvas>
             </div>
         </div>
-        <div class="info-panel empty" id="infoPanel">
-            <p>Click on a region to view information</p>
+        <div class="info-panel" id="infoPanel">
+            <div class="search-box">
+                <label for="searchInput">Cerca region key</label>
+                <div class="search-row">
+                    <input type="text" id="searchInput" placeholder="es. cib_reg_londinium" spellcheck="false">
+                    <button id="searchBtn">Cerca</button>
+                </div>
+                <div id="searchFeedback"></div>
+            </div>
+            <div class="info-body empty" id="infoBody">
+                <p>Click on a region to view information</p>
+            </div>
         </div>
     </div>
 <script>
+
 const COLOR_MAP={
   "000080":{"name":"Tig yn cors","new_key":"cib_reg_tig_yn_cors","old_key":"vik_reg_poclintun","sea":false},
   "0000FF":{"name":"Triker","new_key":"cib_reg_triker","old_key":"vik_reg_cissanbyrig","sea":false},
@@ -374,31 +413,72 @@ let REGION_RUNS = null;
 try {
     ROWS = decodeRowData(ROW_DATA_B64);
     REGION_RUNS = buildRegionIndex(ROWS);
-    console.log("Region data decoded: " + ROWS.length + " rows, " + HEX_LIST.length + " regions");
+    console.log("Decoded " + ROWS.length + " rows, " + HEX_LIST.length + " regions");
 } catch(e) {
-    console.error("Failed to decode region data:", e);
+    console.error("Decode failed:", e);
 }
 
-const mapImage = document.getElementById("mapImage");
-const overlayCanvas = document.getElementById("overlayCanvas");
-const interactiveCanvas = document.getElementById("interactiveCanvas");
-const infoPanel = document.getElementById("infoPanel");
+// --- Build reverse lookup: key string -> hexIdx ---
+const KEY_TO_IDX = {};
+HEX_LIST.forEach((hex, idx) => {
+    const r = COLOR_MAP[hex];
+    if (!r) return;
+    if (r.new_key) KEY_TO_IDX[r.new_key.toLowerCase()] = idx;
+    if (r.old_key && r.old_key !== "nuova regione") KEY_TO_IDX[r.old_key.toLowerCase()] = idx;
+});
 
-let currentHoverIdx = -1;
+// --- Lavorata state ---
+const LAVORATA_STORAGE_KEY = "lavorata_new_cib_v1";
+let lavorataSet = new Set();
+try {
+    const saved = localStorage.getItem(LAVORATA_STORAGE_KEY);
+    if (saved) JSON.parse(saved).forEach(i => lavorataSet.add(i));
+} catch(e) {}
+
+function saveLavorata() {
+    try { localStorage.setItem(LAVORATA_STORAGE_KEY, JSON.stringify([...lavorataSet])); } catch(e) {}
+}
+
+// --- Stripe pattern ---
+let stripePattern = null;
+function getStripePattern(ctx) {
+    if (stripePattern) return stripePattern;
+    const pc = document.createElement("canvas");
+    pc.width = 10; pc.height = 10;
+    const px = pc.getContext("2d");
+    px.strokeStyle = "rgba(25,25,25,0.52)";
+    px.lineWidth = 3;
+    for (const o of [-10, 0, 10, 20]) {
+        px.beginPath(); px.moveTo(o, 0); px.lineTo(o + 10, 10); px.stroke();
+    }
+    stripePattern = ctx.createPattern(pc, "repeat");
+    return stripePattern;
+}
+
+// --- DOM refs ---
+const mapImage       = document.getElementById("mapImage");
+const lavorataCanvas = document.getElementById("lavorataCanvas");
+const overlayCanvas  = document.getElementById("overlayCanvas");
+const interactiveCanvas = document.getElementById("interactiveCanvas");
+const infoPanel      = document.getElementById("infoBody");
+const searchInput    = document.getElementById("searchInput");
+const searchBtn      = document.getElementById("searchBtn");
+const searchFeedback = document.getElementById("searchFeedback");
+
+let currentHoverIdx    = -1;
 let currentSelectedIdx = -1;
 
+// --- Canvas sizing ---
 function resizeCanvases() {
     const w = mapImage.clientWidth;
     const h = mapImage.clientHeight;
-    if (w === 0 || h === 0) {
-        requestAnimationFrame(resizeCanvases);
-        return;
-    }
+    if (w === 0 || h === 0) { requestAnimationFrame(resizeCanvases); return; }
     if (interactiveCanvas.width === w && interactiveCanvas.height === h) return;
-    overlayCanvas.width = w; overlayCanvas.height = h;
-    overlayCanvas.style.width = w + "px"; overlayCanvas.style.height = h + "px";
-    interactiveCanvas.width = w; interactiveCanvas.height = h;
-    interactiveCanvas.style.width = w + "px"; interactiveCanvas.style.height = h + "px";
+    [lavorataCanvas, overlayCanvas, interactiveCanvas].forEach(c => {
+        c.width = w; c.height = h;
+        c.style.width = w + "px"; c.style.height = h + "px";
+    });
+    drawLavorata();
     if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
 }
 
@@ -412,12 +492,29 @@ function toLookupCoords(cx, cy) {
 function getRegionIdxAt(x, y) {
     if (!ROWS || y < 0 || y >= ROWS.length) return -1;
     const row = ROWS[y];
-    for (let i = 0; i < row.length; i += 3) {
+    for (let i = 0; i < row.length; i += 3)
         if (x >= row[i] && x <= row[i+1]) return row[i+2];
-    }
     return -1;
 }
 
+// --- Draw lavorata stripes (permanent layer) ---
+function drawLavorata() {
+    const ctx = lavorataCanvas.getContext("2d");
+    ctx.clearRect(0, 0, lavorataCanvas.width, lavorataCanvas.height);
+    if (!lavorataSet.size || !REGION_RUNS) return;
+    const scaleX = lavorataCanvas.width / MAP_W;
+    const scaleY = lavorataCanvas.height / MAP_H;
+    ctx.fillStyle = getStripePattern(ctx);
+    for (const hexIdx of lavorataSet) {
+        const runs = REGION_RUNS[hexIdx];
+        for (let i = 0; i < runs.length; i += 3) {
+            const y = runs[i], xs = runs[i+1], xe = runs[i+2];
+            ctx.fillRect(xs * scaleX, y * scaleY, (xe - xs + 1) * scaleX, scaleY + 0.5);
+        }
+    }
+}
+
+// --- Draw hover/selection highlight ---
 function drawHighlight(hexIdx, isSelected) {
     const ctx = overlayCanvas.getContext("2d");
     ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
@@ -426,7 +523,7 @@ function drawHighlight(hexIdx, isSelected) {
     const scaleY = overlayCanvas.height / MAP_H;
     const runs = REGION_RUNS[hexIdx];
     if (isSelected) {
-        ctx.fillStyle = "rgba(212,175,55,0.25)";
+        ctx.fillStyle = "rgba(212,175,55,0.22)";
         for (let i = 0; i < runs.length; i += 3) {
             const y = runs[i], xs = runs[i+1], xe = runs[i+2];
             ctx.fillRect(xs * scaleX - 1, y * scaleY - 1, (xe - xs + 1) * scaleX + 2, scaleY + 2);
@@ -441,36 +538,49 @@ function drawHighlight(hexIdx, isSelected) {
     }
 }
 
+// --- Info panel ---
 function showRegionInfo(hexIdx) {
     const hex = HEX_LIST[hexIdx];
     const region = COLOR_MAP[hex];
     if (!region) return;
+    const isLavorata = lavorataSet.has(hexIdx);
     infoPanel.classList.remove("empty");
     infoPanel.innerHTML = `
         <h2>${region.name}</h2>
         <div class="info-content">
-            <div style="margin-bottom:20px;">
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="display:inline-block;width:40px;height:40px;background:#${hex};border:2px solid #8b7355;border-radius:4px;"></span>
-                    <span style="font-family:monospace;font-size:1.1rem;">#${hex}</span>
-                </div>
+            <div style="margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+                <span style="display:inline-block;width:40px;height:40px;background:#${hex};border:2px solid #8b7355;border-radius:4px;flex-shrink:0;"></span>
+                <span style="font-family:monospace;font-size:1rem;">#${hex}</span>
             </div>
             <div class="region-details">
                 <div class="detail-row">
-                    <span class="detail-label">New Region Key:</span>
-                    <span class="detail-value" style="font-family:monospace;font-size:0.85rem;">${region.new_key}</span>
+                    <span class="detail-label">New Key:</span>
+                    <span class="detail-value" style="font-family:monospace;font-size:0.82rem;">${region.new_key}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Old Region Key:</span>
-                    <span class="detail-value" style="font-family:monospace;font-size:0.85rem;">${region.old_key}</span>
+                    <span class="detail-label">Old Key:</span>
+                    <span class="detail-value" style="font-family:monospace;font-size:0.82rem;">${region.old_key}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Sea Region:</span>
-                    <span class="detail-value">${region.sea ? "Yes" : "No"}</span>
+                    <span class="detail-label">Mare:</span>
+                    <span class="detail-value">${region.sea ? "Sì" : "No"}</span>
+                </div>
+                <div class="detail-row" style="border-bottom:none;padding-top:16px;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#5a4a2f;font-size:1rem;">
+                        <input type="checkbox" id="lavorataCheck" ${isLavorata ? "checked" : ""}
+                               style="width:18px;height:18px;cursor:pointer;accent-color:#5a4a2f;">
+                        Lavorata
+                    </label>
                 </div>
             </div>
         </div>
     `;
+    document.getElementById("lavorataCheck").addEventListener("change", function() {
+        if (this.checked) lavorataSet.add(hexIdx);
+        else lavorataSet.delete(hexIdx);
+        saveLavorata();
+        drawLavorata();
+    });
 }
 
 function clearInfoPanel() {
@@ -478,6 +588,30 @@ function clearInfoPanel() {
     infoPanel.innerHTML = "<p>Click on a region to view information</p>";
 }
 
+// --- Search ---
+function doSearch() {
+    const query = searchInput.value.trim().toLowerCase();
+    searchFeedback.textContent = "";
+    if (!query) return;
+    const idx = KEY_TO_IDX[query];
+    if (idx === undefined) {
+        searchFeedback.textContent = "Regione non trovata";
+        searchFeedback.style.color = "#b22222";
+        return;
+    }
+    searchFeedback.textContent = "Trovata!";
+    searchFeedback.style.color = "#3a6a3a";
+    currentSelectedIdx = idx;
+    drawHighlight(idx, true);
+    showRegionInfo(idx);
+}
+
+searchBtn.addEventListener("click", doSearch);
+searchInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") doSearch();
+});
+
+// --- Mouse events ---
 interactiveCanvas.addEventListener("mousemove", function(e) {
     if (!ROWS) return;
     const rect = interactiveCanvas.getBoundingClientRect();
@@ -501,10 +635,9 @@ interactiveCanvas.addEventListener("mousemove", function(e) {
             const scaleX = overlayCanvas.width / MAP_W;
             const scaleY = overlayCanvas.height / MAP_H;
             const runs = REGION_RUNS[idx];
-            ctx.fillStyle = "rgba(255,255,255,0.25)";
+            ctx.fillStyle = "rgba(255,255,255,0.22)";
             for (let i = 0; i < runs.length; i += 3) {
-                const ry = runs[i], xs = runs[i+1], xe = runs[i+2];
-                ctx.fillRect(xs * scaleX, ry * scaleY, (xe - xs + 1) * scaleX, scaleY + 0.5);
+                ctx.fillRect(runs[i+1]*scaleX, runs[i]*scaleY, (runs[i+2]-runs[i+1]+1)*scaleX, scaleY+0.5);
             }
         } else if (currentSelectedIdx !== idx) {
             drawHighlight(idx, false);
@@ -540,6 +673,7 @@ interactiveCanvas.addEventListener("click", function(e) {
     }
 });
 
+// --- Init ---
 window.addEventListener("resize", resizeCanvases);
 if (typeof ResizeObserver !== "undefined") {
     new ResizeObserver(function() { resizeCanvases(); }).observe(mapImage);
