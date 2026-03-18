@@ -337,51 +337,10 @@
             top: 0;
             left: 0;
             transform: translateX(-50%);
-            display: flex; flex-direction: column; align-items: center;
             pointer-events: none;
             transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 10;
-        }
-        .vex-finial {
-            font-size: 1rem; color: var(--gold);
-            filter: drop-shadow(0 0 4px rgba(212,175,55,0.6));
-            margin-bottom: 2px;
-        }
-        .vex-pole-top {
-            width: 2px; height: 14px;
-            background: linear-gradient(to bottom, var(--gold), var(--stone));
-        }
-        .vex-banner {
-            width: 52px; height: 34px;
-            background: linear-gradient(135deg, var(--red-dark), var(--red-mid));
-            border: 1.5px solid var(--gold-dim);
-            border-radius: 1px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.2);
-            position: relative;
-        }
-        .vex-banner::after {
-            content: '';
-            position: absolute; top: 0; right: -6px;
-            width: 0; height: 0;
-            border-top: 17px solid transparent;
-            border-bottom: 17px solid transparent;
-            border-left: 6px solid var(--red-mid);
-        }
-        .vex-banner span {
-            font-family: 'Cinzel', serif; font-size: 0.6rem;
-            font-weight: 900; color: var(--gold-pale);
-            letter-spacing: 0.12em;
-        }
-        .vex-crossbar {
-            width: 28px; height: 2px;
-            background: var(--gold-dim); margin: 2px 0;
-        }
-        .vex-pole-bottom {
-            width: 2px;
-            /* extends down to the dot — height set dynamically or by layout */
-            height: 40px;
-            background: linear-gradient(to bottom, var(--stone), var(--gold));
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
         }
 
         /* ── TIMELINE TRACK ───────────────────────────────────────────── */
@@ -729,11 +688,109 @@
 
                 <!-- Vexillum SPQR (positioned by JS) -->
                 <div class="vexillum" id="vexillum">
-                    <div class="vex-finial">&#10022;</div>
-                    <div class="vex-pole-top"></div>
-                    <div class="vex-banner"><span>SPQR</span></div>
-                    <div class="vex-crossbar"></div>
-                    <div class="vex-pole-bottom"></div>
+                  <svg viewBox="0 0 76 130" width="76" height="130" xmlns="http://www.w3.org/2000/svg" aria-label="SPQR vexillum">
+                    <defs>
+                      <linearGradient id="vexPole" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#5a3e08"/>
+                        <stop offset="30%"  stop-color="#d4af37"/>
+                        <stop offset="60%"  stop-color="#b8962e"/>
+                        <stop offset="100%" stop-color="#5a3e08"/>
+                      </linearGradient>
+                      <linearGradient id="vexBanner" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#3e0606"/>
+                        <stop offset="18%"  stop-color="#6e1010"/>
+                        <stop offset="50%"  stop-color="#952020"/>
+                        <stop offset="82%"  stop-color="#6e1010"/>
+                        <stop offset="100%" stop-color="#3e0606"/>
+                      </linearGradient>
+                      <linearGradient id="vexSpear" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#a07820"/>
+                        <stop offset="45%"  stop-color="#f0d868"/>
+                        <stop offset="100%" stop-color="#a07820"/>
+                      </linearGradient>
+                    </defs>
+
+                    <!-- POLE (full height, x=38 centre) -->
+                    <rect x="35.5" y="0" width="5" height="130" fill="url(#vexPole)" rx="2.5"/>
+
+                    <!-- SPEAR TIP -->
+                    <polygon points="38,0 33.5,16 42.5,16" fill="url(#vexSpear)"/>
+                    <polygon points="38,1 36,9 38,5.5" fill="rgba(255,248,190,0.55)"/>
+                    <line x1="38" y1="1" x2="38" y2="15" stroke="rgba(255,240,150,0.25)" stroke-width="1"/>
+
+                    <!-- CONNECTOR RING BELOW SPEAR -->
+                    <rect x="27" y="15" width="22" height="4"   fill="#c8a020" rx="2"/>
+                    <rect x="30" y="16" width="16" height="2.5" fill="#f0d060" rx="1.5" opacity="0.55"/>
+
+                    <!-- BANNER BODY -->
+                    <rect x="10" y="20" width="56" height="76" fill="url(#vexBanner)" rx="2"/>
+
+                    <!-- SIDE SHADOW PANELS -->
+                    <rect x="10" y="20" width="10" height="76" fill="rgba(0,0,0,0.32)" rx="2"/>
+                    <rect x="56" y="20" width="10" height="76" fill="rgba(0,0,0,0.32)" rx="2"/>
+
+                    <!-- INNER VERTICAL TRIM LINES -->
+                    <line x1="20" y1="20" x2="20" y2="96" stroke="#c8a020" stroke-width="1.2" opacity="0.55"/>
+                    <line x1="56" y1="20" x2="56" y2="96" stroke="#c8a020" stroke-width="1.2" opacity="0.55"/>
+
+                    <!-- OUTER GOLD BORDER -->
+                    <rect x="10" y="20" width="56" height="76" fill="none" stroke="#c8a020" stroke-width="1.6" rx="2"/>
+
+                    <!-- INNER INSET BORDER -->
+                    <rect x="13" y="23" width="50" height="70" fill="none" stroke="#c8a020" stroke-width="0.7" rx="1" opacity="0.45"/>
+
+                    <!-- SPQR TEXT -->
+                    <text x="38" y="51"
+                          text-anchor="middle"
+                          font-family="Cinzel, Georgia, 'Times New Roman', serif"
+                          font-size="13" font-weight="900"
+                          fill="#d4af37" letter-spacing="2.5">SPQR</text>
+
+                    <!-- LAUREL WREATH (below SPQR) -->
+                    <!-- Left branch: 3 leaves arcing up-left from centre-bottom -->
+                    <g fill="#d4af37" opacity="0.9">
+                      <ellipse cx="23.5" cy="72" rx="5.8" ry="2.3" transform="rotate(18,23.5,72)"/>
+                      <ellipse cx="22"   cy="64" rx="5.8" ry="2.3" transform="rotate(40,22,64)"/>
+                      <ellipse cx="25"   cy="57" rx="5.8" ry="2.3" transform="rotate(62,25,57)"/>
+                      <!-- Right branch (mirror) -->
+                      <ellipse cx="52.5" cy="72" rx="5.8" ry="2.3" transform="rotate(-18,52.5,72)"/>
+                      <ellipse cx="54"   cy="64" rx="5.8" ry="2.3" transform="rotate(-40,54,64)"/>
+                      <ellipse cx="51"   cy="57" rx="5.8" ry="2.3" transform="rotate(-62,51,57)"/>
+                    </g>
+                    <!-- Wreath stem / tie at bottom -->
+                    <path d="M32,78 Q38,84 44,78" stroke="#d4af37" stroke-width="1.6" fill="none" opacity="0.8"/>
+                    <!-- Small central berry -->
+                    <circle cx="38" cy="57" r="2.2" fill="#d4af37" opacity="0.65"/>
+
+                    <!-- FRINGE HEADER BAR -->
+                    <rect x="10" y="94"  width="56" height="4" fill="#c8a020" rx="1"/>
+                    <rect x="10" y="94.5" width="56" height="2" fill="#f0d060" opacity="0.45"/>
+
+                    <!-- FRINGE STRANDS (skip pole area ~35.5–40.5) -->
+                    <g stroke="#d4af37" stroke-width="1.1" stroke-linecap="round" opacity="0.85">
+                      <line x1="12"  y1="98" x2="11"   y2="112"/>
+                      <line x1="14.5" y1="98" x2="13.5" y2="113"/>
+                      <line x1="17"  y1="98" x2="16"   y2="112"/>
+                      <line x1="19.5" y1="98" x2="18.5" y2="113"/>
+                      <line x1="22"  y1="98" x2="21"   y2="112"/>
+                      <line x1="24.5" y1="98" x2="23.5" y2="113"/>
+                      <line x1="27"  y1="98" x2="26"   y2="112"/>
+                      <line x1="29.5" y1="98" x2="28.5" y2="113"/>
+                      <line x1="32"  y1="98" x2="31"   y2="112"/>
+                      <line x1="34.5" y1="98" x2="33.5" y2="113"/>
+                      <!-- gap for pole 35.5–40.5 -->
+                      <line x1="41"  y1="98" x2="40"   y2="112"/>
+                      <line x1="43.5" y1="98" x2="42.5" y2="113"/>
+                      <line x1="46"  y1="98" x2="45"   y2="112"/>
+                      <line x1="48.5" y1="98" x2="47.5" y2="113"/>
+                      <line x1="51"  y1="98" x2="50"   y2="112"/>
+                      <line x1="53.5" y1="98" x2="52.5" y2="113"/>
+                      <line x1="56"  y1="98" x2="55"   y2="112"/>
+                      <line x1="58.5" y1="98" x2="57.5" y2="113"/>
+                      <line x1="61"  y1="98" x2="60"   y2="112"/>
+                      <line x1="63.5" y1="98" x2="62.5" y2="113"/>
+                    </g>
+                  </svg>
                 </div>
 
                 <!-- Timeline track -->
