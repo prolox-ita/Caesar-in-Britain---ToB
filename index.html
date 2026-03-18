@@ -10,21 +10,20 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --red:      #8b1a1a;
-            --red-dark: #5c0e0e;
-            --red-mid:  #a52a2a;
-            --gold:     #d4af37;
-            --gold-dim: #b8962e;
-            --gold-pale:#f0d98a;
-            --dark:     #100a04;
-            --dark-mid: #1e1208;
-            --dark-warm:#2a1810;
-            --stone:    #c4a882;
-            --parchment:#f5edd8;
-            --parch-mid:#ede0c4;
-            --text-dark:#2e1f0e;
-            --text-mid: #5a3f28;
-            --text-light:#f0e8d8;
+            --red:       #8b1a1a;
+            --red-dark:  #5c0e0e;
+            --red-mid:   #a52a2a;
+            --gold:      #d4af37;
+            --gold-dim:  #b8962e;
+            --gold-pale: #f0d98a;
+            --dark:      #100a04;
+            --dark-mid:  #1e1208;
+            --dark-warm: #2a1810;
+            --stone:     #c4a882;
+            --parchment: #f5edd8;
+            --parch-mid: #ede0c4;
+            --text-dark: #2e1f0e;
+            --text-mid:  #5a3f28;
         }
 
         html { scroll-behavior: smooth; }
@@ -50,13 +49,10 @@
                 linear-gradient(180deg, rgba(10,4,0,0.72) 0%, rgba(90,15,10,0.55) 50%, rgba(10,4,0,0.80) 100%),
                 url('background_cib.jpg') center/cover no-repeat;
         }
-
-        /* Decorative top & bottom borders */
         .hero::before, .hero::after {
             content: '';
             position: absolute;
-            left: 0; right: 0;
-            height: 4px;
+            left: 0; right: 0; height: 4px;
             background: linear-gradient(to right, transparent, var(--gold), var(--red), var(--gold), transparent);
         }
         .hero::before { top: 0; }
@@ -64,366 +60,202 @@
 
         .hero-badge {
             font-family: 'Cinzel', serif;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.4em;
-            color: var(--gold);
-            text-transform: uppercase;
-            margin-bottom: 24px;
-            opacity: 0.85;
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.4em; color: var(--gold);
+            text-transform: uppercase; margin-bottom: 24px;
             animation: fadeInDown 0.8s ease-out both;
         }
-
         .hero-title {
             font-family: 'Cinzel', serif;
-            font-size: clamp(3rem, 9vw, 7.5rem);
-            font-weight: 900;
-            color: #fff;
-            letter-spacing: 0.12em;
-            line-height: 1.05;
+            font-size: clamp(3rem, 9vw, 7.5rem); font-weight: 900;
+            color: #fff; letter-spacing: 0.12em; line-height: 1.05;
             text-shadow: 0 2px 30px rgba(0,0,0,0.8), 0 0 60px rgba(180,30,20,0.4);
             margin-bottom: 8px;
             animation: fadeInDown 0.9s ease-out 0.1s both;
         }
-
         .hero-divider {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            justify-content: center;
-            margin: 20px 0;
+            display: flex; align-items: center; gap: 16px;
+            justify-content: center; margin: 20px 0;
             animation: fadeIn 1s ease-out 0.3s both;
         }
         .hero-divider span {
-            display: block;
-            height: 2px;
-            width: 80px;
+            display: block; height: 2px; width: 80px;
             background: linear-gradient(to right, transparent, var(--gold));
         }
         .hero-divider span:last-child {
             background: linear-gradient(to left, transparent, var(--gold));
         }
-        .hero-divider-icon {
-            color: var(--gold);
-            font-size: 1.2rem;
-        }
-
+        .hero-divider-icon { color: var(--gold); font-size: 1.2rem; }
         .hero-subtitle {
             font-family: 'Cinzel', serif;
             font-size: clamp(0.9rem, 2.5vw, 1.4rem);
-            color: var(--parch-mid);
-            letter-spacing: 0.25em;
-            font-weight: 400;
-            margin-bottom: 32px;
+            color: var(--parch-mid); letter-spacing: 0.25em;
+            font-weight: 400; margin-bottom: 32px;
             animation: fadeIn 1s ease-out 0.4s both;
         }
-
         .hero-tagline {
-            font-family: 'Merriweather', serif;
-            font-style: italic;
-            font-size: clamp(1rem, 2.2vw, 1.35rem);
-            color: rgba(245,237,216,0.9);
-            font-weight: 300;
-            max-width: 700px;
-            line-height: 1.8;
+            font-style: italic; font-size: clamp(1rem, 2.2vw, 1.35rem);
+            color: rgba(245,237,216,0.9); font-weight: 300;
+            max-width: 700px; line-height: 1.8;
             margin: 0 auto 48px;
             animation: fadeInUp 1s ease-out 0.5s both;
         }
-
         .hero-cta {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
             animation: fadeInUp 1s ease-out 0.6s both;
         }
-
-        .btn-primary {
-            display: inline-block;
-            padding: 14px 36px;
-            background: linear-gradient(135deg, var(--red) 0%, var(--red-mid) 100%);
-            color: #fff;
-            font-family: 'Cinzel', serif;
-            font-size: 0.95rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-decoration: none;
-            border: 2px solid rgba(212,175,55,0.4);
-            border-radius: 3px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--red-mid) 0%, var(--red) 100%);
-            border-color: var(--gold);
-            box-shadow: 0 0 20px rgba(212,175,55,0.35);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            display: inline-block;
-            padding: 14px 36px;
-            background: transparent;
-            color: var(--gold);
-            font-family: 'Cinzel', serif;
-            font-size: 0.95rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-decoration: none;
-            border: 2px solid var(--gold-dim);
-            border-radius: 3px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-        }
-        .btn-secondary:hover {
-            background: rgba(212,175,55,0.1);
-            border-color: var(--gold);
-            box-shadow: 0 0 20px rgba(212,175,55,0.2);
-            transform: translateY(-2px);
-        }
-
         .hero-scroll {
-            position: absolute;
-            bottom: 32px;
-            left: 50%;
+            position: absolute; bottom: 32px; left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
             animation: fadeIn 1.5s ease-out 1.2s both;
         }
         .hero-scroll span {
-            font-family: 'Cinzel', serif;
-            font-size: 0.65rem;
-            letter-spacing: 0.3em;
-            color: rgba(212,175,55,0.6);
-            text-transform: uppercase;
+            font-family: 'Cinzel', serif; font-size: 0.65rem;
+            letter-spacing: 0.3em; color: rgba(212,175,55,0.6); text-transform: uppercase;
         }
         .hero-scroll-arrow {
-            width: 24px;
-            height: 24px;
+            width: 22px; height: 22px;
             border-right: 2px solid rgba(212,175,55,0.5);
             border-bottom: 2px solid rgba(212,175,55,0.5);
             transform: rotate(45deg);
             animation: bounce 2s infinite;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: rotate(45deg) translateY(0); }
-            50% { transform: rotate(45deg) translateY(4px); }
+        /* ── BUTTONS ──────────────────────────────────────────────────── */
+        .btn-primary {
+            display: inline-block; padding: 14px 36px;
+            background: linear-gradient(135deg, var(--red) 0%, var(--red-mid) 100%);
+            color: #fff; font-family: 'Cinzel', serif; font-size: 0.95rem;
+            font-weight: 700; letter-spacing: 0.12em; text-decoration: none;
+            border: 2px solid rgba(212,175,55,0.4); border-radius: 3px;
+            transition: all 0.3s ease; text-transform: uppercase; cursor: pointer;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--red-mid) 0%, var(--red) 100%);
+            border-color: var(--gold); box-shadow: 0 0 20px rgba(212,175,55,0.35);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            display: inline-block; padding: 14px 36px;
+            background: transparent; color: var(--gold);
+            font-family: 'Cinzel', serif; font-size: 0.95rem;
+            font-weight: 700; letter-spacing: 0.12em; text-decoration: none;
+            border: 2px solid var(--gold-dim); border-radius: 3px;
+            transition: all 0.3s ease; text-transform: uppercase; cursor: pointer;
+        }
+        .btn-secondary:hover {
+            background: rgba(212,175,55,0.1); border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(212,175,55,0.2); transform: translateY(-2px);
         }
 
         /* ── NAV ──────────────────────────────────────────────────────── */
         .main-nav {
-            position: sticky;
-            top: 0;
-            z-index: 200;
-            background: rgba(14, 7, 2, 0.97);
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(14,7,2,0.97);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(212,175,55,0.2);
         }
-
         .nav-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center;
+            justify-content: space-between; padding: 0 30px;
         }
-
         .nav-logo {
-            font-family: 'Cinzel', serif;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--gold);
-            letter-spacing: 0.15em;
-            text-decoration: none;
-            text-transform: uppercase;
-            padding: 16px 0;
+            font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 700;
+            color: var(--gold); letter-spacing: 0.15em;
+            text-decoration: none; text-transform: uppercase; padding: 16px 0;
         }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 0;
-        }
-
+        .nav-links { list-style: none; display: flex; }
         .nav-links a {
-            display: block;
-            padding: 20px 22px;
-            color: rgba(245,237,216,0.7);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 0.82rem;
-            font-weight: 400;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            transition: color 0.25s;
-            position: relative;
+            display: block; padding: 20px 20px;
+            color: rgba(245,237,216,0.7); text-decoration: none;
+            font-family: 'Cinzel', serif; font-size: 0.78rem;
+            font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+            transition: color 0.25s; position: relative;
         }
         .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 22px; right: 22px;
-            height: 2px;
-            background: var(--gold);
-            transform: scaleX(0);
-            transition: transform 0.25s;
+            content: ''; position: absolute;
+            bottom: 0; left: 20px; right: 20px;
+            height: 2px; background: var(--gold);
+            transform: scaleX(0); transition: transform 0.25s;
         }
-        .nav-links a:hover {
-            color: var(--gold);
-        }
-        .nav-links a:hover::after {
-            transform: scaleX(1);
-        }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-links a:hover::after { transform: scaleX(1); }
 
         /* ── SECTION SHARED ───────────────────────────────────────────── */
         .section-title {
             font-family: 'Cinzel', serif;
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 16px;
+            font-size: clamp(2rem, 4vw, 3rem); font-weight: 700;
+            text-align: center; margin-bottom: 16px;
         }
-
         .section-divider {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            justify-content: center;
-            margin-bottom: 60px;
+            display: flex; align-items: center; gap: 16px;
+            justify-content: center; margin-bottom: 60px;
         }
-        .section-divider span {
-            display: block;
-            height: 1px;
-            width: 60px;
-        }
+        .section-divider span { display: block; height: 1px; width: 60px; }
         .section-divider-text {
-            font-family: 'Cinzel', serif;
-            font-size: 0.7rem;
-            letter-spacing: 0.35em;
-            text-transform: uppercase;
+            font-family: 'Cinzel', serif; font-size: 0.7rem;
+            letter-spacing: 0.35em; text-transform: uppercase;
         }
+        .section-divider.light span { background: var(--gold-dim); }
+        .section-divider.light .section-divider-text { color: var(--text-mid); }
+        .section-divider.dark span { background: var(--gold-dim); }
+        .section-divider.dark .section-divider-text { color: var(--stone); }
 
         /* ── ABOUT ────────────────────────────────────────────────────── */
         .section-about {
             background: var(--parchment);
-            padding: 110px 20px;
-            position: relative;
-            overflow: hidden;
+            padding: 110px 20px; position: relative; overflow: hidden;
         }
-
-        /* Subtle papyrus texture overlay */
         .section-about::before {
-            content: '';
-            position: absolute;
-            inset: 0;
+            content: ''; position: absolute; inset: 0;
             background-image:
                 repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(139,90,20,0.025) 3px, rgba(139,90,20,0.025) 4px),
                 repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(139,90,20,0.015) 3px, rgba(139,90,20,0.015) 4px);
             pointer-events: none;
         }
-
         .about-inner {
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
-            text-align: center;
+            max-width: 900px; margin: 0 auto;
+            position: relative; text-align: center;
         }
-
         .about-spqr {
-            font-family: 'Cinzel', serif;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.5em;
-            color: var(--red);
-            text-transform: uppercase;
-            margin-bottom: 18px;
+            font-family: 'Cinzel', serif; font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.5em; color: var(--red);
+            text-transform: uppercase; margin-bottom: 18px;
         }
-
         .about-inner .section-title { color: var(--text-dark); }
-        .section-divider.light span { background: var(--gold-dim); }
-        .section-divider.light .section-divider-text { color: var(--text-mid); }
-
         .about-text {
-            font-size: 1.15rem;
-            color: var(--text-mid);
-            line-height: 2;
-            margin-bottom: 20px;
+            font-size: 1.15rem; color: var(--text-mid);
+            line-height: 2; margin-bottom: 20px;
         }
+        .about-text strong { color: var(--red-dark); font-weight: 700; }
 
-        .about-text strong {
-            color: var(--red-dark);
-            font-weight: 700;
-        }
-
-        .about-quote {
-            margin: 48px auto 0;
-            max-width: 680px;
-            border-left: 3px solid var(--gold-dim);
-            padding: 18px 28px;
-            background: rgba(139,90,20,0.06);
-            border-radius: 0 6px 6px 0;
-            text-align: left;
-        }
-        .about-quote p {
-            font-style: italic;
-            font-size: 1.05rem;
-            color: var(--text-mid);
-            line-height: 1.9;
-        }
-        .about-quote cite {
-            display: block;
-            margin-top: 10px;
-            font-size: 0.82rem;
-            color: var(--red);
-            font-style: normal;
-            font-family: 'Cinzel', serif;
-            letter-spacing: 0.1em;
-        }
-
-        /* ── HIGHLIGHTS / CARDS ───────────────────────────────────────── */
+        /* ── FEATURES ─────────────────────────────────────────────────── */
         .section-features {
             background:
-                linear-gradient(rgba(20,8,4,0.92), rgba(20,8,4,0.92)),
+                linear-gradient(rgba(20,8,4,0.93), rgba(20,8,4,0.93)),
                 url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect width="120" height="120" fill="%23150900"/><path d="M0,60 L60,0 L120,60 L60,120 Z" stroke="%23d4af37" stroke-width="0.4" fill="none" opacity="0.07"/><circle cx="60" cy="60" r="30" stroke="%23d4af37" stroke-width="0.3" fill="none" opacity="0.05"/></svg>');
             background-size: cover, 120px 120px;
             padding: 110px 20px;
         }
-
-        .features-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
+        .features-inner { max-width: 1200px; margin: 0 auto; }
         .section-features .section-title { color: var(--parchment); }
-        .section-divider.dark span { background: var(--gold-dim); }
-        .section-divider.dark .section-divider-text { color: var(--stone); }
-
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 28px;
-            max-width: 1000px;
-            margin: 0 auto;
+            gap: 28px; max-width: 1000px; margin: 0 auto;
         }
-
         .feature-card {
             background: rgba(255,248,235,0.04);
-            border: 1px solid rgba(212,175,55,0.18);
-            border-radius: 6px;
-            padding: 42px 36px;
-            position: relative;
-            overflow: hidden;
+            border: 1px solid rgba(212,175,55,0.18); border-radius: 6px;
+            padding: 42px 36px; position: relative; overflow: hidden;
             transition: all 0.35s ease;
+            text-decoration: none; display: block;
         }
         .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
             background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
         }
         .feature-card:hover {
@@ -432,102 +264,214 @@
             transform: translateY(-6px);
             box-shadow: 0 16px 40px rgba(0,0,0,0.5);
         }
-
         .card-icon-wrap {
-            width: 52px;
-            height: 52px;
+            width: 52px; height: 52px;
             background: rgba(139,26,26,0.25);
-            border: 1px solid rgba(139,26,26,0.4);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 22px;
-            font-size: 1.6rem;
+            border: 1px solid rgba(139,26,26,0.4); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 22px; font-size: 1.6rem;
         }
-
         .feature-card h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.35rem;
-            color: var(--gold);
-            margin-bottom: 14px;
-            font-weight: 700;
+            font-family: 'Cinzel', serif; font-size: 1.35rem;
+            color: var(--gold); margin-bottom: 14px; font-weight: 700;
         }
-
         .feature-card p {
-            font-size: 0.97rem;
-            color: rgba(245,237,216,0.7);
-            line-height: 1.8;
+            font-size: 0.97rem; color: rgba(245,237,216,0.7); line-height: 1.8;
         }
 
-        /* ── CAMPAIGN ─────────────────────────────────────────────────── */
-        .section-campaign {
+        /* ── CAMPAIGNS + TIMELINE ─────────────────────────────────────── */
+        .section-campaigns {
             background: var(--parch-mid);
-            padding: 110px 20px;
+            padding: 110px 20px; position: relative;
+        }
+        .campaigns-inner {
+            max-width: 1100px; margin: 0 auto;
+        }
+        .campaigns-inner .section-title { color: var(--text-dark); }
+        .campaigns-intro {
+            text-align: center; font-size: 1.08rem;
+            color: var(--text-mid); line-height: 1.9;
+            max-width: 700px; margin: 0 auto 48px;
+        }
+        .campaigns-intro strong { color: var(--red-dark); }
+
+        /* Timeline toggle button */
+        .timeline-toggle {
+            display: flex; align-items: center; gap: 12px;
+            margin: 0 auto; padding: 16px 44px;
+            background: var(--dark-warm);
+            border: 2px solid var(--gold-dim); border-radius: 3px;
+            color: var(--gold); font-family: 'Cinzel', serif;
+            font-size: 1rem; font-weight: 700; letter-spacing: 0.15em;
+            text-transform: uppercase; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .timeline-toggle:hover {
+            background: var(--dark-mid); border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(212,175,55,0.2);
+        }
+        .toggle-arrow {
+            display: inline-block;
+            transition: transform 0.4s ease;
+            font-size: 1.1rem;
+        }
+        .toggle-arrow.open { transform: rotate(180deg); }
+
+        /* Timeline panel */
+        .timeline-panel {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .timeline-panel.open { max-height: 700px; }
+
+        .timeline-wrap {
+            position: relative;
+            margin-top: 60px;
+            padding-top: 130px; /* space for vexillum */
+        }
+
+        /* ── VEXILLUM ─────────────────────────────────────────────────── */
+        .vexillum {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center;
+            pointer-events: none;
+            transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+        .vex-finial {
+            font-size: 1rem; color: var(--gold);
+            filter: drop-shadow(0 0 4px rgba(212,175,55,0.6));
+            margin-bottom: 2px;
+        }
+        .vex-pole-top {
+            width: 2px; height: 14px;
+            background: linear-gradient(to bottom, var(--gold), var(--stone));
+        }
+        .vex-banner {
+            width: 52px; height: 34px;
+            background: linear-gradient(135deg, var(--red-dark), var(--red-mid));
+            border: 1.5px solid var(--gold-dim);
+            border-radius: 1px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.2);
             position: relative;
         }
-
-        .campaign-inner {
-            max-width: 1100px;
-            margin: 0 auto;
+        .vex-banner::after {
+            content: '';
+            position: absolute; top: 0; right: -6px;
+            width: 0; height: 0;
+            border-top: 17px solid transparent;
+            border-bottom: 17px solid transparent;
+            border-left: 6px solid var(--red-mid);
+        }
+        .vex-banner span {
+            font-family: 'Cinzel', serif; font-size: 0.6rem;
+            font-weight: 900; color: var(--gold-pale);
+            letter-spacing: 0.12em;
+        }
+        .vex-crossbar {
+            width: 28px; height: 2px;
+            background: var(--gold-dim); margin: 2px 0;
+        }
+        .vex-pole-bottom {
+            width: 2px;
+            /* extends down to the dot — height set dynamically or by layout */
+            height: 40px;
+            background: linear-gradient(to bottom, var(--stone), var(--gold));
         }
 
-        .campaign-inner .section-title { color: var(--text-dark); }
-
-        .campaign-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: start;
-            margin-top: 20px;
+        /* ── TIMELINE TRACK ───────────────────────────────────────────── */
+        .timeline-track {
+            position: relative;
+            display: flex; align-items: center;
+            padding: 0 5%;
+        }
+        .timeline-line {
+            position: absolute; left: 5%; right: 5%; top: 50%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--gold-dim) 15%, var(--gold-dim) 85%, transparent);
+            transform: translateY(-50%);
+        }
+        .timeline-dots {
+            position: relative; z-index: 2;
+            display: flex; justify-content: space-around;
+            width: 100%;
+        }
+        .tl-dot {
+            display: flex; flex-direction: column;
+            align-items: center; cursor: pointer; gap: 0;
+            transition: opacity 0.2s;
+        }
+        .tl-dot.future { cursor: default; opacity: 0.4; }
+        .tl-dot-node {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--parch-mid);
+            border: 3px solid var(--gold-dim);
+            transition: all 0.3s ease;
+            position: relative; z-index: 3;
+        }
+        .tl-dot.active .tl-dot-node {
+            background: var(--gold);
+            border-color: var(--gold);
+            box-shadow: 0 0 0 4px rgba(212,175,55,0.2);
+        }
+        .tl-dot:not(.future):hover .tl-dot-node {
+            border-color: var(--gold);
+            background: rgba(212,175,55,0.3);
+        }
+        .tl-dot-date {
+            font-family: 'Cinzel', serif; font-size: 0.78rem;
+            font-weight: 700; color: var(--red-dark);
+            margin-top: 14px; letter-spacing: 0.05em;
+        }
+        .tl-dot.future .tl-dot-date { color: var(--text-mid); }
+        .tl-dot-label {
+            font-size: 0.72rem; color: var(--text-mid);
+            text-align: center; max-width: 100px;
+            margin-top: 4px; line-height: 1.4;
+            font-style: italic;
         }
 
-        .campaign-text p {
-            font-size: 1.05rem;
-            color: var(--text-mid);
-            line-height: 2;
-            margin-bottom: 18px;
+        /* ── TIMELINE INFO CARD ───────────────────────────────────────── */
+        .timeline-info {
+            margin-top: 48px;
+            background: var(--dark-warm);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-top: 3px solid var(--red);
+            border-radius: 6px;
+            padding: 36px 40px;
+            min-height: 180px;
+            transition: all 0.3s ease;
         }
-        .campaign-text p strong { color: var(--red-dark); }
-
-        .campaign-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+        .tl-info-year {
+            font-family: 'Cinzel', serif; font-size: 0.75rem;
+            font-weight: 700; letter-spacing: 0.4em;
+            color: var(--red-mid); text-transform: uppercase; margin-bottom: 8px;
         }
-
-        .campaign-list li {
-            display: flex;
-            gap: 14px;
-            align-items: flex-start;
+        .tl-info-title {
+            font-family: 'Cinzel', serif; font-size: 1.6rem;
+            color: var(--gold); margin-bottom: 16px;
         }
-
-        .campaign-list-icon {
-            width: 36px;
-            height: 36px;
-            min-width: 36px;
-            background: var(--red-dark);
-            border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            margin-top: 2px;
+        .tl-info-desc {
+            font-size: 1rem; color: rgba(245,237,216,0.75);
+            line-height: 1.9; max-width: 800px;
         }
-
-        .campaign-list-text strong {
-            display: block;
-            font-family: 'Cinzel', serif;
-            font-size: 0.95rem;
-            color: var(--text-dark);
-            margin-bottom: 3px;
+        .tl-info-status {
+            display: inline-block; margin-top: 20px;
+            padding: 5px 16px;
+            background: rgba(139,26,26,0.3);
+            border: 1px solid rgba(212,175,55,0.2); border-radius: 2px;
+            font-family: 'Cinzel', serif; font-size: 0.72rem;
+            color: var(--gold-pale); letter-spacing: 0.1em;
         }
-        .campaign-list-text span {
-            font-size: 0.9rem;
-            color: var(--text-mid);
-            line-height: 1.7;
+        .tl-info-status.dev {
+            background: rgba(80,60,10,0.3);
+            border-color: rgba(180,140,30,0.2);
+            color: var(--stone);
         }
 
         /* ── LEGIONS ──────────────────────────────────────────────────── */
@@ -537,204 +481,79 @@
                 url('background_cib_scaled.jpg') center/cover no-repeat fixed;
             padding: 110px 20px;
         }
-
-        .legions-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
+        .legions-inner { max-width: 1100px; margin: 0 auto; }
         .legions-inner .section-title { color: var(--parchment); }
-
         .legions-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-            margin-top: 20px;
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 30px; margin-top: 20px;
         }
-
         .legion-card {
             background: rgba(10,3,0,0.7);
             border: 1px solid rgba(212,175,55,0.25);
-            border-top: 3px solid var(--red);
-            border-radius: 4px;
-            padding: 36px 32px;
-            backdrop-filter: blur(4px);
+            border-top: 3px solid var(--red); border-radius: 4px;
+            padding: 36px 32px; backdrop-filter: blur(4px);
             transition: all 0.3s ease;
         }
         .legion-card:hover {
             border-top-color: var(--gold);
             box-shadow: 0 8px 30px rgba(0,0,0,0.6);
         }
-
-        .legion-card .legion-num {
-            font-family: 'Cinzel', serif;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.35em;
-            color: var(--red-mid);
-            text-transform: uppercase;
-            margin-bottom: 10px;
+        .legion-num {
+            font-family: 'Cinzel', serif; font-size: 0.72rem;
+            font-weight: 700; letter-spacing: 0.35em;
+            color: var(--red-mid); text-transform: uppercase; margin-bottom: 10px;
         }
-
         .legion-card h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.55rem;
-            color: var(--gold);
-            margin-bottom: 16px;
+            font-family: 'Cinzel', serif; font-size: 1.55rem;
+            color: var(--gold); margin-bottom: 16px;
         }
-
         .legion-card p {
-            font-size: 0.97rem;
-            color: rgba(245,237,216,0.72);
-            line-height: 1.8;
-            margin-bottom: 20px;
+            font-size: 0.97rem; color: rgba(245,237,216,0.72);
+            line-height: 1.8; margin-bottom: 20px;
         }
-
         .legion-tag {
-            display: inline-block;
-            padding: 4px 12px;
+            display: inline-block; padding: 4px 12px;
             background: rgba(139,26,26,0.3);
-            border: 1px solid rgba(212,175,55,0.2);
-            border-radius: 2px;
-            font-family: 'Cinzel', serif;
-            font-size: 0.75rem;
-            color: var(--gold-pale);
-            letter-spacing: 0.08em;
-            margin-right: 6px;
-            margin-bottom: 6px;
+            border: 1px solid rgba(212,175,55,0.2); border-radius: 2px;
+            font-family: 'Cinzel', serif; font-size: 0.75rem;
+            color: var(--gold-pale); letter-spacing: 0.08em;
+            margin-right: 6px; margin-bottom: 6px;
         }
 
-        /* ── BATTLE MODES ─────────────────────────────────────────────── */
-        .section-battle {
-            background: var(--parchment);
-            padding: 110px 20px;
-        }
-
-        .battle-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .battle-inner .section-title { color: var(--text-dark); }
-
-        .battle-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-top: 20px;
-        }
-
-        .battle-mode {
-            background: var(--dark-warm);
-            border-radius: 6px;
-            padding: 32px 28px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        .battle-mode::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(to right, var(--red), var(--gold-dim));
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.35s ease;
-        }
-        .battle-mode:hover::after { transform: scaleX(1); }
-        .battle-mode:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
-        }
-
-        .battle-mode-num {
-            font-family: 'Cinzel', serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: rgba(212,175,55,0.12);
-            position: absolute;
-            top: 16px; right: 24px;
-            line-height: 1;
-        }
-
-        .battle-mode h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.2rem;
-            color: var(--gold);
-            margin-bottom: 14px;
-        }
-
-        .battle-mode p {
-            font-size: 0.94rem;
-            color: rgba(245,237,216,0.7);
-            line-height: 1.8;
-        }
-
-        /* ── COMMUNITY ────────────────────────────────────────────────── */
+        /* ── COMMUNITY / DOWNLOAD ─────────────────────────────────────── */
         .section-community {
-            background:
-                linear-gradient(rgba(90,15,10,0.92), rgba(14,6,2,0.96));
-            padding: 100px 20px;
-            text-align: center;
+            background: linear-gradient(rgba(90,15,10,0.92), rgba(14,6,2,0.96));
+            padding: 100px 20px; text-align: center;
         }
-
-        .community-inner {
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
+        .community-inner { max-width: 700px; margin: 0 auto; }
         .community-inner .section-title { color: var(--parchment); margin-bottom: 20px; }
-
         .community-text {
-            font-size: 1.08rem;
-            color: rgba(245,237,216,0.75);
-            line-height: 2;
-            margin-bottom: 44px;
+            font-size: 1.08rem; color: rgba(245,237,216,0.75);
+            line-height: 2; margin-bottom: 44px;
         }
-
         .community-links {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
+            display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
         }
 
         /* ── FOOTER ───────────────────────────────────────────────────── */
         .footer {
             background: #080402;
             border-top: 1px solid rgba(212,175,55,0.15);
-            padding: 48px 20px 32px;
-            text-align: center;
+            padding: 48px 20px 32px; text-align: center;
         }
-
         .footer-links {
-            display: flex;
-            gap: 32px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 32px;
+            display: flex; gap: 28px; justify-content: center;
+            flex-wrap: wrap; margin-bottom: 28px;
         }
-
         .footer-links a {
-            color: var(--stone);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 0.82rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            transition: color 0.25s;
+            color: var(--stone); text-decoration: none;
+            font-family: 'Cinzel', serif; font-size: 0.82rem;
+            letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.25s;
         }
         .footer-links a:hover { color: var(--gold); }
-
-        .footer-sep {
-            color: rgba(212,175,55,0.2);
-        }
-
+        .footer-sep { color: rgba(212,175,55,0.2); }
         .footer-copy {
-            font-size: 0.82rem;
-            color: rgba(180,160,130,0.4);
-            line-height: 1.8;
+            font-size: 0.82rem; color: rgba(180,160,130,0.4); line-height: 1.8;
         }
 
         /* ── ANIMATIONS ───────────────────────────────────────────────── */
@@ -750,345 +569,396 @@
             from { opacity: 0; }
             to   { opacity: 1; }
         }
+        @keyframes bounce {
+            0%, 100% { transform: rotate(45deg) translateY(0); }
+            50%       { transform: rotate(45deg) translateY(4px); }
+        }
 
         /* ── RESPONSIVE ───────────────────────────────────────────────── */
         @media (max-width: 900px) {
-            .cards-grid,
-            .campaign-layout,
-            .legions-grid,
-            .battle-grid { grid-template-columns: 1fr; }
+            .cards-grid, .legions-grid { grid-template-columns: 1fr; }
             .nav-inner { flex-direction: column; padding: 0; }
             .nav-logo { padding: 12px 0 0; }
-            .nav-links { flex-wrap: wrap; justify-content: center; gap: 0; }
-            .nav-links a { padding: 12px 14px; font-size: 0.75rem; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .nav-links a { padding: 10px 12px; font-size: 0.72rem; }
+            .tl-dot-label { display: none; }
         }
-
         @media (max-width: 600px) {
             .hero-cta { flex-direction: column; align-items: center; }
             .btn-primary, .btn-secondary { width: 220px; text-align: center; }
-            .section-about, .section-features, .section-campaign,
-            .section-legions, .section-battle, .section-community { padding: 70px 16px; }
+            .section-about, .section-features, .section-campaigns,
+            .section-legions, .section-community { padding: 70px 16px; }
+            .timeline-info { padding: 24px 20px; }
+            .tl-dot-date { font-size: 0.68rem; }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ── HERO ──────────────────────────────────────────────────────────── -->
-    <header class="hero" id="home">
-        <p class="hero-badge">A Total War: Thrones of Britannia Modification</p>
-        <h1 class="hero-title">Caesars<br>in Britain</h1>
+<!-- ── HERO ──────────────────────────────────────────────────────────── -->
+<header class="hero" id="home">
+    <p class="hero-badge">A Total War: Thrones of Britannia Modification</p>
+    <h1 class="hero-title">Caesars<br>in Britain</h1>
+    <div class="hero-divider">
+        <span></span>
+        <span class="hero-divider-icon">&#9876;</span>
+        <span></span>
+    </div>
+    <p class="hero-subtitle">SPQR · The Eagles Have Landed</p>
+    <p class="hero-tagline">
+        Rome marches north. The tribes of Britannia stand defiant.<br>
+        Command legions, forge alliances, and decide the fate of an island
+        on the edge of the known world.
+    </p>
+    <div class="hero-cta">
+        <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2843452087" target="_blank" class="btn-primary">Steam Workshop</a>
+        <a href="#about" class="btn-secondary">Discover the Mod</a>
+    </div>
+    <div class="hero-scroll">
+        <span>Scroll</span>
+        <div class="hero-scroll-arrow"></div>
+    </div>
+</header>
 
-        <div class="hero-divider">
+<!-- ── NAV ───────────────────────────────────────────────────────────── -->
+<nav class="main-nav">
+    <div class="nav-inner">
+        <a class="nav-logo" href="#home">CIB</a>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#campaign">Campaigns</a></li>
+            <li><a href="#legions">Legions</a></li>
+            <li><a href="new_cib.html">Region Map</a></li>
+            <li><a href="#download">Download</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ── ABOUT ─────────────────────────────────────────────────────────── -->
+<section class="section-about" id="about">
+    <div class="about-inner">
+        <p class="about-spqr">&#9876; SPQR</p>
+        <h2 class="section-title">A Full Conversion Mod<br>for Thrones of Britannia</h2>
+        <div class="section-divider light">
             <span></span>
-            <span class="hero-divider-icon">&#9876;</span>
+            <span class="section-divider-text">The Setting</span>
             <span></span>
         </div>
+        <p class="about-text">
+            <strong>Caesars in Britain</strong> is a full overhaul of
+            <em>Total War Saga: Thrones of Britannia</em>, set during crucial periods
+            of Rome's presence in the British Isles. The mod delivers multiple distinct
+            campaigns spanning different eras, each with its own factions, settlements,
+            and historical context.
+        </p>
+        <p class="about-text">
+            From Julius Caesar's first tentative landings on the southern shores to the
+            deeper transformations of the island's peoples and powers, every campaign
+            reflects the <strong>evolving face of Roman and Britannic history</strong> —
+            changing landscapes, changing alliances, changing worlds.
+        </p>
+    </div>
+</section>
 
-        <p class="hero-subtitle">SPQR · The Eagles Have Landed</p>
+<!-- ── FEATURES ──────────────────────────────────────────────────────── -->
+<section class="section-features" id="features">
+    <div class="features-inner">
+        <h2 class="section-title">What Awaits You</h2>
+        <div class="section-divider dark">
+            <span></span>
+            <span class="section-divider-text">Key Features</span>
+            <span></span>
+        </div>
+        <div class="cards-grid">
+            <div class="feature-card">
+                <div class="card-icon-wrap">&#9876;</div>
+                <h3>The Legion System</h3>
+                <p>Each Roman legion carries distinct strengths and weaknesses.
+                   Players must collaborate and compensate across legions —
+                   no single force is self-sufficient on the Britannic frontier.</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon-wrap">&#127758;</div>
+                <h3>Historical Campaigns</h3>
+                <p>Multiple campaigns spanning different epochs of Roman Britain.
+                   Each era brings new factions, new settlements, and new
+                   strategic challenges across an evolving island.</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon-wrap">&#127810;</div>
+                <h3>British Tribes</h3>
+                <p>Dozens of uniquely designed factions — each with playstyles
+                   that force Roman commanders to constantly adapt their tactics
+                   against the island's resilient peoples.</p>
+            </div>
+            <a class="feature-card" href="new_cib.html">
+                <div class="card-icon-wrap">&#128505;</div>
+                <h3>Interactive Region Map</h3>
+                <p>Explore the full campaign map — search regions by name or key,
+                   inspect settlement data, and navigate the geography of
+                   Roman and Britannic Britannia.</p>
+            </a>
+        </div>
+    </div>
+</section>
 
-        <p class="hero-tagline">
-            Rome marches north. The tribes of Britannia stand defiant.
-            Command legions, forge alliances, and decide the fate of an island
-            on the edge of the known world.
+<!-- ── CAMPAIGNS + TIMELINE ──────────────────────────────────────────── -->
+<section class="section-campaigns" id="campaign">
+    <div class="campaigns-inner">
+        <h2 class="section-title">Historical Campaigns</h2>
+        <div class="section-divider light">
+            <span></span>
+            <span class="section-divider-text">Timeline</span>
+            <span></span>
+        </div>
+        <p class="campaigns-intro">
+            Each campaign is set in a <strong>distinct historical moment</strong>.
+            As the centuries pass, the island changes — new peoples, new settlements,
+            new conflicts. Select an era to learn more.
         </p>
 
-        <div class="hero-cta">
+        <button class="timeline-toggle" id="timelineToggle">
+            Explore the Timeline
+            <span class="toggle-arrow" id="toggleArrow">&#8595;</span>
+        </button>
+
+        <div class="timeline-panel" id="timelinePanel">
+            <div class="timeline-wrap" id="timelineWrap">
+
+                <!-- Vexillum SPQR (positioned by JS) -->
+                <div class="vexillum" id="vexillum">
+                    <div class="vex-finial">&#10022;</div>
+                    <div class="vex-pole-top"></div>
+                    <div class="vex-banner"><span>SPQR</span></div>
+                    <div class="vex-crossbar"></div>
+                    <div class="vex-pole-bottom"></div>
+                </div>
+
+                <!-- Timeline track -->
+                <div class="timeline-track" id="timelineTrack">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-dots" id="timelineDots">
+
+                        <div class="tl-dot active" data-idx="0">
+                            <div class="tl-dot-node"></div>
+                            <div class="tl-dot-date">56 BCE</div>
+                            <div class="tl-dot-label">Prima esplorazione</div>
+                        </div>
+
+                        <div class="tl-dot" data-idx="1">
+                            <div class="tl-dot-node"></div>
+                            <div class="tl-dot-date">55 BCE</div>
+                            <div class="tl-dot-label">Grande invasione</div>
+                        </div>
+
+                        <div class="tl-dot future" data-idx="2">
+                            <div class="tl-dot-node"></div>
+                            <div class="tl-dot-date">···</div>
+                            <div class="tl-dot-label">In arrivo</div>
+                        </div>
+
+                        <div class="tl-dot future" data-idx="3">
+                            <div class="tl-dot-node"></div>
+                            <div class="tl-dot-date">···</div>
+                            <div class="tl-dot-label">In arrivo</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Campaign info card -->
+                <div class="timeline-info" id="timelineInfo">
+                    <p class="tl-info-year">56 BCE</p>
+                    <h3 class="tl-info-title">Caesar's First Expedition</h3>
+                    <p class="tl-info-desc">
+                        Julius Caesar crosses the channel with two legions — the first Roman commander
+                        to set foot on the shores of Britannia. The landing is contested, the terrain
+                        unfamiliar, and the tribes resistant. A beachhead is established and then
+                        abandoned. Caesar returns to Gaul, but the island's call remains.
+                    </p>
+                    <span class="tl-info-status">Playable</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── LEGIONS ────────────────────────────────────────────────────────── -->
+<section class="section-legions" id="legions">
+    <div class="legions-inner">
+        <h2 class="section-title">The Legions of Caesar</h2>
+        <div class="section-divider dark">
+            <span></span>
+            <span class="section-divider-text">Legion System</span>
+            <span></span>
+        </div>
+        <div class="legions-grid">
+            <div class="legion-card">
+                <p class="legion-num">Legio VII</p>
+                <h3>Legio VII</h3>
+                <p>Masters of close-quarters formation warfare. Legio VII fields
+                   the finest heavy infantry available to Rome, capable of holding
+                   ground against any Britannic charge. Their weakness lies on
+                   the flanks — cavalry screens are nearly nonexistent.</p>
+                <div>
+                    <span class="legion-tag">Heavy Infantry</span>
+                    <span class="legion-tag">Spear Specialists</span>
+                    <span class="legion-tag">Weak Cavalry</span>
+                </div>
+            </div>
+            <div class="legion-card">
+                <p class="legion-num">Legio IX Hispana</p>
+                <h3>Legio IX Hispana</h3>
+                <p>The Ninth fields a diverse and powerful cavalry arm — the
+                   perfect counterpart to the Seventh's infantry-heavy doctrine.
+                   In tandem, the two legions form a self-supporting force
+                   capable of dominating open terrain and breaking encirclements.</p>
+                <div>
+                    <span class="legion-tag">Diverse Cavalry</span>
+                    <span class="legion-tag">Mobile Warfare</span>
+                    <span class="legion-tag">Flanking Expert</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── DOWNLOAD ───────────────────────────────────────────────────────── -->
+<section class="section-community" id="download">
+    <div class="community-inner">
+        <h2 class="section-title">Join the Campaign</h2>
+        <p class="community-text">
+            Caesars in Britain is a living, growing project — always open to new
+            voices. Whether you're an experienced modder or simply a passionate
+            historian, your contribution matters. Play, test, suggest, create.
+        </p>
+        <div class="community-links">
             <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2843452087" target="_blank" class="btn-primary">Steam Workshop</a>
-            <a href="#about" class="btn-secondary">Discover the Mod</a>
+            <a href="https://discord.gg/fb7ZMC4Waf" target="_blank" class="btn-secondary">Discord</a>
+            <a href="https://www.moddb.com/games/total-war-saga-thrones-of-britannia/addons/caesars-in-britannia" target="_blank" class="btn-secondary">ModDB</a>
         </div>
+    </div>
+</section>
 
-        <div class="hero-scroll">
-            <span>Scroll</span>
-            <div class="hero-scroll-arrow"></div>
-        </div>
-    </header>
+<!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
+<footer class="footer">
+    <div class="footer-links">
+        <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2843452087" target="_blank">Steam Workshop</a>
+        <span class="footer-sep">·</span>
+        <a href="https://discord.gg/fb7ZMC4Waf" target="_blank">Discord</a>
+        <span class="footer-sep">·</span>
+        <a href="https://www.moddb.com/games/total-war-saga-thrones-of-britannia/addons/caesars-in-britannia" target="_blank">ModDB</a>
+        <span class="footer-sep">·</span>
+        <a href="new_cib.html">Region Map</a>
+    </div>
+    <p class="footer-copy">
+        Caesars in Britain — A community modification for Total War Saga: Thrones of Britannia<br>
+        Not affiliated with Creative Assembly or SEGA. All game assets remain property of their respective owners.
+    </p>
+</footer>
 
-    <!-- ── NAV ───────────────────────────────────────────────────────────── -->
-    <nav class="main-nav">
-        <div class="nav-inner">
-            <a class="nav-logo" href="#home">CIB</a>
-            <ul class="nav-links">
-                <li><a href="#about">About</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#campaign">Campaign</a></li>
-                <li><a href="#legions">Legions</a></li>
-                <li><a href="#battle">Battle Modes</a></li>
-                <li><a href="new_cib.html">Region Map</a></li>
-                <li><a href="#download">Download</a></li>
-            </ul>
-        </div>
-    </nav>
+<script>
+    /* ── CAMPAIGN DATA ────────────────────────────────────────────── */
+    const CAMPAIGNS = [
+        {
+            year:   '56 BCE',
+            title:  "Caesar's First Expedition",
+            desc:   "Julius Caesar crosses the channel with two legions — the first Roman commander to set foot on the shores of Britannia. The landing is contested, the terrain unfamiliar, and the tribes resistant. A beachhead is established and then abandoned. Caesar returns to Gaul, but the island's call remains.",
+            status: 'Playable',
+            dev:    false
+        },
+        {
+            year:   '55 BCE',
+            title:  'The Full-Scale Invasion',
+            desc:   "Caesar returns with a larger force, pushing deeper into the island's interior. Crossing rivers, breaking tribal confederacies, and negotiating uneasy surrenders — the campaign reshapes Britannia's political landscape even as Rome withdraws once more. The tribes learn what Roman legions can do.",
+            status: 'Playable',
+            dev:    false
+        },
+        {
+            year:   'In arrivo',
+            title:  'Future Campaign',
+            desc:   "An additional historical period is in development. As the centuries unfold, the island continues to change — new factions emerge, settlements shift, and the balance of power evolves across the landscape of Britannia.",
+            status: 'In Development',
+            dev:    true
+        },
+        {
+            year:   'In arrivo',
+            title:  'Future Campaign',
+            desc:   "Further eras of the mod's historical arc are planned for future release. Each will bring distinct peoples, geographies, and conflicts to the campaign map.",
+            status: 'In Development',
+            dev:    true
+        }
+    ];
 
-    <!-- ── ABOUT ─────────────────────────────────────────────────────────── -->
-    <section class="section-about" id="about">
-        <div class="about-inner">
-            <p class="about-spqr">&#128505; SPQR</p>
-            <h2 class="section-title">A Full Conversion Mod<br>Born from the Community</h2>
-            <div class="section-divider light">
-                <span></span>
-                <span class="section-divider-text">History Unwritten</span>
-                <span></span>
-            </div>
+    /* ── TIMELINE TOGGLE ──────────────────────────────────────────── */
+    const panel  = document.getElementById('timelinePanel');
+    const arrow  = document.getElementById('toggleArrow');
+    const toggle = document.getElementById('timelineToggle');
+    let   isOpen = false;
 
-            <p class="about-text">
-                <strong>Caesars in Britain</strong> is a full overhaul of
-                <em>Total War Saga: Thrones of Britannia</em>, set during three
-                crucial periods of Rome's occupation of the British Isles.
-                The mod aims to deliver three distinct campaigns and an entirely
-                new multiplayer experience.
-            </p>
-            <p class="about-text">
-                Built by historical enthusiasts who felt abandoned by the official developers,
-                CIB carries a simple spirit: <strong>"If they won't give us something to
-                play, why don't we do it ourselves?"</strong> It is a community mod —
-                made by the fanbase, for the fanbase.
-            </p>
+    toggle.addEventListener('click', () => {
+        isOpen = !isOpen;
+        panel.classList.toggle('open', isOpen);
+        arrow.classList.toggle('open', isOpen);
+        if (isOpen) {
+            // position vexillum on first open
+            setTimeout(() => positionVexillum(0), 50);
+        }
+    });
 
-            <blockquote class="about-quote">
-                <p>The legions landed not as conquerors alone, but as players in a drama
-                   already millennia in the making. The tribes of Britannia had their
-                   own kingdoms, their own gods, and their own reasons to resist.</p>
-                <cite>— Caesars in Britain, mod description</cite>
-            </blockquote>
-        </div>
-    </section>
+    /* ── DOT CLICKS ───────────────────────────────────────────────── */
+    const dots = document.querySelectorAll('.tl-dot:not(.future)');
+    dots.forEach(dot => {
+        dot.addEventListener('click', () => {
+            const idx = parseInt(dot.dataset.idx);
+            selectCampaign(idx);
+        });
+    });
 
-    <!-- ── FEATURES ──────────────────────────────────────────────────────── -->
-    <section class="section-features" id="features">
-        <div class="features-inner">
-            <h2 class="section-title">What Awaits You</h2>
-            <div class="section-divider dark">
-                <span></span>
-                <span class="section-divider-text">Key Features</span>
-                <span></span>
-            </div>
+    /* ── SELECT CAMPAIGN ──────────────────────────────────────────── */
+    function selectCampaign(idx) {
+        // update active dot
+        document.querySelectorAll('.tl-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === idx);
+        });
+        // move vexillum
+        positionVexillum(idx);
+        // update info card
+        const c = CAMPAIGNS[idx];
+        const info = document.getElementById('timelineInfo');
+        info.innerHTML = `
+            <p class="tl-info-year">${c.year}</p>
+            <h3 class="tl-info-title">${c.title}</h3>
+            <p class="tl-info-desc">${c.desc}</p>
+            <span class="tl-info-status${c.dev ? ' dev' : ''}">${c.status}</span>
+        `;
+    }
 
-            <div class="cards-grid">
-                <div class="feature-card">
-                    <div class="card-icon-wrap">&#9876;</div>
-                    <h3>The Legion System</h3>
-                    <p>Each Roman legion carries distinct strengths and weaknesses.
-                       Players must collaborate and compensate across legions —
-                       no single force is self-sufficient on the Britannic frontier.</p>
-                </div>
+    /* ── POSITION VEXILLUM ────────────────────────────────────────── */
+    function positionVexillum(idx) {
+        const wrap = document.getElementById('timelineWrap');
+        const vex  = document.getElementById('vexillum');
+        const allDots = document.querySelectorAll('.tl-dot');
+        if (!allDots[idx]) return;
 
-                <div class="feature-card">
-                    <div class="card-icon-wrap">&#127758;</div>
-                    <h3>Three Campaigns</h3>
-                    <p>Three separate campaigns spanning different periods of
-                       Rome's occupation of the British Isles, each with its own
-                       strategic context, factions, and objectives.</p>
-                </div>
+        const node      = allDots[idx].querySelector('.tl-dot-node');
+        const wrapRect  = wrap.getBoundingClientRect();
+        const nodeRect  = node.getBoundingClientRect();
+        const centerX   = nodeRect.left + nodeRect.width / 2 - wrapRect.left;
 
-                <div class="feature-card">
-                    <div class="card-icon-wrap">&#9876;</div>
-                    <h3>British Tribes</h3>
-                    <p>Dozens of uniquely designed factions — including five newly
-                       introduced tribes of Wales — each with playstyles that force
-                       Roman commanders to constantly adapt their tactics.</p>
-                </div>
+        vex.style.left = centerX + 'px';
+    }
 
-                <div class="feature-card">
-                    <div class="card-icon-wrap">&#127962;</div>
-                    <h3>Innovative Battle Modes</h3>
-                    <p>Breakthrough, Conquest, Hold the Fort, Supply Line —
-                       custom multiplayer battle types designed for strategic depth,
-                       cooperation, and immersion in Roman-Britannic conflict.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ── CAMPAIGN ──────────────────────────────────────────────────────── -->
-    <section class="section-campaign" id="campaign">
-        <div class="campaign-inner">
-            <h2 class="section-title">The Roman Invasion</h2>
-            <div class="section-divider light">
-                <span></span>
-                <span class="section-divider-text">Campaign Overview</span>
-                <span></span>
-            </div>
-
-            <div class="campaign-layout">
-                <div class="campaign-text">
-                    <p>
-                        The campaign places you at the heart of Rome's most ambitious
-                        northern expedition. Following the model of the
-                        <strong>AD 43 invasion under general Aulus Plautius</strong>,
-                        you choose where to land your first two legions on the island
-                        and establish an initial foothold.
-                    </p>
-                    <p>
-                        Every decision carries weight. The Britannic tribes are not
-                        passive victims — they will unite, divide, negotiate, and betray
-                        depending on your movements. Rome's grip on the island is far
-                        from guaranteed.
-                    </p>
-                    <p>
-                        Playing as Rome means managing an ever-shifting coalition of
-                        legions, each with its own specialization, while the tribes
-                        exploit any vulnerability left exposed on the front lines.
-                    </p>
-                </div>
-
-                <ul class="campaign-list">
-                    <li>
-                        <div class="campaign-list-icon">&#127758;</div>
-                        <div class="campaign-list-text">
-                            <strong>Strategic Landing System</strong>
-                            <span>Choose where your legions make landfall — each position opens different strategic corridors into the island's interior.</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="campaign-list-icon">&#9876;</div>
-                        <div class="campaign-list-text">
-                            <strong>Roman vs. Britannic Asymmetry</strong>
-                            <span>Two radically different play experiences — Rome's disciplined might versus the guerrilla resilience of the tribes.</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="campaign-list-icon">&#128505;</div>
-                        <div class="campaign-list-text">
-                            <strong>16+ Factions Planned</strong>
-                            <span>From Roman legions to coastal tribes and Welsh kingdoms, each with distinct unit rosters and campaign traits.</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="campaign-list-icon">&#127939;</div>
-                        <div class="campaign-list-text">
-                            <strong>Custom Assets</strong>
-                            <span>Models from Rome 2 HD, Imperial Legions units by Leonardo, and assets from the Sol Invictus mod community.</span>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- ── LEGIONS ────────────────────────────────────────────────────────── -->
-    <section class="section-legions" id="legions">
-        <div class="legions-inner">
-            <h2 class="section-title">The Legions of Caesar</h2>
-            <div class="section-divider dark">
-                <span></span>
-                <span class="section-divider-text">Legion System</span>
-                <span></span>
-            </div>
-
-            <div class="legions-grid">
-                <div class="legion-card">
-                    <p class="legion-num">VII</p>
-                    <h3>Legio VII</h3>
-                    <p>Masters of close-quarters formation warfare. Legio VII fields
-                       the finest heavy spearmen available to Rome, capable of holding
-                       ground against any Britannic charge. Their weakness lies on
-                       the flanks — cavalry screens are nearly nonexistent.</p>
-                    <div>
-                        <span class="legion-tag">Heavy Infantry</span>
-                        <span class="legion-tag">Spear Specialists</span>
-                        <span class="legion-tag">Weak Cavalry</span>
-                    </div>
-                </div>
-
-                <div class="legion-card">
-                    <p class="legion-num">IX</p>
-                    <h3>Legio IX Hispana</h3>
-                    <p>The Ninth fields a diverse and powerful cavalry arm — the
-                       perfect counterpart to the Seventh's infantry-heavy doctrine.
-                       In tandem, the two legions form a self-supporting force
-                       capable of dominating open terrain and breaking encirclements.</p>
-                    <div>
-                        <span class="legion-tag">Diverse Cavalry</span>
-                        <span class="legion-tag">Mobile Warfare</span>
-                        <span class="legion-tag">Flanking Expert</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ── BATTLE MODES ───────────────────────────────────────────────────── -->
-    <section class="section-battle" id="battle">
-        <div class="battle-inner">
-            <h2 class="section-title">Innovative Battle Modes</h2>
-            <div class="section-divider light">
-                <span></span>
-                <span class="section-divider-text">Multiplayer Experience</span>
-                <span></span>
-            </div>
-
-            <div class="battle-grid">
-                <div class="battle-mode">
-                    <span class="battle-mode-num">I</span>
-                    <h3>Breakthrough</h3>
-                    <p>Legions begin from random positions across the map and must
-                       navigate hostile, challenging terrain to reach the safety of
-                       their Fort — all within a brutal one-hour window. Failure
-                       means facing the Emperor's wrath.</p>
-                </div>
-
-                <div class="battle-mode">
-                    <span class="battle-mode-num">II</span>
-                    <h3>Conquest</h3>
-                    <p>Villages dot the battlefield, each defended by Britannic
-                       tribesmen. Roman legions must storm and hold as many
-                       settlements as possible while the Britons contest every
-                       inch of ground.</p>
-                </div>
-
-                <div class="battle-mode">
-                    <span class="battle-mode-num">III</span>
-                    <h3>Hold the Fort</h3>
-                    <p>One Roman player commands a small garrison against overwhelming
-                       barbarian waves — and must hold long enough for a relief
-                       force to arrive. Cooperation and timing are everything.</p>
-                </div>
-
-                <div class="battle-mode">
-                    <span class="battle-mode-num">IV</span>
-                    <h3>Supply Line</h3>
-                    <p>Seize encampments and control points to strangle the enemy's
-                       logistics. Rome's legions can march forever; a starved tribe
-                       cannot fight. Command the land and command the war.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ── COMMUNITY / DOWNLOAD ───────────────────────────────────────────── -->
-    <section class="section-community" id="download">
-        <div class="community-inner">
-            <h2 class="section-title">Join the Campaign</h2>
-            <p class="community-text">
-                Caesars in Britain is a living, growing project — always open to new
-                voices. Whether you're an experienced modder or simply a passionate
-                historian, your contribution matters. Play, test, suggest, create.
-            </p>
-            <div class="community-links">
-                <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2843452087" target="_blank" class="btn-primary">Steam Workshop</a>
-                <a href="https://discord.gg/fb7ZMC4Waf" target="_blank" class="btn-secondary">Discord</a>
-                <a href="https://www.moddb.com/games/total-war-saga-thrones-of-britannia/addons/caesars-in-britannia" target="_blank" class="btn-secondary">ModDB</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2843452087" target="_blank">Steam Workshop</a>
-            <span class="footer-sep">·</span>
-            <a href="https://discord.gg/fb7ZMC4Waf" target="_blank">Discord</a>
-            <span class="footer-sep">·</span>
-            <a href="https://www.moddb.com/games/total-war-saga-thrones-of-britannia/addons/caesars-in-britannia" target="_blank">ModDB</a>
-            <span class="footer-sep">·</span>
-            <a href="new_cib.html">Region Map</a>
-        </div>
-        <p class="footer-copy">
-            Caesars in Britain — A community modification for Total War Saga: Thrones of Britannia<br>
-            Not affiliated with Creative Assembly or SEGA. All game assets remain property of their respective owners.
-        </p>
-    </footer>
+    /* Reposition on resize */
+    window.addEventListener('resize', () => {
+        const activeIdx = [...document.querySelectorAll('.tl-dot')]
+            .findIndex(d => d.classList.contains('active'));
+        if (activeIdx >= 0 && isOpen) positionVexillum(activeIdx);
+    });
+</script>
 
 </body>
 </html>
