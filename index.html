@@ -299,6 +299,114 @@
             color: var(--stone);
         }
 
+        /* ── START DATES ─────────────────────────────────────────────── */
+        .section-startdates {
+            background: var(--parch-mid);
+            padding: 100px 40px; position: relative; overflow: hidden;
+        }
+        .section-startdates::before {
+            content: ''; position: absolute; inset: 0;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(139,90,20,0.025) 3px, rgba(139,90,20,0.025) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(139,90,20,0.015) 3px, rgba(139,90,20,0.015) 4px);
+            pointer-events: none;
+        }
+        .startdates-inner {
+            max-width: 1000px; margin: 0 auto;
+            position: relative; text-align: center;
+        }
+        .startdates-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900;
+            color: var(--text-dark); letter-spacing: 0.08em; margin-bottom: 16px;
+        }
+        .startdates-divider {
+            display: flex; align-items: center; gap: 16px;
+            justify-content: center; margin-bottom: 64px;
+        }
+        .startdates-divider span { display: block; height: 1px; width: 60px; background: var(--gold-dim); }
+        .startdates-divider-text {
+            font-family: 'Cinzel', serif; font-size: 0.7rem;
+            letter-spacing: 0.35em; text-transform: uppercase; color: var(--text-mid);
+        }
+
+        /* Track */
+        .tl-track {
+            position: relative; display: flex;
+            justify-content: space-between; align-items: flex-start;
+            padding: 0 5%; margin-bottom: 48px;
+        }
+        .tl-track::before {
+            content: ''; position: absolute;
+            top: 20px; left: 5%; right: 5%; height: 2px;
+            background: linear-gradient(to right, transparent, var(--gold-dim) 15%, var(--gold-dim) 85%, transparent);
+        }
+
+        /* Dots */
+        .tl-dot {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 12px; cursor: pointer; position: relative; z-index: 2;
+            flex: 1;
+        }
+        .tl-dot.future { cursor: default; opacity: 0.45; }
+        .tl-node {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--parch-mid); border: 3px solid var(--gold-dim);
+            transition: all 0.3s; box-shadow: 0 0 0 4px rgba(212,175,55,0.1);
+            margin-top: 11px;
+        }
+        .tl-dot.active .tl-node {
+            background: var(--red); border-color: var(--gold);
+            box-shadow: 0 0 0 6px rgba(212,175,55,0.2), 0 0 18px rgba(139,26,26,0.5);
+            transform: scale(1.3);
+        }
+        .tl-dot:not(.future):hover .tl-node { border-color: var(--gold); transform: scale(1.1); }
+        .tl-date {
+            font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 700;
+            color: var(--text-dark); letter-spacing: 0.06em;
+        }
+        .tl-dot.active .tl-date { color: var(--red); }
+        .tl-label {
+            font-size: 0.72rem; color: var(--text-mid); font-style: italic;
+            max-width: 110px; text-align: center; line-height: 1.4;
+        }
+
+        /* Info card */
+        .tl-card {
+            background: var(--dark-warm);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-top: 3px solid var(--red);
+            border-radius: 4px; padding: 36px 40px;
+            text-align: left; min-height: 180px;
+            transition: border-top-color 0.3s;
+        }
+        .tl-card-year {
+            font-family: 'Cinzel', serif; font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.4em; color: var(--red-mid);
+            text-transform: uppercase; margin-bottom: 8px;
+        }
+        .tl-card-title {
+            font-family: 'Cinzel', serif; font-size: 1.5rem;
+            color: var(--gold); margin-bottom: 14px;
+        }
+        .tl-card-desc {
+            font-size: 0.97rem; color: rgba(245,237,216,0.75); line-height: 1.9;
+        }
+        .tl-card-status {
+            display: inline-block; margin-top: 20px;
+            padding: 5px 16px; border-radius: 2px;
+            font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+        }
+        .tl-card-status.playable {
+            background: rgba(40,120,40,0.2); border: 1px solid rgba(40,120,40,0.4);
+            color: #7ec87e;
+        }
+        .tl-card-status.dev {
+            background: rgba(139,26,26,0.2); border: 1px solid rgba(139,26,26,0.35);
+            color: var(--stone);
+        }
+
         /* ── RESPONSIVE ───────────────────────────────────────────────── */
         @media (max-width: 768px) {
             .project-body { grid-template-columns: 1fr; gap: 24px; }
@@ -306,6 +414,9 @@
             .section-project { padding: 70px 20px; }
             .news-grid { grid-template-columns: 1fr; }
             .section-news { padding: 70px 20px; }
+            .section-startdates { padding: 70px 20px; }
+            .tl-label { display: none; }
+            .tl-card { padding: 24px 20px; }
         }
         @media (max-width: 600px) {
             .hero-cta { flex-direction: column; align-items: center; }
@@ -432,6 +543,80 @@
         </div>
     </div>
 </section>
+
+<!-- ── START DATES ───────────────────────────────────────────────────── -->
+<section class="section-startdates" id="startdates">
+    <div class="startdates-inner">
+        <h2 class="startdates-title">Historical Start Dates</h2>
+        <div class="startdates-divider">
+            <span></span>
+            <span class="startdates-divider-text">Timeline</span>
+            <span></span>
+        </div>
+
+        <div class="tl-track">
+            <div class="tl-dot active" data-idx="0">
+                <div class="tl-node"></div>
+                <div class="tl-date">56 BCE</div>
+                <div class="tl-label">First Expedition</div>
+            </div>
+            <div class="tl-dot" data-idx="1">
+                <div class="tl-node"></div>
+                <div class="tl-date">55 BCE</div>
+                <div class="tl-label">Full-Scale Invasion</div>
+            </div>
+            <div class="tl-dot future" data-idx="2">
+                <div class="tl-node"></div>
+                <div class="tl-date">43 AD</div>
+                <div class="tl-label">Claudian Invasion</div>
+            </div>
+        </div>
+
+        <div class="tl-card" id="tlCard">
+            <p class="tl-card-year">56 BCE</p>
+            <h3 class="tl-card-title">Caesar's First Expedition</h3>
+            <p class="tl-card-desc">Julius Caesar crosses the channel with two legions — the first Roman commander to set foot on the shores of Britannia. The landing is contested, the terrain unfamiliar, and the tribes resistant. A beachhead is established and then abandoned. Caesar returns to Gaul, but the island's call remains.</p>
+            <span class="tl-card-status playable">Playable</span>
+        </div>
+    </div>
+</section>
+
+<script>
+    const CAMPAIGNS = [
+        {
+            year:   '56 BCE',
+            title:  "Caesar's First Expedition",
+            desc:   "Julius Caesar crosses the channel with two legions — the first Roman commander to set foot on the shores of Britannia. The landing is contested, the terrain unfamiliar, and the tribes resistant. A beachhead is established and then abandoned. Caesar returns to Gaul, but the island's call remains.",
+            status: 'Playable', playable: true
+        },
+        {
+            year:   '55 BCE',
+            title:  'The Full-Scale Invasion',
+            desc:   "Caesar returns with a larger force, pushing deeper into the island's interior. Crossing rivers, breaking tribal confederacies, and negotiating uneasy surrenders — the campaign reshapes Britannia's political landscape even as Rome withdraws once more. The tribes learn what Roman legions can do.",
+            status: 'Playable', playable: true
+        },
+        {
+            year:   '43 AD',
+            title:  'The Claudian Invasion',
+            desc:   "Emperor Claudius dispatches four legions under Aulus Plautius to complete what Caesar began. A new era of Roman conquest is underway — and Britannia will never be the same.",
+            status: 'In Development', playable: false
+        }
+    ];
+
+    document.querySelectorAll('.tl-dot:not(.future)').forEach(dot => {
+        dot.addEventListener('click', () => {
+            const idx = parseInt(dot.dataset.idx);
+            document.querySelectorAll('.tl-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+            const c = CAMPAIGNS[idx];
+            document.getElementById('tlCard').innerHTML = `
+                <p class="tl-card-year">${c.year}</p>
+                <h3 class="tl-card-title">${c.title}</h3>
+                <p class="tl-card-desc">${c.desc}</p>
+                <span class="tl-card-status ${c.playable ? 'playable' : 'dev'}">${c.status}</span>
+            `;
+        });
+    });
+</script>
 
 </body>
 </html>
