@@ -167,7 +167,73 @@
             50%       { transform: rotate(45deg) translateY(4px); }
         }
 
+        /* ── NEWS ────────────────────────────────────────────────────── */
+        .section-news {
+            background: linear-gradient(180deg, var(--dark) 0%, var(--dark-mid) 100%);
+            padding: 100px 40px;
+            border-top: 1px solid rgba(212,175,55,0.15);
+        }
+        .news-inner {
+            max-width: 1100px; margin: 0 auto; text-align: center;
+        }
+        .news-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900;
+            color: var(--parchment); letter-spacing: 0.1em;
+            margin-bottom: 16px;
+        }
+        .news-divider {
+            display: flex; align-items: center; gap: 16px;
+            justify-content: center; margin-bottom: 56px;
+        }
+        .news-divider span {
+            display: block; height: 1px; width: 60px;
+            background: var(--gold-dim);
+        }
+        .news-divider-text {
+            font-family: 'Cinzel', serif; font-size: 0.7rem;
+            letter-spacing: 0.35em; text-transform: uppercase; color: var(--stone);
+        }
+        .news-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+        }
+        .news-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(212,175,55,0.15);
+            border-top: 3px solid var(--red);
+            border-radius: 3px; padding: 36px 28px;
+            text-align: left; display: flex; flex-direction: column; gap: 14px;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .news-card:hover {
+            border-top-color: var(--gold);
+            transform: translateY(-4px);
+        }
+        .news-card-date {
+            font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.25em; color: var(--gold-dim); text-transform: uppercase;
+        }
+        .news-card-title {
+            font-family: 'Cinzel', serif; font-size: 1.05rem; font-weight: 700;
+            color: var(--parchment); line-height: 1.4;
+        }
+        .news-card-body {
+            font-size: 0.88rem; color: var(--stone); line-height: 1.8; flex: 1;
+        }
+        .news-card-tag {
+            display: inline-block; margin-top: auto;
+            font-family: 'Cinzel', serif; font-size: 0.63rem; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            padding: 4px 12px; border-radius: 2px;
+            background: rgba(139,26,26,0.2); border: 1px solid rgba(139,26,26,0.4);
+            color: var(--stone);
+        }
+
         /* ── RESPONSIVE ───────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .news-grid { grid-template-columns: 1fr; }
+            .section-news { padding: 70px 20px; }
+        }
         @media (max-width: 600px) {
             .hero-cta { flex-direction: column; align-items: center; }
             .btn-primary, .btn-secondary { width: 220px; text-align: center; }
@@ -201,6 +267,38 @@
         <div class="hero-scroll-arrow"></div>
     </div>
 </header>
+
+<!-- ── NEWS ──────────────────────────────────────────────────────────── -->
+<section class="section-news" id="news">
+    <div class="news-inner">
+        <h2 class="news-title">Latest News</h2>
+        <div class="news-divider">
+            <span></span>
+            <span class="news-divider-text">Updates</span>
+            <span></span>
+        </div>
+        <div class="news-grid">
+            <div class="news-card">
+                <span class="news-card-date">Coming Soon</span>
+                <h3 class="news-card-title">Update Log &amp; Patch Notes</h3>
+                <p class="news-card-body">Development news and changelogs will be published here as the mod evolves.</p>
+                <span class="news-card-tag">Work in Progress</span>
+            </div>
+            <div class="news-card">
+                <span class="news-card-date">Coming Soon</span>
+                <h3 class="news-card-title">Dev Diary — The Claudian Invasion</h3>
+                <p class="news-card-body">An in-depth look at the upcoming 43 AD campaign, its factions, and its new mechanics.</p>
+                <span class="news-card-tag">Work in Progress</span>
+            </div>
+            <div class="news-card">
+                <span class="news-card-date">Coming Soon</span>
+                <h3 class="news-card-title">Community Highlights</h3>
+                <p class="news-card-body">Screenshots, AARs, and stories from the players shaping their own history in Britannia.</p>
+                <span class="news-card-tag">Work in Progress</span>
+            </div>
+        </div>
+    </div>
+</section>
 
 </body>
 </html>
