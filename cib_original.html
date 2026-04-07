@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Campaign Map - CIB</title>
+    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Merriweather:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #1a1410;
+        }
+
+        .map-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .map-area {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1410;
+            padding: 20px;
+        }
+
+        .map-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .map-image {
+            max-width: 90vw;
+            max-height: 90vh;
+            display: block;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 3px solid #d4af37;
+            border-radius: 8px;
+        }
+
+        #interactiveSvg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+            border-radius: 8px;
+            pointer-events: all;
+        }
+
+        .region-polygon {
+            fill: rgba(212, 175, 55, 0);
+            stroke: rgba(212, 175, 55, 0);
+            stroke-width: 0;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            transition: fill 0.1s ease, stroke 0.1s ease, filter 0.1s ease;
+            cursor: pointer;
+        }
+
+        .region-polygon:hover {
+            fill: rgba(255, 255, 255, 0.35);
+            stroke: rgba(255, 255, 255, 1.0);
+            stroke-width: 20;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+        }
+
+        .region-polygon.selected {
+            fill: rgba(212, 175, 55, 0.45);
+            stroke: rgba(212, 175, 55, 1.0);
+            stroke-width: 28;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 1.0));
+        }
+
+        .info-panel {
+            width: 350px;
+            background: linear-gradient(135deg, rgba(245, 241, 232, 0.98), rgba(232, 220, 196, 0.98));
+            backdrop-filter: blur(10px);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            overflow-y: auto;
+            border-left: 3px solid #d4af37;
+        }
+
+        .info-panel.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a7a5f;
+            font-style: italic;
+        }
+
+        .info-panel h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            color: #5a4a2f;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        .info-content {
+            font-size: 1.1rem;
+            color: #4a3a25;
+            line-height: 1.8;
+        }
+
+        .region-details {
+            margin-top: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #5a4a2f;
+            font-size: 0.95rem;
+        }
+
+        .detail-value {
+            color: #6a5a3f;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #d4af37, #b8962e);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #b8962e, #d4af37);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* View Mode Toggle */
+        .view-toggle {
+            position: absolute;
+            bottom: 30px;
+            right: 380px;
+            background: linear-gradient(135deg, rgba(245, 241, 232, 0.98), rgba(232, 220, 196, 0.98));
+            backdrop-filter: blur(10px);
+            padding: 20px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #d4af37;
+            z-index: 1000;
+        }
+
+        .view-toggle-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            color: #5a4a2f;
+            margin-bottom: 10px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-option {
+            font-size: 0.9rem;
+            color: #6a5a3f;
+            font-weight: 500;
+        }
+
+        .toggle-option.active {
+            color: #d4af37;
+            font-weight: 700;
+        }
+
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #8a7a5f;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .switch.active {
+            background: #d4af37;
+        }
+
+        .switch-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .switch.active .switch-slider {
+            transform: translateX(30px);
+        }
+
+        /* Faction mode styles */
+        .region-polygon.faction-mode {
+            stroke-width: 0;
+        }
+
+        .region-polygon.faction-mode.same-faction-neighbor {
+            stroke: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="back-button">← Back to Home</a>
+
+    <div class="view-toggle">
+        <span class="view-toggle-label">View Mode</span>
+        <div class="toggle-switch">
+            <span class="toggle-option active" id="regionModeLabel">Regions</span>
+            <div class="switch" id="viewModeSwitch">
+                <div class="switch-slider"></div>
+            </div>
+            <span class="toggle-option" id="factionModeLabel">Factions</span>
+        </div>
+    </div>
+
+    <div class="map-container">
+        <div class="map-area">
+            <div class="map-wrapper" id="mapWrapper">
+                <img src="background_cib.jpg" alt="CIB Campaign Map" class="map-image" id="mapImage">
+                <svg id="interactiveSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+        </div>
+        <div class="info-panel empty" id="infoPanel">
+            <p>Click on a region to view information</p>
+        </div>
+    </div>
+
+    <script src="cib_data.js"></script>
+    <script>
+        const mapImage = document.getElementById('mapImage');
+        const interactiveSvg = document.getElementById('interactiveSvg');
+        const infoPanel = document.getElementById('infoPanel');
+        const viewModeSwitch = document.getElementById('viewModeSwitch');
+        const regionModeLabel = document.getElementById('regionModeLabel');
+        const factionModeLabel = document.getElementById('factionModeLabel');
+
+        const REFERENCE_WIDTH = 1908;
+        const REFERENCE_HEIGHT = 2127;
+
+        let selectedPolygon = null;
+        let currentViewMode = 'region'; // 'region' or 'faction'
+
+        // Toggle view mode
+        viewModeSwitch.addEventListener('click', function() {
+            currentViewMode = currentViewMode === 'region' ? 'faction' : 'region';
+            viewModeSwitch.classList.toggle('active');
+            regionModeLabel.classList.toggle('active');
+            factionModeLabel.classList.toggle('active');
+
+            // Reinitialize the map with new mode
+            initializeRegions();
+
+            // Clear selection
+            selectedPolygon = null;
+            infoPanel.classList.add('empty');
+            infoPanel.innerHTML = '<p>Click on a ' + (currentViewMode === 'region' ? 'region' : 'faction') + ' to view information</p>';
+
+            console.log(`Switched to ${currentViewMode} mode`);
+        });
+
+        // Wait for map image to load
+        mapImage.onload = function() {
+            initializeRegions();
+        };
+
+        // If image is already loaded (from cache), initialize immediately
+        if (mapImage.complete) {
+            initializeRegions();
+        }
+
+        function initializeRegions() {
+            const displayWidth = mapImage.offsetWidth;
+            const displayHeight = mapImage.offsetHeight;
+
+            console.log(`Image dimensions: ${displayWidth}x${displayHeight}`);
+            console.log(`Regions loaded: ${typeof regions !== 'undefined' ? regions.length : 'NOT LOADED'}`);
+            console.log(`View mode: ${currentViewMode}`);
+
+            if (typeof regions === 'undefined' || regions.length === 0) {
+                console.error('Regions data not loaded!');
+                return;
+            }
+
+            // Set SVG dimensions to match displayed image exactly
+            interactiveSvg.setAttribute('width', displayWidth);
+            interactiveSvg.setAttribute('height', displayHeight);
+            interactiveSvg.setAttribute('viewBox', `0 0 ${REFERENCE_WIDTH} ${REFERENCE_HEIGHT}`);
+
+            // Clear any existing polygons
+            interactiveSvg.innerHTML = '';
+
+            if (currentViewMode === 'region') {
+                initializeRegionMode();
+            } else {
+                initializeFactionMode();
+            }
+        }
+
+        function initializeRegionMode() {
+            let totalPolygons = 0;
+
+            // Create region groups with multiple polygons
+            regions.forEach((region, index) => {
+                // Skip sea regions to prevent blocking land regions
+                if (region.sea) {
+                    return;
+                }
+
+                // Create a group for this region (to handle multiple polygons as one)
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.setAttribute('class', 'region-group');
+                group.setAttribute('data-region-name', region.name);
+                group.setAttribute('data-region-color', region.color);
+                group.setAttribute('data-region-id', index);
+
+                // Create a polygon for each shape in this region
+                region.polygons.forEach((coords) => {
+                    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    polygon.setAttribute('points', coords);
+                    polygon.setAttribute('class', 'region-polygon');
+                    group.appendChild(polygon);
+                    totalPolygons++;
+                });
+
+                // Add event listeners to the group
+                group.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectRegion(this, region);
+                });
+
+                interactiveSvg.appendChild(group);
+            });
+
+            console.log(`✓ Region mode: ${totalPolygons} polygons from non-sea regions`);
+        }
+
+        function initializeFactionMode() {
+            // Group regions by faction
+            const factionGroups = {};
+
+            regions.forEach((region) => {
+                if (!region.factionColor || region.sea) return;
+
+                const factionKey = region.owner || 'Unknown';
+                if (!factionGroups[factionKey]) {
+                    factionGroups[factionKey] = {
+                        owner: region.owner,
+                        factionColor: region.factionColor,
+                        regions: []
+                    };
+                }
+                factionGroups[factionKey].regions.push(region);
+            });
+
+            // Create a group for each faction
+            Object.entries(factionGroups).forEach(([factionKey, factionData]) => {
+                const factionGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                factionGroup.setAttribute('class', 'faction-group');
+                factionGroup.setAttribute('data-faction-name', factionKey);
+                factionGroup.setAttribute('data-faction-color', factionData.factionColor);
+
+                // Add all polygons from all regions of this faction
+                factionData.regions.forEach((region) => {
+                    region.polygons.forEach((coords) => {
+                        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        polygon.setAttribute('points', coords);
+                        polygon.setAttribute('class', 'region-polygon faction-mode');
+                        polygon.setAttribute('fill', factionData.factionColor);
+                        polygon.setAttribute('fill-opacity', '0.7');
+                        polygon.setAttribute('stroke', 'none');
+                        polygon.setAttribute('stroke-width', '0');
+                        factionGroup.appendChild(polygon);
+                    });
+                });
+
+                // Add hover effect to the group
+                factionGroup.addEventListener('mouseenter', function() {
+                    const polygons = this.querySelectorAll('.region-polygon');
+                    polygons.forEach(p => {
+                        p.setAttribute('fill-opacity', '0.85');
+                    });
+                });
+
+                factionGroup.addEventListener('mouseleave', function() {
+                    if (this !== selectedPolygon) {
+                        const polygons = this.querySelectorAll('.region-polygon');
+                        polygons.forEach(p => {
+                            p.setAttribute('fill-opacity', '0.7');
+                        });
+                    }
+                });
+
+                // Add event listener for faction click
+                factionGroup.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectFaction(this, factionData);
+                });
+
+                interactiveSvg.appendChild(factionGroup);
+            });
+
+            console.log(`✓ Faction mode: ${Object.keys(factionGroups).length} factions`);
+        }
+
+        function selectRegion(groupElement, region) {
+            console.log(`🖱️ Region clicked: ${region.name} (${region.color})`);
+
+            // Deselect previous region
+            if (selectedPolygon) {
+                const previousPolygons = selectedPolygon.querySelectorAll('.region-polygon');
+                previousPolygons.forEach(p => p.classList.remove('selected'));
+            }
+
+            // Select new region - add 'selected' class to all polygons in the group
+            selectedPolygon = groupElement;
+            const polygons = groupElement.querySelectorAll('.region-polygon');
+            polygons.forEach(p => p.classList.add('selected'));
+
+            // Show region info
+            showRegionInfo(region);
+        }
+
+        function selectFaction(groupElement, factionData) {
+            console.log(`🖱️ Faction clicked: ${factionData.owner}`);
+
+            // Deselect previous selection
+            if (selectedPolygon) {
+                const previousPolygons = selectedPolygon.querySelectorAll('.region-polygon');
+                previousPolygons.forEach(p => {
+                    p.setAttribute('fill-opacity', '0.7');
+                });
+            }
+
+            // Select new faction - highlight all polygons with higher opacity
+            selectedPolygon = groupElement;
+            const polygons = groupElement.querySelectorAll('.region-polygon');
+            polygons.forEach(p => {
+                p.setAttribute('fill-opacity', '0.95');
+            });
+
+            // Show faction info
+            showFactionInfo(factionData);
+        }
+
+        function showFactionInfo(factionData) {
+            infoPanel.classList.remove('empty');
+
+            const regionsList = factionData.regions.map(r => r.name).join(', ');
+
+            infoPanel.innerHTML = `
+                <h2>${factionData.owner}</h2>
+                <div class="info-content">
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="display: inline-block; width: 40px; height: 40px; background: ${factionData.factionColor}; border: 2px solid #8b7355; border-radius: 4px;"></span>
+                            <span style="font-family: monospace; font-size: 1.1rem;">${factionData.factionColor}</span>
+                        </div>
+                    </div>
+
+                    <div class="region-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Number of Regions:</span>
+                            <span class="detail-value">${factionData.regions.length}</span>
+                        </div>
+                        <div class="detail-row" style="flex-direction: column; align-items: flex-start; padding: 15px 0;">
+                            <span class="detail-label" style="margin-bottom: 10px;">Controlled Regions:</span>
+                            <span class="detail-value" style="line-height: 1.6; font-style: normal;">${regionsList}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showRegionInfo(region) {
+            const formatValue = (value) => {
+                if (value === null || value === undefined) return '—';
+                if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+                return value;
+            };
+
+            infoPanel.classList.remove('empty');
+            infoPanel.innerHTML = `
+                <h2>${region.name}</h2>
+                <div class="info-content">
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="display: inline-block; width: 40px; height: 40px; background: ${region.color}; border: 2px solid #8b7355; border-radius: 4px;"></span>
+                            <span style="font-family: monospace; font-size: 1.1rem;">${region.color}</span>
+                        </div>
+                    </div>
+
+                    <div class="region-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Region Key:</span>
+                            <span class="detail-value">${formatValue(region.regionKey)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Sea:</span>
+                            <span class="detail-value">${formatValue(region.sea)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+
+</body>
+
+</html>
