@@ -1,14 +1,17 @@
 :root {
-    --bg-dark: #121212; /* Pietra scura */
-    --accent-red: #8B0000; /* Rosso Pompeiano */
-    --accent-gold: #C5B358; /* Oro Antico */
-    --text-parchment: #F5E6BE; /* Pergamena */
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --parch-mid: #ede0c4;
-    --red:       #8b1a1a;
+    --bg-dark:        #121212;
+    --accent-red:     #8B0000;
+    --accent-gold:    #C5B358;
+    --text-parchment: #F5E6BE;
+    --parch-mid:      #ede0c4;
+    --red:            #8b1a1a;
+    --gold:           #C5B358;
+    --gold-dim:       rgba(197, 179, 88, 0.4);
+    --text-mid:       rgba(245, 230, 190, 0.6);
+    --stone:          #a89880;
 }
 
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     background-color: var(--bg-dark);
@@ -24,7 +27,7 @@ h1, h2, h3, .logo {
     letter-spacing: 2px;
 }
 
-/* Navbar */
+/* ── Navbar ──────────────────────────────────────────────── */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -38,7 +41,7 @@ h1, h2, h3, .logo {
 .nav-links { display: flex; list-style: none; gap: 2rem; }
 .nav-links a { color: var(--text-parchment); text-decoration: none; font-size: 0.9rem; }
 
-/* Hero */
+/* ── Hero ────────────────────────────────────────────────── */
 .hero {
     position: relative;
     min-height: 100vh;
@@ -56,8 +59,7 @@ h1, h2, h3, .logo {
     content: '';
     position: absolute;
     left: 0; right: 0; height: 1px;
-    /* background: linear-gradient(to right, transparent, var(--accent-gold), transparent);*/
-    background: #C5B358;
+    background: var(--accent-gold);
 }
 .hero::before { top: 0; }
 .hero::after  { bottom: 0; }
@@ -105,11 +107,7 @@ h1, h2, h3, .logo {
     animation: fadeInUp 1s ease-out 0.5s both;
 }
 
-.hero-content { z-index: 10; padding: 0 20px; }
-.hero h1 { font-size: clamp(3rem, 8vw, 6rem); margin-bottom: 1rem; color: #fff; }
-.subtitle { font-style: italic; opacity: 0.8; max-width: 600px; margin: 0 auto 2rem; }
-
-/* Bottone Moderno/Storico */
+/* ── Buttons ─────────────────────────────────────────────── */
 .btn-main {
     padding: 1.2rem 2.5rem;
     background: var(--accent-red);
@@ -120,14 +118,12 @@ h1, h2, h3, .logo {
     transition: all 0.4s ease;
     display: inline-block;
 }
-
 .btn-main:hover {
     box-shadow: 0 0 20px rgba(197, 179, 88, 0.4);
     transform: scale(1.05);
 }
-
 .btn-secondary {
-    display: inline-block; 
+    display: inline-block;
     padding: 1.2rem 2.5rem;
     background: transparent; color: var(--gold);
     font-family: 'Cinzel', serif;
@@ -135,7 +131,6 @@ h1, h2, h3, .logo {
     border: 1px solid var(--accent-gold);
     transition: all 0.4s ease; text-transform: uppercase; cursor: pointer;
 }
-
 .btn-secondary:hover {
     background: rgba(212,175,55,0.1); border-color: var(--gold);
     box-shadow: 0 0 20px rgba(212,175,55,0.2); transform: translateY(-2px);
@@ -144,27 +139,66 @@ h1, h2, h3, .logo {
     display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
     animation: fadeInUp 1s ease-out 0.6s both;
 }
-
 @media (max-width: 700px) {
     .hero-cta { flex-direction: column; align-items: center; }
-    .btn-primary, .btn-secondary { width: 220px; text-align: center; }
+    .btn-main, .btn-secondary { width: 220px; text-align: center; }
 }
 
-/* Timeline */
-.timeline-section { padding: 100px 5%; background: #161616; }
-.section-title { text-align: center; margin-bottom: 4rem; color: var(--accent-gold); }
+/* ── Project Section ─────────────────────────────────────── */
+.section-project {
+    background: var(--red);
+    position: relative;
+    text-align: center;
+    padding: 25px 0;
+}
+.section-project::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--accent-gold);
+}
+.section-project::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--accent-gold);
+}
+.project-title { color: var(--text-parchment); }
 
-.timeline-container {
-    display: flex;
-    justify-content: center;
-    gap: 4rem;
-    margin-bottom: 3rem;
+/* ── Start Dates ─────────────────────────────────────────── */
+.section-startdates {
+    background: var(--parch-mid);
+    padding: 100px 40px; position: relative; overflow: hidden;
+}
+.section-startdates::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(139,90,20,0.025) 3px, rgba(139,90,20,0.025) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(139,90,20,0.015) 3px, rgba(139,90,20,0.015) 4px);
+    pointer-events: none;
+}
+.startdates-inner {
+    max-width: 1000px; margin: 0 auto;
+    position: relative; text-align: center;
+}
+.startdates-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900;
+    color: var(--red); letter-spacing: 0.08em; margin-bottom: 16px;
+}
+.startdates-divider {
+    display: flex; align-items: center; gap: 16px;
+    justify-content: center; margin-bottom: 64px;
+}
+.startdates-divider span { display: block; height: 1px; width: 60px; background: var(--gold-dim); }
+.startdates-divider-text {
+    font-family: 'Cinzel', serif; font-size: 0.7rem;
+    letter-spacing: 0.35em; text-transform: uppercase; color: var(--bg-dark);
 }
 
-.timeline-item { cursor: pointer; text-align: center; opacity: 0.5; transition: 0.3s; }
-.timeline-item.active { opacity: 1; transform: scale(1.1); }
-
-/* Track */
+/* ── Timeline track ──────────────────────────────────────── */
 .tl-track {
     position: relative; display: flex;
     justify-content: space-between; align-items: flex-start;
@@ -175,8 +209,6 @@ h1, h2, h3, .logo {
     top: 20px; left: 5%; right: 5%; height: 2px;
     background: linear-gradient(to right, transparent, var(--accent-gold) 15%, var(--accent-gold) 85%, transparent);
 }
-
-/* Dots */
 .tl-dot {
     display: flex; flex-direction: column; align-items: center;
     gap: 12px; cursor: pointer; position: relative; z-index: 2;
@@ -204,38 +236,8 @@ h1, h2, h3, .logo {
     font-size: 0.72rem; color: var(--text-mid); font-style: italic;
     max-width: 110px; text-align: center; line-height: 1.4;
 }
-        /* ── START DATES ─────────────────────────────────────────────── */
-        .section-startdates {
-            background: var(--parch-mid);
-            padding: 100px 40px; position: relative; overflow: hidden;
-        }
-        .section-startdates::before {
-            content: ''; position: absolute; inset: 0;
-            background-image:
-                repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(139,90,20,0.025) 3px, rgba(139,90,20,0.025) 4px),
-                repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(139,90,20,0.015) 3px, rgba(139,90,20,0.015) 4px);
-            pointer-events: none;
-        }
-        .startdates-inner {
-            max-width: 1000px; margin: 0 auto;
-            position: relative; text-align: center;
-        }
-        .startdates-title {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900;
-            color: var(--red); letter-spacing: 0.08em; margin-bottom: 16px;
-        }
-        .startdates-divider {
-            display: flex; align-items: center; gap: 16px;
-            justify-content: center; margin-bottom: 64px;
-        }
-        .startdates-divider span { display: block; height: 1px; width: 60px; background: var(--gold-dim); }
-        .startdates-divider-text {
-            font-family: 'Cinzel', serif; font-size: 0.7rem;
-            letter-spacing: 0.35em; text-transform: uppercase; color: var(--bg-dark);
-        }
 
-/* Info card */
+/* ── Info card ───────────────────────────────────────────── */
 .tl-card {
     background: var(--bg-dark);
     border: 1px solid rgba(212,175,55,0.2);
@@ -271,38 +273,5 @@ h1, h2, h3, .logo {
     color: var(--stone);
 }
 
-/* PROLOX */
-/* Project Section */
-.section-project {
-    background: var(--red);
-    position: relative;
-    text-align: center;
-    /* Rimuovi display: flex se non ti serve per centrare contenuti complessi, 
-       il padding gestisce l'altezza della fascia rossa */
-    padding: 25px 0; 
-    overflow: hidden;
-}
-
-/* Linea Superiore */
-.section-project::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px; /* Spessore identico */
-    background: #C5B358;
-    opacity: 0.8; /* Opzionale: per renderla meno "tagliente" */
-}
-
-/* Linea Inferiore */
-.section-project::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px; /* Spessore identico */
-    background: #C5B358;
-    opacity: 0.8;
-}
+/* ── Features ────────────────────────────────────────────── */
+.section-title { text-align: center; margin-bottom: 4rem; color: var(--accent-gold); }
