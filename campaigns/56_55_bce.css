@@ -1,0 +1,106 @@
+:root {
+    --bg-dark: #121212;
+    --accent-red: #8B0000;
+    --accent-gold: #C5B358;
+    --text-parchment: #F5E6BE;
+    --red: #8b1a1a;
+    --gold: #C5B358;
+    --gold-dim: rgba(197, 179, 88, 0.4);
+    --stone: #a89880;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-color: var(--text-parchment);
+    color: var(--bg-dark)
+}
+.campaign{
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--accent-red);
+}
+
+.section-cultures{
+    text-align: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.2rem;         /* Molto più grande (regola a piacere) */
+    line-height: 1;          /* Evita spazio extra sopra/sotto */
+    letter-spacing: 3px;     /* Effetto epigrafe romana */
+    background-color: var(--bg-dark);
+    padding: 30px
+}
+
+.culture-title{
+    color: #8B0000;
+}
+
+.cultures-box {
+    position: relative;
+    text-align: center;
+    align-items: center;
+    display: flex;          /* Attiva il layout flessibile */
+    flex-wrap: nowrap;      /* Impedisce ai box di andare a capo */
+    width: 70%;           /* Occupa il 70% della larghezza del genitore */
+    max-width: 1600px;    /* Opzionale: evita che diventi troppo largo su monitor giganti */
+    margin: 0 auto;       /* Centra il blocco orizzontalmente */
+    gap: 10px;              /* Crea spazio tra i rettangoli senza usare i margini */
+    padding: 20px;
+    justify-content: center; /* Centra i 6 rettangoli nella pagina */
+}
+
+.culture-card {
+    flex: 1;                /* Distribuisce lo spazio equamente: tutti avranno la stessa larghezza */
+    min-width: 100px;       /* Larghezza minima per evitare che diventino troppo sottili */
+    height: 500px;          /* Altezza del rettangolo */
+    background-color: var(--accent-red); /* Usa le tue variabili se vuoi lo stile romano */
+    border: 1px solid var(--accent-gold);
+    color: rgb(255, 0, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    transition: all 0.3s ease;
+}
+
+/* 1 e 6: I PIÙ PICCOLI */
+.culture-card:nth-child(1),
+.culture-card:nth-child(6) {
+    height: 300px;
+}
+
+/* 2 e 5: MEDI */
+.culture-card:nth-child(2),
+.culture-card:nth-child(5) {
+    height: 400px;
+}
+
+/* 3 e 4: I PIÙ GRANDI (Il centro) */
+.culture-card:nth-child(4) {
+    height: 500px;
+}
+
+.culture-card:nth-child(3) {
+    height: 500px; /* Mantieni l'altezza massima */
+    background-image: url('../campaigns/julius_caesar.png'); /* Inserisci il nome file corretto */
+    background-size: cover;
+    background-position: center;
+    border: 1px solid var(--accent-gold); /* Risalta di più l'immagine */
+}
+
+/* Effetto Hover (opzionale) */
+.culture-card:hover {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 15px var(--gold-dim);
+}

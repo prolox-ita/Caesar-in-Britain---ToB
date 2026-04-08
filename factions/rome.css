@@ -1,0 +1,78 @@
+:root {
+    --bg-dark: #121212;
+    --accent-red: #8B0000;
+    --accent-gold: #C5B358;
+    --light-yellow: #F5E6BE;
+    --red: #8b1a1a;
+    --gold: #C5B358;
+    --gold-dim: rgba(197, 179, 88, 0.4);
+    --stone: #a89880;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--light-yellow);
+    color: var(--text-parchment);
+    font-family: 'Cinzel', serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Applica l'altezza e la spaziatura al contenitore principale */
+.title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 30vh; /* Centra tutto il blocco verticalmente nello schermo */
+    gap: 10px;        /* Controlla lo spazio preciso tra la data e il titolo */
+    color: var(--accent-red)
+}
+
+.faction-name {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 5rem;         /* Molto più grande (regola a piacere) */
+    line-height: 1;          /* Evita spazio extra sopra/sotto */
+    letter-spacing: 3px;     /* Effetto epigrafe romana */
+    margin-top: -10px;       /* Opzionale: per avvicinarlo ancora di più alla data */
+}
+
+.faction-name::after {
+    content: "";          /* Necessario per far apparire lo pseudo-elemento */
+    display: block;       /* Lo rende un blocco che va a capo */
+    width: 80%;           /* Lunghezza della linea (puoi usare anche px, es: 200px) */
+    height: 1px;          /* Spessore della linea */
+    background-color: var(--accent-red); /* Il colore che hai definito nei :root */
+    margin: 15px auto 0;  /* 15px di spazio sopra, centrata (auto), 0 sotto */
+}
+
+.date {
+    font-size: 1rem;         /* Molto più grande (regola a piacere) */
+    letter-spacing: 3px;     /* Effetto epigrafe romana */
+    font-weight: 500;
+}
+
+h1,
+h2,
+h3,
+.logo {
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}

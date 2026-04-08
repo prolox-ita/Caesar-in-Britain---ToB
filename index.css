@@ -114,18 +114,14 @@ h3,
     gap: 16px;
     justify-content: center;
     margin: 20px 0;
-    animation: fadeIn 1s ease-out 0.3s both;
+    animation: fadeIn 1s  both;
 }
 
 .hero-divider span {
     display: block;
     height: 2px;
-    width: 80px;
-    background: linear-gradient(to right, transparent, var(--gold));
-}
-
-.hero-divider span:last-child {
-    background: linear-gradient(to left, transparent, var(--gold));
+    width: 300px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
 }
 
 .hero-divider-icon {
@@ -590,6 +586,16 @@ h3,
     text-align: center;
     line-height: 1.4;
 }
+
+.tl-link {
+    font-size: 0.72rem;
+    color: var(--text-parchment);
+    font-style: italic;
+    max-width: 110px;
+    text-align: center;
+    line-height: 1.4;
+}
+
 
 /* ── Info card ───────────────────────────────────────────── */
 .tl-card {
