@@ -587,13 +587,37 @@ h3,
     line-height: 1.4;
 }
 
-.tl-link {
-    font-size: 0.72rem;
-    color: var(--text-parchment);
-    font-style: italic;
-    max-width: 110px;
-    text-align: center;
-    line-height: 1.4;
+.btn-campagna {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: transparent;
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.btn-campagna span {
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+}
+
+/* Effetto Hover */
+.btn-campagna:hover {
+    background-color: var(--accent-gold);
+    color: var(--bg-dark);
+    box-shadow: 0 0 10px var(--gold-dim);
+}
+
+.btn-campagna:hover span {
+    transform: translateX(5px); /* La freccetta si muove a destra */
 }
 
 

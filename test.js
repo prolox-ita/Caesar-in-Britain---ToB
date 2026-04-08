@@ -38,14 +38,14 @@ const CAMPAIGNS = [
         year: '56-55 BCE',
         title: "Caesar's First Expedition",
         desc: "Julius Caesar crosses the channel with two legions — the first Roman commander to set foot on the shores of Britannia. The landing is contested, the terrain unfamiliar, and the tribes resistant. A beachhead is established and then abandoned. Caesar returns to Gaul, but the island's call remains.",
-        status: 'In Development', playable: false, link: 'In development'
+        status: 'In Development', playable: false, link: "https://url-della-tua-campagna.com", // Aggiungi questa riga
 
     },
     {
         year: '43 AD',
         title: 'The Claudian Invasion',
         desc: "Emperor Claudius dispatches four legions under Aulus Plautius to complete what Caesar began. A new era of Roman conquest is underway — and Britannia will never be the same.",
-        status: 'Planned', playable: false, link: 'In development'
+        status: 'Planned', playable: false, link: "https://url-della-tua-campagna.com", // Aggiungi questa riga
     }
 ];
 
@@ -59,7 +59,6 @@ document.querySelectorAll('.tl-dot:not(.future)').forEach(dot => {
                 <h3 class="tl-card-title">${c.title}</h3>
                 <p class="tl-card-desc">${c.desc}</p>
                 <span class="tl-card-status ${c.playable ? 'playable' : 'dev'}">${c.status}</span>
-                <span class="tl-link">${c.link}</span>
-            `;
+                <a href="${data.link}" class="btn-campagna">Vai alla Campagna ⚔️</a>            `;
     });
 });
