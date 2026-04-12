@@ -30,7 +30,7 @@ CONFIG = {
     "variants_root": r"D:\Thrones of Britannia\modding\VariantMeshDefinitions",
 
     # File HTML da generare
-    "output": "C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html",
+    "output": r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html",
 }
 # ═══════════════════════════════════════════════════════════════
 
