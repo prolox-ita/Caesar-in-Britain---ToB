@@ -183,8 +183,8 @@ class Handler(SimpleHTTPRequestHandler):
             super().do_GET()
 
     def log_message(self, fmt, *args):
-        # Mostra solo le chiamate API, non i file statici
-        if "/api/" in args[0]:
+        # Mostra solo le chiamate API; args[0] può essere HTTPStatus (non stringa) in caso di errore
+        if args and isinstance(args[0], str) and "/api/" in args[0]:
             print(f"  →  {args[0]}")
 
 
