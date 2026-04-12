@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 # ═══════════════════════════════════════════════════════════════
 CONFIG = {
 
-    # Una o più cartelle che contengono i .variantmesh (modelli).
+    # Una o più cartelle che contengono i .rigid_model_v2.
     # Vengono scansionate ricorsivamente.
      "models_roots": [
         r"D:\Thrones of Britannia\modding\variantmeshes",
@@ -42,7 +42,7 @@ def scan_models(roots):
         if not root_path.exists():
             print(f"  ⚠  Non trovata: {root_str}")
             continue
-        for f in sorted(root_path.rglob("*.variantmesh")):
+        for f in sorted(root_path.rglob("*.rigid_model_v2")):
             rel = f.parent.relative_to(root_path)
             key = str(rel).replace("\\", "/") if str(rel) != "." else root_path.name
             tree.setdefault(key, []).append(f.name)
@@ -55,7 +55,7 @@ def parse_vmd(filepath):
         for elem in ET.parse(filepath).getroot().iter():
             for val in elem.attrib.values():
                 lo = val.lower()
-                if lo.endswith(".variantmesh"):
+                if lo.endswith(".rigid_model_v2") or lo.endswith(".variantmesh"):
                     refs_mesh.append(val.replace("\\", "/"))
                 elif lo.endswith(".variantmeshdefinition"):
                     refs_vmd.append(val.replace("\\", "/"))
