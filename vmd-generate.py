@@ -493,7 +493,7 @@ if __name__ == "__main__":
     models_tree, center_vmds, right_vmds = build_data()
     html = generate_html(models_tree, center_vmds, right_vmds)
 
-    out = Path(CONFIG["output"])
+    out = Path(CONFIG.get("output", "vmd-viewer.html"))
     out.write_text(html, encoding="utf-8")
     print(f"  ✓  Generato: {out.resolve()}")
     print(f"     Aprilo nel browser con doppio click.\n")
