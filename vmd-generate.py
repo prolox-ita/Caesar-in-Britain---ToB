@@ -225,6 +225,41 @@ def generate_html(models_tree, center_vmds, right_vmds):
         .item.selected.unused::after {{ color: rgba(255,255,255,0.2); }}
         .item.connected {{ color: #F5E6BE; background: rgba(197,179,88,0.1); border-left-color: #C5B358; }}
 
+        /* ── Filtri ───────────────────────────────────────────── */
+        .hidden-filter {{ display: none !important; }}
+
+        #search {{
+            padding: 4px 8px;
+            background: #111;
+            border: 1px solid #2a2a2a;
+            color: #bbb;
+            font-family: inherit;
+            font-size: 0.72rem;
+            width: 200px;
+            outline: none;
+            transition: border-color 0.15s;
+        }}
+        #search:focus {{ border-color: #C5B358; }}
+        #search::placeholder {{ color: #3a3a3a; }}
+
+        #btn-unused {{
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid #2a2a2a;
+            color: #555;
+            cursor: pointer;
+            font-size: 0.68rem;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }}
+        #btn-unused:hover {{ border-color: #555; color: #888; }}
+        #btn-unused.active {{
+            border-color: #C5B358;
+            color: #C5B358;
+            background: rgba(197,179,88,0.07);
+        }}
+
         #svg-overlay {{
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh;
@@ -240,11 +275,8 @@ def generate_html(models_tree, center_vmds, right_vmds):
         Click: seleziona &nbsp;·&nbsp; Ctrl+Click: aggiungi/rimuovi &nbsp;·&nbsp;
         Shift+Click: seleziona intervallo &nbsp;·&nbsp; &#8853; = non utilizzato
     </span>
-    <span class="col-count" id="cnt-models"></span>
-    &nbsp;/&nbsp;
-    <span class="col-count" id="cnt-vmds"></span>
-    &nbsp;/&nbsp;
-    <span class="col-count" id="cnt-variants"></span>
+    <input id="search" type="text" placeholder="Cerca…" oninput="applyFilters()">
+    <button id="btn-unused" onclick="toggleUnused()">&#8853; Solo non assegnati</button>
 </header>
 
 <div class="columns">
@@ -491,6 +523,35 @@ document.querySelector('.columns').addEventListener('click', e => {{
         selectedEls.clear(); lastClickedInCol.clear(); applySelection();
     }}
 }});
+
+// ── Filtri ─────────────────────────────────────────────────────
+let onlyUnused = false;
+
+function toggleUnused() {{
+    onlyUnused = !onlyUnused;
+    document.getElementById('btn-unused').classList.toggle('active', onlyUnused);
+    applyFilters();
+}}
+
+function applyFilters() {{
+    const query = document.getElementById('search').value.toLowerCase().trim();
+    for (const col of ['col-models','col-vmds','col-variants']) {{
+        for (const item of colItems[col]) {{
+            const matchSearch = !query || item.textContent.toLowerCase().includes(query);
+            const matchUnused = !onlyUnused || item.classList.contains('unused');
+            item.classList.toggle('hidden-filter', !(matchSearch && matchUnused));
+        }}
+        updateFolderVisibility(document.getElementById(col));
+    }}
+}}
+
+function updateFolderVisibility(container) {{
+    for (const folder of [...container.querySelectorAll('.folder')].reverse()) {{
+        const hasVisible = [...folder.querySelectorAll('.item')].some(i => !i.classList.contains('hidden-filter'));
+        folder.classList.toggle('hidden-filter', !hasVisible);
+        if (document.getElementById('search').value.trim() && hasVisible) folder.classList.add('open');
+    }}
+}}
 
 // ── Utils & Init ───────────────────────────────────────────────
 function mk(tag, cls) {{
