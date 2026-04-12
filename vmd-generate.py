@@ -30,7 +30,7 @@ CONFIG = {
     "variants_root": r"C:\path\alla\tua\cartella\variants",
 
     # File HTML da generare
-    "output": "vmd-viewer.html",
+    "output": r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html",
 }
 # ═══════════════════════════════════════════════════════════════
 
