@@ -18,19 +18,19 @@ CONFIG = {
 
     # Una o più cartelle che contengono i .variantmesh (modelli).
     # Vengono scansionate ricorsivamente.
-    "models_roots": [
-        r"C:\path\alla\tua\cartella\modelli",
+     "models_roots": [
+        r"D:\Thrones of Britannia\modding\variantmeshes",
     ],
 
     # Cartella dei VMD centrali (.variantmeshdefinition delle unità).
     # Scansionata ricorsivamente.
-    "vmds_root": r"C:\path\alla\tua\cartella\unit_vmds",
+    "vmds_root": r"D:\Thrones of Britannia\modding\variantmeshes",
 
     # Cartella delle varianti destra (una sola cartella specifica).
-    "variants_root": r"C:\path\alla\tua\cartella\variants",
+    "variants_root": r"D:\Thrones of Britannia\modding\VariantMeshDefinitions",
 
     # File HTML da generare
-    "output": r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html",
+    "output": "C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html",
 }
 # ═══════════════════════════════════════════════════════════════
 
