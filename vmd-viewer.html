@@ -24,11 +24,37 @@
             border-bottom: 1px solid #C5B358;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             flex-shrink: 0;
         }
         header h1 { font-size: 0.8rem; letter-spacing: 0.18em; color: #C5B358; font-weight: normal; }
-        .hint { font-size: 0.68rem; color: #4a4a4a; }
+        .hint { font-size: 0.68rem; color: #4a4a4a; flex: 1; }
+
+        /* Pulsante reload */
+        #btn-reload {
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #777;
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-family: inherit;
+            letter-spacing: 0.08em;
+            transition: border-color 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        #btn-reload:hover { border-color: #C5B358; color: #C5B358; }
+        #btn-reload.loading { color: #555; border-color: #2a2a2a; pointer-events: none; }
+
+        /* Status bar */
+        #status {
+            font-size: 0.65rem;
+            color: #555;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        #status.ok  { color: #4a7a4a; }
+        #status.err { color: #7a3a3a; }
 
         .columns { display: flex; flex: 1; overflow: hidden; }
 
@@ -44,13 +70,14 @@
         .col-head { padding: 7px 12px; background: #161616; border-bottom: 1px solid #222; flex-shrink: 0; }
         .col-head-title { font-size: 0.68rem; letter-spacing: 0.14em; color: #C5B358; text-transform: uppercase; }
         .col-head-sub { font-size: 0.6rem; color: #444; margin-top: 2px; }
+        .col-count { float: right; color: #333; font-size: 0.6rem; margin-top: 1px; }
 
         .col-body { flex: 1; overflow-y: auto; padding: 3px 0; }
         .col-body::-webkit-scrollbar { width: 3px; }
         .col-body::-webkit-scrollbar-track { background: #111; }
         .col-body::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
 
-        /* ── Tree ─────────────────────────────────────── */
+        /* ── Tree ─────────────────────────────────── */
         .folder { user-select: none; }
         .folder-label {
             display: flex; align-items: center; gap: 5px;
@@ -62,37 +89,34 @@
         .folder-children { display: none; }
         .folder.open > .folder-children { display: block; }
 
-        /* ── Items ────────────────────────────────────── */
+        /* ── Items ────────────────────────────────── */
         .item {
             padding: 3px 10px;
             cursor: pointer;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             color: #999;
             border-left: 2px solid transparent;
             transition: background 0.08s;
         }
         .item:hover { background: rgba(255,255,255,0.04); }
 
-        /* Unused: dimmed + ⊘ suffix */
         .item.unused { color: #555; }
         .item.unused::after { content: ' ⊘'; color: #333; font-size: 10px; }
 
-        .item.selected {
-            color: #fff;
-            background: rgba(139, 0, 0, 0.22);
-            border-left-color: #8B0000;
-        }
+        .item.selected { color: #fff; background: rgba(139,0,0,0.22); border-left-color: #8B0000; }
         .item.selected.unused::after { color: rgba(255,255,255,0.2); }
+        .item.connected { color: #F5E6BE; background: rgba(197,179,88,0.1); border-left-color: #C5B358; }
 
-        .item.connected {
-            color: #F5E6BE;
-            background: rgba(197, 179, 88, 0.1);
-            border-left-color: #C5B358;
+        /* ── Overlay stato ────────────────────────── */
+        #overlay {
+            position: absolute; inset: 40px 0 0 0;
+            display: flex; align-items: center; justify-content: center;
+            background: #111; z-index: 100;
+            font-size: 0.8rem; color: #555;
         }
+        #overlay.hidden { display: none; }
 
-        /* ── SVG overlay ──────────────────────────────── */
+        /* ── SVG frecce ───────────────────────────── */
         #svg-overlay {
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh;
@@ -108,29 +132,38 @@
         Click: seleziona &nbsp;·&nbsp; Ctrl+Click: aggiungi/rimuovi &nbsp;·&nbsp;
         Shift+Click: seleziona intervallo &nbsp;·&nbsp; ⊘ = non utilizzato
     </span>
+    <span id="status"></span>
+    <button id="btn-reload" onclick="loadData()">&#8635; Ricarica</button>
 </header>
 
-<div class="columns">
-    <div class="col">
-        <div class="col-head">
-            <div class="col-head-title">Models</div>
-            <div class="col-head-sub">.variantmesh — mesh files</div>
+<div style="position:relative; flex:1; display:flex; flex-direction:column; overflow:hidden;">
+    <div id="overlay">Caricamento…</div>
+
+    <div class="columns">
+        <div class="col">
+            <div class="col-head">
+                <span class="col-count" id="cnt-models"></span>
+                <div class="col-head-title">Models</div>
+                <div class="col-head-sub">.variantmesh</div>
+            </div>
+            <div class="col-body" id="col-models"></div>
         </div>
-        <div class="col-body" id="col-models"></div>
-    </div>
-    <div class="col">
-        <div class="col-head">
-            <div class="col-head-title">Definitions</div>
-            <div class="col-head-sub">.variantmeshdefinition — unit VMDs</div>
+        <div class="col">
+            <div class="col-head">
+                <span class="col-count" id="cnt-vmds"></span>
+                <div class="col-head-title">Definitions</div>
+                <div class="col-head-sub">.variantmeshdefinition — unit VMDs</div>
+            </div>
+            <div class="col-body" id="col-vmds"></div>
         </div>
-        <div class="col-body" id="col-vmds"></div>
-    </div>
-    <div class="col">
-        <div class="col-head">
-            <div class="col-head-title">Variants</div>
-            <div class="col-head-sub">.variantmeshdefinition — faction / unit variants</div>
+        <div class="col">
+            <div class="col-head">
+                <span class="col-count" id="cnt-variants"></span>
+                <div class="col-head-title">Variants</div>
+                <div class="col-head-sub">.variantmeshdefinition — faction / unit variants</div>
+            </div>
+            <div class="col-body" id="col-variants"></div>
         </div>
-        <div class="col-body" id="col-variants"></div>
     </div>
 </div>
 
@@ -140,133 +173,80 @@
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════════════
-//  DATA  —  sostituire con i propri dati reali
-//
-//  MODELS_TREE   : mappa "percorso/cartella" → array di filename
-//  CENTER_VMDS   : array di VMD centrali
-//    - id, folder, file
-//    - models      : array di percorsi completi dei .variantmesh usati
-//    - in_variants : array di id dei RIGHT_VMDS che lo contengono
-//  RIGHT_VMDS    : array di VMD destra (una sola cartella specifica)
-//    - id, file
-//    - vmds        : array di id dei CENTER_VMDS contenuti
+//  STATO GLOBALE
 // ═══════════════════════════════════════════════════════════════════════
+let CENTER_VMDS = [], RIGHT_VMDS = [];
 
-const MODELS_TREE = {
-    "units/roman/infantry": [
-        "legionary.variantmesh",
-        "praetorian.variantmesh",
-        "cohort_veterans.variantmesh",
-        "militia_levy.variantmesh"          // ← non usato in alcun VMD
-    ],
-    "units/roman/cavalry": [
-        "equites.variantmesh",
-        "ala_sociorum.variantmesh"
-    ],
-    "units/britannic/infantry": [
-        "warrior_tribe.variantmesh",
-        "noble_warrior.variantmesh",
-        "skirmisher.variantmesh"            // ← non usato in alcun VMD
-    ],
-    "units/britannic/chariot": [
-        "charioteer.variantmesh"
-    ]
-};
+const modelMap   = new Map();
+const vmdMap     = new Map();
+const variantMap = new Map();
+const colItems   = { 'col-models': [], 'col-vmds': [], 'col-variants': [] };
 
-const CENTER_VMDS = [
-    {
-        id: "vmd_legionary",
-        folder: "units/roman/infantry",
-        file: "legionary.variantmeshdefinition",
-        models: ["units/roman/infantry/legionary.variantmesh"],
-        in_variants: ["var_rome", "var_rome_56bce"]
-    },
-    {
-        id: "vmd_praetorian",
-        folder: "units/roman/infantry",
-        file: "praetorian.variantmeshdefinition",
-        models: [
-            "units/roman/infantry/praetorian.variantmesh",
-            "units/roman/infantry/cohort_veterans.variantmesh"
-        ],
-        in_variants: ["var_rome"]
-    },
-    {
-        id: "vmd_signifier",
-        folder: "units/roman/infantry",
-        file: "signifier.variantmeshdefinition",     // ← non contenuto in alcuna variante
-        models: ["units/roman/infantry/legionary.variantmesh"],
-        in_variants: []
-    },
-    {
-        id: "vmd_equites",
-        folder: "units/roman/cavalry",
-        file: "equites.variantmeshdefinition",
-        models: ["units/roman/cavalry/equites.variantmesh"],
-        in_variants: ["var_rome", "var_rome_56bce"]
-    },
-    {
-        id: "vmd_ala",
-        folder: "units/roman/cavalry",
-        file: "ala_sociorum.variantmeshdefinition",  // ← non contenuto in alcuna variante
-        models: ["units/roman/cavalry/ala_sociorum.variantmesh"],
-        in_variants: []
-    },
-    {
-        id: "vmd_warrior",
-        folder: "units/britannic",
-        file: "warrior.variantmeshdefinition",
-        models: [
-            "units/britannic/infantry/warrior_tribe.variantmesh",
-            "units/britannic/infantry/noble_warrior.variantmesh"
-        ],
-        in_variants: ["var_britannia"]
-    },
-    {
-        id: "vmd_charioteer",
-        folder: "units/britannic",
-        file: "charioteer.variantmeshdefinition",
-        models: ["units/britannic/chariot/charioteer.variantmesh"],
-        in_variants: ["var_britannia"]
+let usedModelPaths = new Set();
+let usedVmdIds     = new Set();
+
+const selectedEls      = new Set();
+const lastClickedInCol = new Map();
+
+// ═══════════════════════════════════════════════════════════════════════
+//  CARICAMENTO DATI
+// ═══════════════════════════════════════════════════════════════════════
+async function loadData() {
+    const btn    = document.getElementById('btn-reload');
+    const status = document.getElementById('status');
+    const overlay = document.getElementById('overlay');
+
+    btn.classList.add('loading');
+    btn.textContent = '… carico';
+    overlay.classList.remove('hidden');
+    overlay.textContent = 'Scansione in corso…';
+    status.className = '';
+    status.textContent = '';
+
+    // Reset selezione
+    selectedEls.clear();
+    lastClickedInCol.clear();
+    modelMap.clear(); vmdMap.clear(); variantMap.clear();
+    colItems['col-models'] = []; colItems['col-vmds'] = []; colItems['col-variants'] = [];
+    ['col-models','col-vmds','col-variants'].forEach(id => {
+        document.getElementById(id).innerHTML = '';
+    });
+    document.getElementById('svg-overlay').innerHTML = '';
+
+    try {
+        const res  = await fetch('/api/data');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        CENTER_VMDS = data.center_vmds || [];
+        RIGHT_VMDS  = data.right_vmds  || [];
+        usedModelPaths = new Set(CENTER_VMDS.flatMap(v => v.models));
+        usedVmdIds     = new Set(RIGHT_VMDS.flatMap(v => v.vmds));
+
+        renderTree(buildTree(data.models_tree || {}), document.getElementById('col-models'), 0, '');
+        renderCenterVmds();
+        renderRightVmds();
+
+        const totalModels = Object.values(data.models_tree || {}).reduce((s, a) => s + a.length, 0);
+        document.getElementById('cnt-models').textContent   = totalModels;
+        document.getElementById('cnt-vmds').textContent     = CENTER_VMDS.length;
+        document.getElementById('cnt-variants').textContent = RIGHT_VMDS.length;
+
+        overlay.classList.add('hidden');
+        status.className = 'ok';
+        status.textContent = `✓ ${new Date().toLocaleTimeString()}`;
+    } catch (e) {
+        overlay.textContent = `Errore: ${e.message} — assicurati che vmd-server.py sia in esecuzione`;
+        status.className = 'err';
+        status.textContent = '✗ errore';
+    } finally {
+        btn.classList.remove('loading');
+        btn.textContent = '↺ Ricarica';
     }
-];
-
-const RIGHT_VMDS = [
-    {
-        id: "var_rome",
-        file: "rome_faction.variantmeshdefinition",
-        vmds: ["vmd_legionary", "vmd_praetorian", "vmd_equites"]
-    },
-    {
-        id: "var_rome_56bce",
-        file: "rome_56bce.variantmeshdefinition",
-        vmds: ["vmd_legionary", "vmd_equites"]
-    },
-    {
-        id: "var_britannia",
-        file: "britannia_faction.variantmeshdefinition",
-        vmds: ["vmd_warrior", "vmd_charioteer"]
-    }
-];
+}
 
 // ═══════════════════════════════════════════════════════════════════════
-//  PRE-CALCOLO ELEMENTI NON UTILIZZATI
-// ═══════════════════════════════════════════════════════════════════════
-const usedModelPaths = new Set(CENTER_VMDS.flatMap(v => v.models));
-const usedVmdIds     = new Set(RIGHT_VMDS.flatMap(v => v.vmds));
-
-// ═══════════════════════════════════════════════════════════════════════
-//  MAPPE ELEMENTI & LISTE PER COLONNA (per shift+click)
-// ═══════════════════════════════════════════════════════════════════════
-const modelMap   = new Map(); // modelPath  → element
-const vmdMap     = new Map(); // vmd.id     → element
-const variantMap = new Map(); // variant.id → element
-
-// Tutti gli item in ordine DOM, per colonna
-const colItems = { 'col-models': [], 'col-vmds': [], 'col-variants': [] };
-
-// ═══════════════════════════════════════════════════════════════════════
-//  RENDER
+//  TREE BUILDER
 // ═══════════════════════════════════════════════════════════════════════
 function buildTree(flatMap) {
     const root = {};
@@ -288,7 +268,7 @@ function buildTree(flatMap) {
 
 function renderTree(node, parent, depth, pathSoFar) {
     for (const [name, data] of Object.entries(node)) {
-        const fullPath = pathSoFar ? `${pathSoFar}/${name}` : name;
+        const fullPath  = pathSoFar ? `${pathSoFar}/${name}` : name;
         const padFolder = 8 + depth * 14;
         const padFile   = padFolder + 18;
 
@@ -307,10 +287,10 @@ function renderTree(node, parent, depth, pathSoFar) {
             const unused = !usedModelPaths.has(mp);
             const el = mk('div', 'item' + (unused ? ' unused' : ''));
             el.style.paddingLeft = padFile + 'px';
-            el.textContent  = file;
-            el.title        = mp + (unused ? '\n⊘ Non utilizzato da nessun VMD' : '');
-            el.dataset.mp   = mp;
-            el.dataset.col  = 'col-models';
+            el.textContent = file;
+            el.title       = mp + (unused ? '\n⊘ Non usato da nessun VMD' : '');
+            el.dataset.mp  = mp;
+            el.dataset.col = 'col-models';
             el.addEventListener('click', e => { e.stopPropagation(); handleClick(el, e); });
             childrenEl.appendChild(el);
             modelMap.set(mp, el);
@@ -340,10 +320,10 @@ function renderCenterVmds() {
             const unused = !usedVmdIds.has(vmd.id);
             const el = mk('div', 'item' + (unused ? ' unused' : ''));
             el.style.paddingLeft = '26px';
-            el.textContent     = vmd.file;
-            el.title           = `${vmd.folder}/${vmd.file}` + (unused ? '\n⊘ Non contenuto in alcuna variante' : '');
-            el.dataset.vmdId   = vmd.id;
-            el.dataset.col     = 'col-vmds';
+            el.textContent   = vmd.file;
+            el.title         = `${vmd.folder}/${vmd.file}` + (unused ? '\n⊘ Non in nessuna variante' : '');
+            el.dataset.vmdId = vmd.id;
+            el.dataset.col   = 'col-vmds';
             el.addEventListener('click', e => { e.stopPropagation(); handleClick(el, e); });
             childrenEl.appendChild(el);
             vmdMap.set(vmd.id, el);
@@ -359,11 +339,11 @@ function renderRightVmds() {
     const body = document.getElementById('col-variants');
     for (const v of RIGHT_VMDS) {
         const el = mk('div', 'item');
-        el.style.paddingLeft    = '12px';
-        el.textContent          = v.file;
-        el.title                = v.file;
-        el.dataset.variantId    = v.id;
-        el.dataset.col          = 'col-variants';
+        el.style.paddingLeft = '12px';
+        el.textContent       = v.file;
+        el.title             = v.file;
+        el.dataset.variantId = v.id;
+        el.dataset.col       = 'col-variants';
         el.addEventListener('click', e => { e.stopPropagation(); handleClick(el, e); });
         body.appendChild(el);
         variantMap.set(v.id, el);
@@ -377,21 +357,15 @@ function renderRightVmds() {
 function getConnectionEls(el) {
     const result = [];
     if (el.dataset.mp) {
-        // Model → VMD centrali che lo usano
-        CENTER_VMDS
-            .filter(v => v.models.includes(el.dataset.mp))
+        CENTER_VMDS.filter(v => v.models.includes(el.dataset.mp))
             .forEach(v => { const e = vmdMap.get(v.id); if (e) result.push(e); });
-
     } else if (el.dataset.vmdId) {
-        // VMD centrale → model usati + varianti che lo contengono
         const vmd = CENTER_VMDS.find(v => v.id === el.dataset.vmdId);
         if (vmd) {
-            vmd.models.forEach(mp => { const e = modelMap.get(mp);   if (e) result.push(e); });
+            vmd.models.forEach(mp => { const e = modelMap.get(mp); if (e) result.push(e); });
             vmd.in_variants.forEach(id => { const e = variantMap.get(id); if (e) result.push(e); });
         }
-
     } else if (el.dataset.variantId) {
-        // Variante destra → VMD centrali contenuti
         const v = RIGHT_VMDS.find(v => v.id === el.dataset.variantId);
         if (v) v.vmds.forEach(id => { const e = vmdMap.get(id); if (e) result.push(e); });
     }
@@ -399,62 +373,40 @@ function getConnectionEls(el) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  STATO SELEZIONE
+//  SELEZIONE
 // ═══════════════════════════════════════════════════════════════════════
-const selectedEls      = new Set();
-const lastClickedInCol = new Map(); // colId → ultimo elemento cliccato
-
 function handleClick(el, e) {
     const colId = el.dataset.col;
 
     if (e.shiftKey) {
-        // Seleziona intervallo di elementi visibili nella stessa colonna
         const last = lastClickedInCol.get(colId);
         if (last && last !== el) {
             const visible = colItems[colId].filter(i => i.getBoundingClientRect().height > 0);
-            const i1 = visible.indexOf(last);
-            const i2 = visible.indexOf(el);
+            const i1 = visible.indexOf(last), i2 = visible.indexOf(el);
             if (i1 !== -1 && i2 !== -1) {
-                const lo = Math.min(i1, i2), hi = Math.max(i1, i2);
-                for (let i = lo; i <= hi; i++) selectedEls.add(visible[i]);
-            } else {
-                selectedEls.add(el);
-            }
+                for (let i = Math.min(i1,i2); i <= Math.max(i1,i2); i++) selectedEls.add(visible[i]);
+            } else selectedEls.add(el);
         } else {
             selectedEls.add(el);
             lastClickedInCol.set(colId, el);
         }
-        // lastClickedInCol non cambia con shift (comportamento standard)
-
     } else if (e.ctrlKey || e.metaKey) {
-        // Toggle elemento
-        if (selectedEls.has(el)) selectedEls.delete(el);
-        else                     selectedEls.add(el);
+        if (selectedEls.has(el)) selectedEls.delete(el); else selectedEls.add(el);
         lastClickedInCol.set(colId, el);
-
     } else {
-        // Click normale: deseleziona se già unico selezionato
-        if (selectedEls.size === 1 && selectedEls.has(el)) {
-            selectedEls.clear();
-        } else {
-            selectedEls.clear();
-            selectedEls.add(el);
-        }
+        if (selectedEls.size === 1 && selectedEls.has(el)) selectedEls.clear();
+        else { selectedEls.clear(); selectedEls.add(el); }
         lastClickedInCol.set(colId, el);
     }
-
     applySelection();
 }
 
 function applySelection() {
-    // Rimuovi classi precedenti
     document.querySelectorAll('.item.selected, .item.connected')
         .forEach(el => el.classList.remove('selected', 'connected'));
     document.getElementById('svg-overlay').innerHTML = '';
-
     if (!selectedEls.size) return;
 
-    // Calcola unione connessioni (esclusi gli elementi già selezionati)
     const connectedSet = new Set();
     for (const sel of selectedEls) {
         sel.classList.add('selected');
@@ -463,12 +415,10 @@ function applySelection() {
 
     for (const el of connectedSet) {
         el.classList.add('connected');
-        for (let p = el.parentElement; p; p = p.parentElement) {
+        for (let p = el.parentElement; p; p = p.parentElement)
             if (p.classList.contains('folder')) p.classList.add('open');
-        }
         el.scrollIntoView({ block: 'nearest' });
     }
-
     drawArrows(connectedSet);
 }
 
@@ -489,12 +439,10 @@ function drawArrows(connectedSet) {
         if (sr.height === 0) continue;
         const sy = (sr.top + sr.bottom) / 2;
 
-        const conns = getConnectionEls(selEl).filter(e => connectedSet.has(e));
-        for (const cel of conns) {
+        for (const cel of getConnectionEls(selEl).filter(e => connectedSet.has(e))) {
             const cr = cel.getBoundingClientRect();
             if (cr.height === 0) continue;
-
-            const cy      = (cr.top + cr.bottom) / 2;
+            const cy = (cr.top + cr.bottom) / 2;
             const goRight = cr.left > sr.right - 4;
             const goLeft  = cr.right < sr.left + 4;
             if (!goRight && !goLeft) continue;
@@ -520,16 +468,13 @@ function redrawArrows() {
     drawArrows(new Set(document.querySelectorAll('.item.connected')));
 }
 
-['col-models', 'col-vmds', 'col-variants'].forEach(id => {
-    document.getElementById(id).addEventListener('scroll', redrawArrows, { passive: true });
-});
+['col-models','col-vmds','col-variants'].forEach(id =>
+    document.getElementById(id).addEventListener('scroll', redrawArrows, { passive: true }));
 window.addEventListener('resize', redrawArrows);
 
 document.querySelector('.columns').addEventListener('click', e => {
     if (!e.target.closest('.item')) {
-        selectedEls.clear();
-        lastClickedInCol.clear();
-        applySelection();
+        selectedEls.clear(); lastClickedInCol.clear(); applySelection();
     }
 });
 
@@ -542,9 +487,7 @@ function mk(tag, cls) {
     return el;
 }
 
-renderTree(buildTree(MODELS_TREE), document.getElementById('col-models'), 0, '');
-renderCenterVmds();
-renderRightVmds();
+loadData();
 </script>
 </body>
 </html>
