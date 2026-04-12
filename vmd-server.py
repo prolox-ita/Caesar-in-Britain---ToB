@@ -9,11 +9,14 @@ VMD Viewer Server
 Premi il pulsante ↺ nel viewer per ricaricare i file dal disco.
 """
 
-import os, json
+import os, json, time
 from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
+
+# Cache: { filepath_str: (mtime, refs_mesh, refs_vmd) }
+_parse_cache = {}
 
 # ═══════════════════════════════════════════════════════════════
 #  CONFIGURAZIONE — modifica questi percorsi
@@ -58,8 +61,14 @@ def parse_vmd(filepath):
     """
     Analizza un file .variantmeshdefinition XML e restituisce
     (list_of_variantmesh_refs, list_of_vmd_refs).
-    Cerca in tutti gli attributi del documento.
+    Usa la cache: rianalizza solo se il file è stato modificato.
     """
+    key   = str(filepath)
+    mtime = filepath.stat().st_mtime
+    if key in _parse_cache and _parse_cache[key][0] == mtime:
+        _, refs_mesh, refs_vmd = _parse_cache[key]
+        return refs_mesh, refs_vmd
+
     refs_mesh, refs_vmd = [], []
     try:
         tree = ET.parse(filepath)
@@ -74,6 +83,8 @@ def parse_vmd(filepath):
         print(f"  ⚠  XML malformato {filepath.name}: {e}")
     except Exception as e:
         print(f"  ⚠  {filepath.name}: {e}")
+
+    _parse_cache[key] = (mtime, refs_mesh, refs_vmd)
     return refs_mesh, refs_vmd
 
 
@@ -115,6 +126,8 @@ def scan_right_vmds(root_str):
 
 
 def build_data():
+    t0 = time.perf_counter()
+    cache_before = len(_parse_cache)
     print("\n── Scansione ──────────────────────────────")
     models_tree  = scan_models(CONFIG["models_roots"])
     center_vmds  = scan_center_vmds(CONFIG["vmds_root"])
@@ -135,9 +148,14 @@ def build_data():
                     matched["in_variants"].append(variant["id"])
         del variant["_raw_refs"]
 
+    parsed_now = len(_parse_cache) - cache_before
+    from_cache = len(center_vmds) + len(right_vmds) - parsed_now
+    elapsed = time.perf_counter() - t0
     print(f"  ✓  Cartelle modelli : {len(models_tree)}")
     print(f"  ✓  VMD centrali     : {len(center_vmds)}")
     print(f"  ✓  Varianti         : {len(right_vmds)}")
+    print(f"  ✓  Analizzati       : {parsed_now} nuovi, {max(from_cache,0)} da cache")
+    print(f"  ✓  Tempo            : {elapsed:.2f}s")
     print("───────────────────────────────────────────\n")
 
     return {
