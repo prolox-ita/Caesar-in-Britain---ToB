@@ -109,6 +109,29 @@ def build_data():
     center_vmds = scan_center_vmds(CONFIG["vmds_root"])
     right_vmds  = scan_right_vmds(CONFIG["variants_root"])
 
+    # Mappa nome_file (lowercase) → path scansionato completo
+    # Es. "fp_dc_leather_skullcap.rigid_model_v2" → "characters/heads/fp_dc_leather_skullcap.rigid_model_v2"
+    model_by_name = {}
+    for folder, files in models_tree.items():
+        for f in files:
+            model_by_name[f.lower()] = f"{folder}/{f}"
+
+    # Risolvi i model refs dei VMD centrali usando il nome file come chiave
+    unresolved = 0
+    for vmd in center_vmds:
+        resolved = []
+        for ref in vmd["models"]:
+            name = Path(ref).name.lower()
+            if name in model_by_name:
+                resolved.append(model_by_name[name])
+            else:
+                resolved.append(ref)  # mantieni originale se non trovato
+                unresolved += 1
+        vmd["models"] = resolved
+
+    if unresolved:
+        print(f"  ⚠  Riferimenti non risolti: {unresolved} (file non trovati nella cartella models)")
+
     by_file = {v["file"]: v for v in center_vmds}
     by_stem = {v["id"]:   v for v in center_vmds}
 
