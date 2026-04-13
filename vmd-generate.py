@@ -49,6 +49,28 @@ def scan_models(roots):
     return tree
 
 
+_RE_REFS = re.compile(
+    r'["\']([^"\']+\.(?:rigid_model_v2|variantmesh|variantmeshdefinition))["\']',
+    re.IGNORECASE,
+)
+
+def _refs_via_regex(filepath):
+    """Estrae refs leggendo il file come testo grezzo — fallback se XML è malformato."""
+    refs_mesh, refs_vmd = [], []
+    try:
+        text = filepath.read_bytes().decode("utf-8", errors="replace")
+        for m in _RE_REFS.finditer(text):
+            val = m.group(1).replace("\\", "/")
+            lo  = val.lower()
+            if lo.endswith(".variantmeshdefinition"):
+                refs_vmd.append(val)
+            else:
+                refs_mesh.append(val)
+    except Exception:
+        pass
+    return refs_mesh, refs_vmd
+
+
 def parse_vmd(filepath):
     refs_mesh, refs_vmd, parse_error = [], [], None
     try:
@@ -60,8 +82,12 @@ def parse_vmd(filepath):
                 elif lo.endswith(".variantmeshdefinition"):
                     refs_vmd.append(val.replace("\\", "/"))
     except ET.ParseError as e:
-        print(f"  ⚠  XML malformato {filepath.name}: {e}")
+        print(f"  ⚠  XML malformato {filepath.name}: {e} → fallback regex")
         parse_error = str(e)
+        refs_mesh, refs_vmd = _refs_via_regex(filepath)
+        if refs_mesh or refs_vmd:
+            # File funzionalmente leggibile dal gioco: non segnalare come rotto
+            parse_error = None
     except Exception as e:
         print(f"  ⚠  {filepath.name}: {e}")
         parse_error = str(e)
