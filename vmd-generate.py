@@ -260,6 +260,19 @@ def generate_html(models_tree, center_vmds, right_vmds):
             background: rgba(197,179,88,0.07);
         }}
 
+        #btn-download {{
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid #2a2a2a;
+            color: #555;
+            cursor: pointer;
+            font-size: 0.68rem;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }}
+        #btn-download:hover {{ border-color: #555; color: #888; }}
+
         #svg-overlay {{
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh;
@@ -277,6 +290,7 @@ def generate_html(models_tree, center_vmds, right_vmds):
     </span>
     <input id="search" type="text" placeholder="Cerca…" oninput="applyFilters()">
     <button id="btn-unused" onclick="toggleUnused()">&#8853; Solo non assegnati</button>
+    <button id="btn-download" onclick="downloadData()">&#8595; Scarica JSON</button>
 </header>
 
 <div class="columns">
@@ -551,6 +565,48 @@ function updateFolderVisibility(container) {{
         folder.classList.toggle('hidden-filter', !hasVisible);
         if (document.getElementById('search').value.trim() && hasVisible) folder.classList.add('open');
     }}
+}}
+
+function downloadData() {{
+    const isFiltered = onlyUnused || document.getElementById('search').value.trim();
+
+    const visibleModels = colItems['col-models']
+        .filter(i => !i.classList.contains('hidden-filter'))
+        .map(i => i.dataset.mp);
+
+    const visibleVmdIds = new Set(
+        colItems['col-vmds']
+            .filter(i => !i.classList.contains('hidden-filter'))
+            .map(i => i.dataset.vmdId)
+    );
+
+    const visibleVariantIds = new Set(
+        colItems['col-variants']
+            .filter(i => !i.classList.contains('hidden-filter'))
+            .map(i => i.dataset.variantId)
+    );
+
+    const out = {{
+        generated: new Date().toISOString(),
+        filters: {{
+            search: document.getElementById('search').value.trim() || null,
+            onlyUnused: onlyUnused,
+        }},
+        models: visibleModels,
+        vmds: CENTER_VMDS
+            .filter(v => visibleVmdIds.has(v.id))
+            .map(v => ({{ id: v.id, folder: v.folder, file: v.file, models: v.models, in_variants: v.in_variants }})),
+        variants: RIGHT_VMDS
+            .filter(v => visibleVariantIds.has(v.id))
+            .map(v => ({{ id: v.id, file: v.file, vmds: v.vmds }})),
+    }};
+
+    const blob = new Blob([JSON.stringify(out, null, 2)], {{type: 'application/json'}});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = isFiltered ? 'vmd-export-filtered.json' : 'vmd-export.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
 }}
 
 // ── Utils & Init ───────────────────────────────────────────────
