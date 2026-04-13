@@ -374,6 +374,45 @@ def generate_html(models_tree, center_vmds, right_vmds, textures_tree, tex_to_mo
         }}
         #btn-download:hover {{ border-color: #555; color: #888; }}
 
+        #btn-help {{
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid #2a2a2a;
+            color: #555;
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-family: inherit;
+            line-height: 1;
+            transition: all 0.15s;
+        }}
+        #btn-help:hover {{ border-color: #555; color: #888; }}
+        #btn-help.active {{ border-color: #C5B358; color: #C5B358; }}
+
+        #help-panel {{
+            display: none;
+            background: #141414;
+            border-bottom: 1px solid #1e1e1e;
+            padding: 10px 18px;
+            gap: 36px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }}
+        #help-panel.open {{ display: flex; }}
+        #help-panel section {{ min-width: 140px; }}
+        #help-panel h4 {{
+            font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+            color: #C5B358; font-weight: normal; margin-bottom: 5px;
+        }}
+        #help-panel ul {{ list-style: none; }}
+        #help-panel li {{ color: #666; font-size: 0.66rem; margin: 3px 0; }}
+        #help-panel li span.sym {{ color: #a05000; margin-right: 3px; }}
+        #help-panel li span.sym2 {{ color: #333; margin-right: 3px; }}
+        #help-panel kbd {{
+            background: #1e1e1e; border: 1px solid #2a2a2a;
+            padding: 1px 5px; border-radius: 2px;
+            font-family: inherit; font-size: 0.63rem; color: #888;
+        }}
+
         #svg-overlay {{
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh;
@@ -392,7 +431,61 @@ def generate_html(models_tree, center_vmds, right_vmds, textures_tree, tex_to_mo
     <input id="search" type="text" placeholder="Cerca…" oninput="applyFilters()">
     <button id="btn-unused" onclick="toggleUnused()">&#8853; Solo non assegnati</button>
     <button id="btn-download" onclick="downloadData()">&#8595; Scarica JSON</button>
+    <button id="btn-help" onclick="toggleHelp()">?</button>
 </header>
+
+<div id="help-panel">
+    <section>
+        <h4>Colonne</h4>
+        <ul>
+            <li>&#127912; <b>Textures</b> — .dds nelle cartelle tex/</li>
+            <li>&#128229; <b>Models</b> — .rigid_model_v2</li>
+            <li>&#128196; <b>Definitions</b> — .variantmeshdefinition (unit&#224;)</li>
+            <li>&#128260; <b>Variants</b> — .variantmeshdefinition (varianti)</li>
+        </ul>
+    </section>
+    <section>
+        <h4>Selezione</h4>
+        <ul>
+            <li><kbd>Click</kbd> seleziona &mdash; ri-click deseleziona</li>
+            <li><kbd>Ctrl+Click</kbd> aggiunge / rimuove dalla selezione</li>
+            <li><kbd>Shift+Click</kbd> seleziona l&apos;intervallo visibile</li>
+            <li>Click su sfondo vuoto &rarr; deseleziona tutto</li>
+        </ul>
+    </section>
+    <section>
+        <h4>Connessioni (frecce)</h4>
+        <ul>
+            <li>Texture &rarr; modelli che la usano</li>
+            <li>Modello &rarr; texture usate &amp; VMD che lo contengono</li>
+            <li>VMD centrale &rarr; modelli &amp; varianti associate</li>
+            <li>Variante &rarr; VMD centrali referenziati</li>
+        </ul>
+    </section>
+    <section>
+        <h4>Indicatori</h4>
+        <ul>
+            <li><span class="sym2">&#8853;</span> non referenziato da nessuno</li>
+            <li><span class="sym">&#9888;</span> contiene riferimenti a file non trovati</li>
+        </ul>
+    </section>
+    <section>
+        <h4>Filtri</h4>
+        <ul>
+            <li>Barra di ricerca &rarr; filtra per nome in tutte le colonne</li>
+            <li>&#8853; Solo non assegnati &rarr; mostra solo i file inutilizzati</li>
+            <li>&#8595; Scarica JSON &rarr; esporta i dati visibili</li>
+        </ul>
+    </section>
+    <section>
+        <h4>Errore XML</h4>
+        <ul>
+            <li>&#9888; <i>mismatched tag</i>: tag di apertura e</li>
+            <li>chiusura non corrispondenti nel file VMD.</li>
+            <li>Il file viene saltato ma non blocca la scansione.</li>
+        </ul>
+    </section>
+</div>
 
 <div class="columns">
     <div class="col">
@@ -685,6 +778,12 @@ document.querySelector('.columns').addEventListener('click', e => {{
 
 // ── Filtri ─────────────────────────────────────────────────────
 let onlyUnused = false;
+
+function toggleHelp() {{
+    const p = document.getElementById('help-panel');
+    p.classList.toggle('open');
+    document.getElementById('btn-help').classList.toggle('active', p.classList.contains('open'));
+}}
 
 function toggleUnused() {{
     onlyUnused = !onlyUnused;
