@@ -182,14 +182,16 @@ def build_data():
     if unresolved_models:
         print(f"  ⚠  Model ref non risolti : {unresolved_models} (file non trovati nella cartella models)")
 
-    by_file = {v["file"]: v for v in center_vmds}
-    by_stem = {v["id"]:   v for v in center_vmds}
+    by_file = {v["file"].lower(): v for v in center_vmds}
+    by_stem = {v["id"].lower():   v for v in center_vmds}
 
     unresolved_vmds = 0
     for variant in right_vmds:
         missing_vmds = []
         for ref in variant["_raw_refs"]:
-            matched = by_file.get(Path(ref).name) or by_stem.get(Path(ref).stem)
+            fname   = Path(ref).name.lower()
+            fstem   = Path(ref).stem.lower()
+            matched = by_file.get(fname) or by_stem.get(fstem)
             if matched:
                 variant["vmds"].append(matched["id"])
                 if variant["id"] not in matched["in_variants"]:
@@ -348,7 +350,25 @@ def generate_html(models_tree, center_vmds, right_vmds, textures_tree, tex_to_mo
         .item.connected {{ color: #F5E6BE; background: rgba(197,179,88,0.1); border-left-color: #C5B358; }}
 
         /* ── Filtri ───────────────────────────────────────────── */
-        .hidden-filter {{ display: none !important; }}
+        .hidden-filter, .hidden-sel {{ display: none !important; }}
+
+        #btn-filter-sel {{
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid #2a2a2a;
+            color: #555;
+            cursor: pointer;
+            font-size: 0.68rem;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }}
+        #btn-filter-sel:hover {{ border-color: #555; color: #888; }}
+        #btn-filter-sel.active {{
+            border-color: #8B0000;
+            color: #c44;
+            background: rgba(139,0,0,0.07);
+        }}
 
         #search {{
             padding: 4px 8px;
@@ -451,6 +471,7 @@ def generate_html(models_tree, center_vmds, right_vmds, textures_tree, tex_to_mo
     </span>
     <input id="search" type="text" placeholder="Cerca…" oninput="applyFilters()">
     <button id="btn-unused" onclick="toggleUnused()">&#8853; Solo non assegnati</button>
+    <button id="btn-filter-sel" onclick="toggleFilterSel()">&#9903; Filtra per selezione</button>
     <button id="btn-download" onclick="downloadData()">&#8595; Scarica JSON</button>
     <button id="btn-help" onclick="toggleHelp()">?</button>
 </header>
@@ -759,7 +780,18 @@ function applySelection() {{
     document.querySelectorAll('.item.selected,.item.connected')
         .forEach(el => el.classList.remove('selected','connected'));
     document.getElementById('svg-overlay').innerHTML = '';
-    if (!selectedEls.size) return;
+
+    // Rimuovi sempre il filtro-selezione prima di ricalcolare
+    document.querySelectorAll('.hidden-sel')
+        .forEach(el => el.classList.remove('hidden-sel'));
+
+    if (!selectedEls.size) {{
+        if (filterBySelection)
+            ['col-textures','col-models','col-vmds','col-variants']
+                .forEach(id => updateFolderVisibility(document.getElementById(id)));
+        return;
+    }}
+
     const conn = new Set();
     for (const sel of selectedEls) {{
         sel.classList.add('selected');
@@ -771,6 +803,16 @@ function applySelection() {{
             if (p.classList.contains('folder')) p.classList.add('open');
         el.scrollIntoView({{block:'nearest'}});
     }}
+
+    if (filterBySelection) {{
+        const relevant = new Set([...selectedEls, ...conn]);
+        for (const col of ['col-textures','col-models','col-vmds','col-variants']) {{
+            for (const item of colItems[col])
+                item.classList.toggle('hidden-sel', !relevant.has(item));
+            updateFolderVisibility(document.getElementById(col));
+        }}
+    }}
+
     drawArrows(conn);
 }}
 
@@ -816,6 +858,13 @@ document.querySelector('.columns').addEventListener('click', e => {{
 
 // ── Filtri ─────────────────────────────────────────────────────
 let onlyUnused = false;
+let filterBySelection = false;
+
+function toggleFilterSel() {{
+    filterBySelection = !filterBySelection;
+    document.getElementById('btn-filter-sel').classList.toggle('active', filterBySelection);
+    applySelection(); // ricalcola con il nuovo stato
+}}
 
 function toggleHelp() {{
     const p = document.getElementById('help-panel');
@@ -841,9 +890,13 @@ function applyFilters() {{
     }}
 }}
 
+function isVisible(item) {{
+    return !item.classList.contains('hidden-filter') && !item.classList.contains('hidden-sel');
+}}
+
 function updateFolderVisibility(container) {{
     for (const folder of [...container.querySelectorAll('.folder')].reverse()) {{
-        const hasVisible = [...folder.querySelectorAll('.item')].some(i => !i.classList.contains('hidden-filter'));
+        const hasVisible = [...folder.querySelectorAll('.item')].some(isVisible);
         folder.classList.toggle('hidden-filter', !hasVisible);
         if (document.getElementById('search').value.trim() && hasVisible) folder.classList.add('open');
     }}
