@@ -50,7 +50,7 @@ def scan_models(roots):
 
 
 def parse_vmd(filepath):
-    refs_mesh, refs_vmd = [], []
+    refs_mesh, refs_vmd, parse_error = [], [], None
     try:
         for elem in ET.parse(filepath).getroot().iter():
             for val in elem.attrib.values():
@@ -61,9 +61,11 @@ def parse_vmd(filepath):
                     refs_vmd.append(val.replace("\\", "/"))
     except ET.ParseError as e:
         print(f"  ⚠  XML malformato {filepath.name}: {e}")
+        parse_error = str(e)
     except Exception as e:
         print(f"  ⚠  {filepath.name}: {e}")
-    return refs_mesh, refs_vmd
+        parse_error = str(e)
+    return refs_mesh, refs_vmd, parse_error
 
 
 def scan_center_vmds(root_str, exclude_str=None):
@@ -82,13 +84,14 @@ def scan_center_vmds(root_str, exclude_str=None):
                 pass
         rel = f.parent.relative_to(root_path)
         folder = str(rel).replace("\\", "/") if str(rel) != "." else root_path.name
-        models, _ = parse_vmd(f)
+        models, _, parse_error = parse_vmd(f)
         result.append({
             "id": f.stem,
             "folder": folder,
             "file": f.name,
             "models": models,
             "in_variants": [],
+            "parse_error": parse_error,
         })
     return result
 
@@ -100,12 +103,13 @@ def scan_right_vmds(root_str):
         return []
     result = []
     for f in sorted(root_path.glob("*.variantmeshdefinition")):
-        _, vmd_refs = parse_vmd(f)
+        _, vmd_refs, parse_error = parse_vmd(f)
         result.append({
             "id": f.stem,
             "file": f.name,
             "_raw_refs": vmd_refs,
             "vmds": [],
+            "parse_error": parse_error,
         })
     return result
 
@@ -208,25 +212,29 @@ def build_data():
         for f in files:
             model_by_stem[Path(f).stem.lower()] = f"{folder}/{f}"
 
-    tex_to_models   = {}   # resolved_dds_path → [model_path, ...]
-    model_to_textures = {} # model_path → [dds_path, ...]
-    hex_count = 0
+    tex_to_models     = {}   # resolved_dds_path → [model_path, ...]
+    model_to_textures = {}   # model_path → [dds_path, ...]
+    models_read = 0
     unresolved_tex = 0
+    print(f"  …  Lettura binaria .rigid_model_v2 per DDS (può richiedere qualche secondo)…")
     for root_str in CONFIG["models_roots"]:
         root_path = Path(root_str)
         if not root_path.exists():
             continue
-        for hex_f in sorted(root_path.rglob("*.hex")):
-            hex_count += 1
-            dds_refs    = extract_dds_refs(hex_f)
-            model_path  = model_by_stem.get(hex_f.stem.lower())
-            for ref in dds_refs:
-                name     = Path(ref).name.lower()
-                resolved = tex_by_name.get(name)
-                if resolved is None:
-                    unresolved_tex += 1
-                    resolved = ref  # mantieni originale
-                if model_path:
+        # Legge anche eventuali .hex con la stessa logica
+        for ext in ("*.rigid_model_v2", "*.hex"):
+            for bin_f in sorted(root_path.rglob(ext)):
+                model_path = model_by_name.get(bin_f.name.lower())
+                if model_path is None:
+                    continue   # file non censito nella models_tree, salta
+                models_read += 1
+                dds_refs = extract_dds_refs(bin_f)
+                for ref in dds_refs:
+                    name     = Path(ref).name.lower()
+                    resolved = tex_by_name.get(name)
+                    if resolved is None:
+                        unresolved_tex += 1
+                        resolved = ref
                     tex_to_models.setdefault(resolved, [])
                     if model_path not in tex_to_models[resolved]:
                         tex_to_models[resolved].append(model_path)
@@ -234,13 +242,12 @@ def build_data():
                     if resolved not in model_to_textures[model_path]:
                         model_to_textures[model_path].append(resolved)
 
-    total_models  = sum(len(v) for v in models_tree.values())
+    total_models   = sum(len(v) for v in models_tree.values())
     total_textures = sum(len(v) for v in textures_tree.values())
     print(f"  ✓  Textures DDS  : {total_textures}")
-    print(f"  ✓  Model files   : {total_models}")
+    print(f"  ✓  Model files   : {total_models}  (letti: {models_read})")
     print(f"  ✓  VMD centrali  : {len(center_vmds)}")
     print(f"  ✓  Varianti      : {len(right_vmds)}")
-    print(f"  ✓  File .hex     : {hex_count}")
     if unresolved_tex:
         print(f"  ⚠  DDS ref non risolti : {unresolved_tex}")
     print("───────────────────────────────────────────\n")
@@ -624,7 +631,7 @@ function renderCenterVmds() {{
         const ce = mk('div','folder-children');
         for (const vmd of vmds) {{
             const unused = !usedVmdIds.has(vmd.id);
-            const broken = vmd.missing_models && vmd.missing_models.length > 0;
+            const broken = (vmd.missing_models && vmd.missing_models.length > 0) || vmd.parse_error;
             let cls = 'item';
             if (unused) cls += ' unused';
             if (broken) cls += ' broken';
@@ -633,7 +640,9 @@ function renderCenterVmds() {{
             el.textContent = vmd.file;
             let tip = `${{vmd.folder}}/${{vmd.file}}`;
             if (unused) tip += '\\n⊘ Non in nessuna variante';
-            if (broken) tip += `\\n⚠ Ref. non trovati (${{vmd.missing_models.length}}):\\n` + vmd.missing_models.join('\\n');
+            if (vmd.parse_error) tip += `\\n⚠ XML malformato: ${{vmd.parse_error}}`;
+            if (vmd.missing_models && vmd.missing_models.length)
+                tip += `\\n⚠ Ref. non trovati (${{vmd.missing_models.length}}):\\n` + vmd.missing_models.join('\\n');
             el.title = tip;
             el.dataset.vmdId = vmd.id;
             el.dataset.col   = 'col-vmds';
@@ -650,12 +659,14 @@ function renderCenterVmds() {{
 function renderRightVmds() {{
     const body = document.getElementById('col-variants');
     for (const v of RIGHT_VMDS) {{
-        const broken = v.missing_vmds && v.missing_vmds.length > 0;
+        const broken = (v.missing_vmds && v.missing_vmds.length > 0) || v.parse_error;
         const el = mk('div', 'item' + (broken ? ' broken' : ''));
         el.style.paddingLeft = '12px';
         el.textContent = v.file;
         let tip = v.file;
-        if (broken) tip += `\\n⚠ VMD ref. non trovati (${{v.missing_vmds.length}}):\\n` + v.missing_vmds.join('\\n');
+        if (v.parse_error) tip += `\\n⚠ XML malformato: ${{v.parse_error}}`;
+        if (v.missing_vmds && v.missing_vmds.length)
+            tip += `\\n⚠ VMD ref. non trovati (${{v.missing_vmds.length}}):\\n` + v.missing_vmds.join('\\n');
         el.title = tip;
         el.dataset.variantId = v.id;
         el.dataset.col = 'col-variants';
