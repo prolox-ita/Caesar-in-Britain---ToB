@@ -857,7 +857,7 @@ document.querySelector('.columns').addEventListener('click', e => {{
 }});
 
 // ── Filtri ─────────────────────────────────────────────────────
-let onlyUnused = false;
+let unusedFilter = 0; // 0=nessuno  1=solo non assegnati  2=solo assegnati
 let filterBySelection = false;
 
 function toggleFilterSel() {{
@@ -873,8 +873,12 @@ function toggleHelp() {{
 }}
 
 function toggleUnused() {{
-    onlyUnused = !onlyUnused;
-    document.getElementById('btn-unused').classList.toggle('active', onlyUnused);
+    unusedFilter = (unusedFilter + 1) % 3;
+    const btn = document.getElementById('btn-unused');
+    btn.classList.toggle('active', unusedFilter > 0);
+    if      (unusedFilter === 0) btn.textContent = '\u2297 Assegnazione';
+    else if (unusedFilter === 1) btn.textContent = '\u2297 Solo non assegnati';
+    else                         btn.textContent = '\u2297 Solo assegnati';
     applyFilters();
 }}
 
@@ -883,7 +887,10 @@ function applyFilters() {{
     for (const col of ['col-textures','col-models','col-vmds','col-variants']) {{
         for (const item of colItems[col]) {{
             const matchSearch = !query || item.textContent.toLowerCase().includes(query);
-            const matchUnused = !onlyUnused || item.classList.contains('unused');
+            const isUnused = item.classList.contains('unused');
+            const matchUnused = unusedFilter === 0
+                || (unusedFilter === 1 &&  isUnused)
+                || (unusedFilter === 2 && !isUnused);
             item.classList.toggle('hidden-filter', !(matchSearch && matchUnused));
         }}
         updateFolderVisibility(document.getElementById(col));
@@ -903,7 +910,7 @@ function updateFolderVisibility(container) {{
 }}
 
 function downloadData() {{
-    const isFiltered = onlyUnused || document.getElementById('search').value.trim();
+    const isFiltered = unusedFilter > 0 || document.getElementById('search').value.trim();
 
     const visibleTextures = colItems['col-textures']
         .filter(i => !i.classList.contains('hidden-filter'))
@@ -929,7 +936,7 @@ function downloadData() {{
         generated: new Date().toISOString(),
         filters: {{
             search: document.getElementById('search').value.trim() || null,
-            onlyUnused: onlyUnused,
+            unusedFilter: ['none','unused-only','used-only'][unusedFilter],
         }},
         textures: visibleTextures,
         models: visibleModels,
