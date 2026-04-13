@@ -84,12 +84,14 @@ def scan_center_vmds(root_str, exclude_str=None):
                 pass
         rel = f.parent.relative_to(root_path)
         folder = str(rel).replace("\\", "/") if str(rel) != "." else root_path.name
-        models, _, parse_error = parse_vmd(f)
+        models, sub_vmd_refs, parse_error = parse_vmd(f)
         result.append({
             "id": f.stem,
             "folder": folder,
             "file": f.name,
             "models": models,
+            "_raw_sub_vmds": sub_vmd_refs,   # refs a altri VMD centrali
+            "sub_vmds": [],                   # risolti in build_data
             "in_variants": [],
             "parse_error": parse_error,
         })
@@ -182,8 +184,21 @@ def build_data():
     if unresolved_models:
         print(f"  ⚠  Model ref non risolti : {unresolved_models} (file non trovati nella cartella models)")
 
-    by_file = {v["file"].lower(): v for v in center_vmds}
-    by_stem = {v["id"].lower():   v for v in center_vmds}
+    by_file  = {v["file"].lower(): v for v in center_vmds}
+    by_stem  = {v["id"].lower():   v for v in center_vmds}
+    # Indici anche per le varianti destre (per ref intra-variante)
+    by_file_rv = {v["file"].lower(): v for v in right_vmds}
+    by_stem_rv = {v["id"].lower():   v for v in right_vmds}
+
+    # Risolvi i riferimenti VMD nei center VMD (center → center)
+    for vmd in center_vmds:
+        for ref in vmd.pop("_raw_sub_vmds", []):
+            fname = Path(ref).name.lower()
+            fstem = Path(ref).stem.lower()
+            m = by_file.get(fname) or by_stem.get(fstem)
+            if m and m["id"] not in vmd["sub_vmds"]:
+                vmd["sub_vmds"].append(m["id"])
+            # se non trovato, ignora silenziosamente (probabilmente file base-game)
 
     unresolved_vmds = 0
     for variant in right_vmds:
@@ -197,8 +212,14 @@ def build_data():
                 if variant["id"] not in matched["in_variants"]:
                     matched["in_variants"].append(variant["id"])
             else:
-                missing_vmds.append(ref)
-                unresolved_vmds += 1
+                # prova tra le varianti destre (ref intra-variante)
+                matched_rv = by_file_rv.get(fname) or by_stem_rv.get(fstem)
+                if matched_rv and matched_rv["id"] != variant["id"]:
+                    if matched_rv["id"] not in variant["vmds"]:
+                        variant["vmds"].append(matched_rv["id"])
+                else:
+                    missing_vmds.append(ref)
+                    unresolved_vmds += 1
         variant["missing_vmds"] = missing_vmds
         del variant["_raw_refs"]
 
@@ -739,11 +760,17 @@ function getConnectionEls(el) {{
         if (vmd) {{
             vmd.models.forEach(mp => {{ const e = modelMap.get(mp); if (e) r.push(e); }});
             vmd.in_variants.forEach(id => {{ const e = variantMap.get(id); if (e) r.push(e); }});
+            // VMD centrale → altri VMD centrali referenziati
+            (vmd.sub_vmds || []).forEach(id => {{ const e = vmdMap.get(id); if (e) r.push(e); }});
         }}
     }} else if (el.dataset.variantId) {{
         const v = RIGHT_VMDS.find(v => v.id === el.dataset.variantId);
         if (v) {{
-            v.vmds.forEach(id => {{ const e = vmdMap.get(id); if (e) r.push(e); }});
+            v.vmds.forEach(id => {{
+                // può essere un center VMD o un'altra variante destra
+                const e = vmdMap.get(id) || variantMap.get(id);
+                if (e) r.push(e);
+            }});
             (v.models || []).forEach(mp => {{ const e = modelMap.get(mp); if (e) r.push(e); }});
         }}
     }}
