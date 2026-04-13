@@ -117,32 +117,42 @@ def build_data():
             model_by_name[f.lower()] = f"{folder}/{f}"
 
     # Risolvi i model refs dei VMD centrali usando il nome file come chiave
-    unresolved = 0
+    unresolved_models = 0
     for vmd in center_vmds:
-        resolved = []
+        resolved, missing = [], []
         for ref in vmd["models"]:
             name = Path(ref).name.lower()
             if name in model_by_name:
                 resolved.append(model_by_name[name])
             else:
-                resolved.append(ref)  # mantieni originale se non trovato
-                unresolved += 1
-        vmd["models"] = resolved
+                missing.append(ref)
+                unresolved_models += 1
+        vmd["models"]         = resolved
+        vmd["missing_models"] = missing
 
-    if unresolved:
-        print(f"  ⚠  Riferimenti non risolti: {unresolved} (file non trovati nella cartella models)")
+    if unresolved_models:
+        print(f"  ⚠  Model ref non risolti : {unresolved_models} (file non trovati nella cartella models)")
 
     by_file = {v["file"]: v for v in center_vmds}
     by_stem = {v["id"]:   v for v in center_vmds}
 
+    unresolved_vmds = 0
     for variant in right_vmds:
+        missing_vmds = []
         for ref in variant["_raw_refs"]:
             matched = by_file.get(Path(ref).name) or by_stem.get(Path(ref).stem)
             if matched:
                 variant["vmds"].append(matched["id"])
                 if variant["id"] not in matched["in_variants"]:
                     matched["in_variants"].append(variant["id"])
+            else:
+                missing_vmds.append(ref)
+                unresolved_vmds += 1
+        variant["missing_vmds"] = missing_vmds
         del variant["_raw_refs"]
+
+    if unresolved_vmds:
+        print(f"  ⚠  VMD ref non risolti   : {unresolved_vmds} (vmd non trovati nella cartella center)")
 
     total_models = sum(len(v) for v in models_tree.values())
     print(f"  ✓  Model files   : {total_models}")
@@ -221,8 +231,11 @@ def generate_html(models_tree, center_vmds, right_vmds):
         .item:hover {{ background: rgba(255,255,255,0.04); }}
         .item.unused {{ color: #555; }}
         .item.unused::after {{ content: ' ⊘'; color: #333; font-size: 10px; }}
+        .item.broken::after {{ content: ' ⚠'; color: #a05000; font-size: 10px; }}
+        .item.unused.broken::after {{ content: ' ⊘ ⚠'; color: #a05000; font-size: 10px; }}
         .item.selected {{ color: #fff; background: rgba(139,0,0,0.22); border-left-color: #8B0000; }}
         .item.selected.unused::after {{ color: rgba(255,255,255,0.2); }}
+        .item.selected.broken::after {{ color: #d07020; }}
         .item.connected {{ color: #F5E6BE; background: rgba(197,179,88,0.1); border-left-color: #C5B358; }}
 
         /* ── Filtri ───────────────────────────────────────────── */
@@ -402,10 +415,17 @@ function renderCenterVmds() {{
         const ce = mk('div','folder-children');
         for (const vmd of vmds) {{
             const unused = !usedVmdIds.has(vmd.id);
-            const el = mk('div','item'+(unused?' unused':''));
+            const broken = vmd.missing_models && vmd.missing_models.length > 0;
+            let cls = 'item';
+            if (unused) cls += ' unused';
+            if (broken) cls += ' broken';
+            const el = mk('div', cls);
             el.style.paddingLeft = '26px';
             el.textContent = vmd.file;
-            el.title = `${{vmd.folder}}/${{vmd.file}}` + (unused ? '\\n⊘ Non in nessuna variante' : '');
+            let tip = `${{vmd.folder}}/${{vmd.file}}`;
+            if (unused) tip += '\\n⊘ Non in nessuna variante';
+            if (broken) tip += `\\n⚠ Ref. non trovati (${{vmd.missing_models.length}}):\\n` + vmd.missing_models.join('\\n');
+            el.title = tip;
             el.dataset.vmdId = vmd.id;
             el.dataset.col   = 'col-vmds';
             el.addEventListener('click', e => {{ e.stopPropagation(); handleClick(el,e); }});
@@ -421,10 +441,13 @@ function renderCenterVmds() {{
 function renderRightVmds() {{
     const body = document.getElementById('col-variants');
     for (const v of RIGHT_VMDS) {{
-        const el = mk('div','item');
+        const broken = v.missing_vmds && v.missing_vmds.length > 0;
+        const el = mk('div', 'item' + (broken ? ' broken' : ''));
         el.style.paddingLeft = '12px';
         el.textContent = v.file;
-        el.title = v.file;
+        let tip = v.file;
+        if (broken) tip += `\\n⚠ VMD ref. non trovati (${{v.missing_vmds.length}}):\\n` + v.missing_vmds.join('\\n');
+        el.title = tip;
         el.dataset.variantId = v.id;
         el.dataset.col = 'col-variants';
         el.addEventListener('click', e => {{ e.stopPropagation(); handleClick(el,e); }});
