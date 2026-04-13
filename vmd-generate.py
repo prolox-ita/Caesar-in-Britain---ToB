@@ -7,7 +7,7 @@ VMD Viewer Generator
 3. Apri il file generato: vmd-viewer.html
 """
 
-import json
+import json, re
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -26,8 +26,8 @@ CONFIG = {
     # Scansionata ricorsivamente.
     "vmds_root": r"D:\Thrones of Britannia\modding\variantmeshes",
 
-    # Cartella delle varianti destra (una sola cartella specifica).
-    "variants_root": r"D:\Thrones of Britannia\modding\VariantMeshDefinitions",
+    # Cartella delle varianti destra (.variantmeshdefinition che referenziano i VMD centrali).
+    "variants_root": r"D:\Thrones of Britannia\modding\variantmeshes\variantmeshdefinitions",
 
     # File HTML da generare
     "output": r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html",
@@ -66,13 +66,20 @@ def parse_vmd(filepath):
     return refs_mesh, refs_vmd
 
 
-def scan_center_vmds(root_str):
-    root_path = Path(root_str)
+def scan_center_vmds(root_str, exclude_str=None):
+    root_path   = Path(root_str)
+    exclude_res = Path(exclude_str).resolve() if exclude_str else None
     if not root_path.exists():
         print(f"  ⚠  Non trovata (VMD): {root_str}")
         return []
     result = []
     for f in sorted(root_path.rglob("*.variantmeshdefinition")):
+        if exclude_res:
+            try:
+                f.resolve().relative_to(exclude_res)
+                continue          # è dentro la cartella esclusa → salta
+            except ValueError:
+                pass
         rel = f.parent.relative_to(root_path)
         folder = str(rel).replace("\\", "/") if str(rel) != "." else root_path.name
         models, _ = parse_vmd(f)
@@ -103,11 +110,47 @@ def scan_right_vmds(root_str):
     return result
 
 
+def scan_textures(roots):
+    """Scansiona le sottocartelle 'tex' per file .dds."""
+    tree = {}
+    for root_str in roots:
+        root_path = Path(root_str)
+        if not root_path.exists():
+            print(f"  ⚠  Non trovata (textures): {root_str}")
+            continue
+        for f in sorted(root_path.rglob("*.dds")):
+            rel_parts = f.relative_to(root_path).parts[:-1]  # escludi filename
+            if not any(p.lower() == "tex" for p in rel_parts):
+                continue
+            rel = f.parent.relative_to(root_path)
+            key = str(rel).replace("\\", "/")
+            tree.setdefault(key, []).append(f.name)
+    return tree
+
+
+def extract_dds_refs(filepath):
+    """Estrae percorsi .dds da file binari (hex, rigid_model_v2, ecc.)."""
+    try:
+        data = filepath.read_bytes()
+        matches = re.findall(rb'[A-Za-z0-9_./ \\-]{3,}\.dds', data, re.IGNORECASE)
+        seen, result = set(), []
+        for m in matches:
+            path = m.decode("ascii", errors="replace").replace("\\", "/").strip()
+            if path and path.lower() not in seen:
+                seen.add(path.lower())
+                result.append(path)
+        return result
+    except Exception as e:
+        print(f"  ⚠  {filepath.name}: {e}")
+        return []
+
+
 def build_data():
     print("\n── Scansione ──────────────────────────────")
-    models_tree = scan_models(CONFIG["models_roots"])
-    center_vmds = scan_center_vmds(CONFIG["vmds_root"])
-    right_vmds  = scan_right_vmds(CONFIG["variants_root"])
+    models_tree   = scan_models(CONFIG["models_roots"])
+    textures_tree = scan_textures(CONFIG["models_roots"])
+    center_vmds   = scan_center_vmds(CONFIG["vmds_root"], CONFIG.get("variants_root"))
+    right_vmds    = scan_right_vmds(CONFIG["variants_root"])
 
     # Mappa nome_file (lowercase) → path scansionato completo
     # Es. "fp_dc_leather_skullcap.rigid_model_v2" → "characters/heads/fp_dc_leather_skullcap.rigid_model_v2"
@@ -154,20 +197,65 @@ def build_data():
     if unresolved_vmds:
         print(f"  ⚠  VMD ref non risolti   : {unresolved_vmds} (vmd non trovati nella cartella center)")
 
-    total_models = sum(len(v) for v in models_tree.values())
+    # ── Connessioni DDS ← hex ← model ──────────────────────────
+    tex_by_name = {}
+    for folder, files in textures_tree.items():
+        for f in files:
+            tex_by_name[f.lower()] = f"{folder}/{f}"
+
+    model_by_stem = {}
+    for folder, files in models_tree.items():
+        for f in files:
+            model_by_stem[Path(f).stem.lower()] = f"{folder}/{f}"
+
+    tex_to_models   = {}   # resolved_dds_path → [model_path, ...]
+    model_to_textures = {} # model_path → [dds_path, ...]
+    hex_count = 0
+    unresolved_tex = 0
+    for root_str in CONFIG["models_roots"]:
+        root_path = Path(root_str)
+        if not root_path.exists():
+            continue
+        for hex_f in sorted(root_path.rglob("*.hex")):
+            hex_count += 1
+            dds_refs    = extract_dds_refs(hex_f)
+            model_path  = model_by_stem.get(hex_f.stem.lower())
+            for ref in dds_refs:
+                name     = Path(ref).name.lower()
+                resolved = tex_by_name.get(name)
+                if resolved is None:
+                    unresolved_tex += 1
+                    resolved = ref  # mantieni originale
+                if model_path:
+                    tex_to_models.setdefault(resolved, [])
+                    if model_path not in tex_to_models[resolved]:
+                        tex_to_models[resolved].append(model_path)
+                    model_to_textures.setdefault(model_path, [])
+                    if resolved not in model_to_textures[model_path]:
+                        model_to_textures[model_path].append(resolved)
+
+    total_models  = sum(len(v) for v in models_tree.values())
+    total_textures = sum(len(v) for v in textures_tree.values())
+    print(f"  ✓  Textures DDS  : {total_textures}")
     print(f"  ✓  Model files   : {total_models}")
     print(f"  ✓  VMD centrali  : {len(center_vmds)}")
     print(f"  ✓  Varianti      : {len(right_vmds)}")
+    print(f"  ✓  File .hex     : {hex_count}")
+    if unresolved_tex:
+        print(f"  ⚠  DDS ref non risolti : {unresolved_tex}")
     print("───────────────────────────────────────────\n")
 
-    return models_tree, center_vmds, right_vmds
+    return models_tree, center_vmds, right_vmds, textures_tree, tex_to_models, model_to_textures
 
 
-def generate_html(models_tree, center_vmds, right_vmds):
+def generate_html(models_tree, center_vmds, right_vmds, textures_tree, tex_to_models, model_to_textures):
     data_js = (
-        f"const MODELS_TREE = {json.dumps(models_tree, ensure_ascii=False, indent=2)};\n\n"
-        f"const CENTER_VMDS = {json.dumps(center_vmds, ensure_ascii=False, indent=2)};\n\n"
-        f"const RIGHT_VMDS  = {json.dumps(right_vmds,  ensure_ascii=False, indent=2)};"
+        f"const TEXTURES_TREE    = {json.dumps(textures_tree,     ensure_ascii=False, indent=2)};\n\n"
+        f"const TEX_TO_MODELS    = {json.dumps(tex_to_models,     ensure_ascii=False, indent=2)};\n\n"
+        f"const MODEL_TO_TEXTURES= {json.dumps(model_to_textures, ensure_ascii=False, indent=2)};\n\n"
+        f"const MODELS_TREE      = {json.dumps(models_tree,       ensure_ascii=False, indent=2)};\n\n"
+        f"const CENTER_VMDS      = {json.dumps(center_vmds,       ensure_ascii=False, indent=2)};\n\n"
+        f"const RIGHT_VMDS       = {json.dumps(right_vmds,        ensure_ascii=False, indent=2)};"
     )
 
     return f"""<!DOCTYPE html>
@@ -309,9 +397,17 @@ def generate_html(models_tree, center_vmds, right_vmds):
 <div class="columns">
     <div class="col">
         <div class="col-head">
+            <span class="cnt" id="c-textures"></span>
+            <div class="col-head-title">Textures</div>
+            <div class="col-head-sub">.dds</div>
+        </div>
+        <div class="col-body" id="col-textures"></div>
+    </div>
+    <div class="col">
+        <div class="col-head">
             <span class="cnt" id="c-models"></span>
             <div class="col-head-title">Models</div>
-            <div class="col-head-sub">.variantmesh</div>
+            <div class="col-head-sub">.rigid_model_v2</div>
         </div>
         <div class="col-body" id="col-models"></div>
     </div>
@@ -342,14 +438,16 @@ def generate_html(models_tree, center_vmds, right_vmds):
 {data_js}
 
 // ── Pre-calcolo unused ─────────────────────────────────────────
-const usedModelPaths = new Set(CENTER_VMDS.flatMap(v => v.models));
-const usedVmdIds     = new Set(RIGHT_VMDS.flatMap(v => v.vmds));
+const usedTexturePaths = new Set(Object.keys(TEX_TO_MODELS));
+const usedModelPaths   = new Set(CENTER_VMDS.flatMap(v => v.models));
+const usedVmdIds       = new Set(RIGHT_VMDS.flatMap(v => v.vmds));
 
 // ── Mappe e liste per colonna ──────────────────────────────────
+const textureMap = new Map();
 const modelMap   = new Map();
 const vmdMap     = new Map();
 const variantMap = new Map();
-const colItems   = {{'col-models': [], 'col-vmds': [], 'col-variants': []}};
+const colItems   = {{'col-textures': [], 'col-models': [], 'col-vmds': [], 'col-variants': []}};
 
 // ── Tree builder ───────────────────────────────────────────────
 function buildTree(flat) {{
@@ -370,7 +468,7 @@ function buildTree(flat) {{
     return root;
 }}
 
-function renderTree(node, parent, depth, pathSoFar) {{
+function renderTree(node, parent, depth, pathSoFar, isTextures=false) {{
     for (const [name, data] of Object.entries(node)) {{
         const fullPath = pathSoFar ? `${{pathSoFar}}/${{name}}` : name;
         const pf = 8 + depth * 14, pi = pf + 18;
@@ -381,24 +479,42 @@ function renderTree(node, parent, depth, pathSoFar) {{
         le.onclick = () => fe.classList.toggle('open');
         fe.appendChild(le);
         const ce = mk('div','folder-children');
-        if (Object.keys(data.sub).length) renderTree(data.sub, ce, depth+1, fullPath);
+        if (Object.keys(data.sub).length) renderTree(data.sub, ce, depth+1, fullPath, isTextures);
         for (const file of data.files) {{
             const mp = `${{fullPath}}/${{file}}`;
-            const unused = !usedModelPaths.has(mp);
-            const el = mk('div','item'+(unused?' unused':''));
-            el.style.paddingLeft = pi+'px';
-            el.textContent = file;
-            el.title = mp + (unused ? '\\n⊘ Non usato da nessun VMD' : '');
-            el.dataset.mp  = mp;
-            el.dataset.col = 'col-models';
-            el.addEventListener('click', e => {{ e.stopPropagation(); handleClick(el,e); }});
-            ce.appendChild(el);
-            modelMap.set(mp, el);
-            colItems['col-models'].push(el);
+            if (isTextures) {{
+                const unused = !usedTexturePaths.has(mp);
+                const el = mk('div','item'+(unused?' unused':''));
+                el.style.paddingLeft = pi+'px';
+                el.textContent = file;
+                el.title = mp + (unused ? '\\n⊘ Non usata da nessun modello' : '');
+                el.dataset.tp  = mp;
+                el.dataset.col = 'col-textures';
+                el.addEventListener('click', e => {{ e.stopPropagation(); handleClick(el,e); }});
+                ce.appendChild(el);
+                textureMap.set(mp, el);
+                colItems['col-textures'].push(el);
+            }} else {{
+                const unused = !usedModelPaths.has(mp);
+                const el = mk('div','item'+(unused?' unused':''));
+                el.style.paddingLeft = pi+'px';
+                el.textContent = file;
+                el.title = mp + (unused ? '\\n⊘ Non usato da nessun VMD' : '');
+                el.dataset.mp  = mp;
+                el.dataset.col = 'col-models';
+                el.addEventListener('click', e => {{ e.stopPropagation(); handleClick(el,e); }});
+                ce.appendChild(el);
+                modelMap.set(mp, el);
+                colItems['col-models'].push(el);
+            }}
         }}
         fe.appendChild(ce);
         parent.appendChild(fe);
     }}
+}}
+
+function renderTextures() {{
+    renderTree(buildTree(TEXTURES_TREE), document.getElementById('col-textures'), 0, '', true);
 }}
 
 function renderCenterVmds() {{
@@ -460,7 +576,13 @@ function renderRightVmds() {{
 // ── Connessioni ────────────────────────────────────────────────
 function getConnectionEls(el) {{
     const r = [];
-    if (el.dataset.mp) {{
+    if (el.dataset.tp) {{
+        // texture → models che la usano
+        (TEX_TO_MODELS[el.dataset.tp] || []).forEach(mp => {{ const e = modelMap.get(mp); if (e) r.push(e); }});
+    }} else if (el.dataset.mp) {{
+        // model → textures che usa
+        (MODEL_TO_TEXTURES[el.dataset.mp] || []).forEach(tp => {{ const e = textureMap.get(tp); if (e) r.push(e); }});
+        // model → VMD centrali che lo referenziano
         CENTER_VMDS.filter(v => v.models.includes(el.dataset.mp))
             .forEach(v => {{ const e = vmdMap.get(v.id); if (e) r.push(e); }});
     }} else if (el.dataset.vmdId) {{
@@ -552,7 +674,7 @@ function drawArrows(conn) {{
 function redraw() {{
     if (selectedEls.size) drawArrows(new Set(document.querySelectorAll('.item.connected')));
 }}
-['col-models','col-vmds','col-variants'].forEach(id =>
+['col-textures','col-models','col-vmds','col-variants'].forEach(id =>
     document.getElementById(id).addEventListener('scroll', redraw, {{passive:true}}));
 window.addEventListener('resize', redraw);
 document.querySelector('.columns').addEventListener('click', e => {{
@@ -572,7 +694,7 @@ function toggleUnused() {{
 
 function applyFilters() {{
     const query = document.getElementById('search').value.toLowerCase().trim();
-    for (const col of ['col-models','col-vmds','col-variants']) {{
+    for (const col of ['col-textures','col-models','col-vmds','col-variants']) {{
         for (const item of colItems[col]) {{
             const matchSearch = !query || item.textContent.toLowerCase().includes(query);
             const matchUnused = !onlyUnused || item.classList.contains('unused');
@@ -592,6 +714,10 @@ function updateFolderVisibility(container) {{
 
 function downloadData() {{
     const isFiltered = onlyUnused || document.getElementById('search').value.trim();
+
+    const visibleTextures = colItems['col-textures']
+        .filter(i => !i.classList.contains('hidden-filter'))
+        .map(i => i.dataset.tp);
 
     const visibleModels = colItems['col-models']
         .filter(i => !i.classList.contains('hidden-filter'))
@@ -615,6 +741,7 @@ function downloadData() {{
             search: document.getElementById('search').value.trim() || null,
             onlyUnused: onlyUnused,
         }},
+        textures: visibleTextures,
         models: visibleModels,
         vmds: CENTER_VMDS
             .filter(v => visibleVmdIds.has(v.id))
@@ -639,22 +766,25 @@ function mk(tag, cls) {{
     return el;
 }}
 
+renderTextures();
 renderTree(buildTree(MODELS_TREE), document.getElementById('col-models'), 0, '');
 renderCenterVmds();
 renderRightVmds();
 
-const totalModels = Object.values(MODELS_TREE).reduce((s,a) => s+a.length, 0);
-document.getElementById('c-models').textContent   = totalModels + ' models';
+const totalTextures = Object.values(TEXTURES_TREE).reduce((s,a) => s+a.length, 0);
+const totalModels   = Object.values(MODELS_TREE).reduce((s,a) => s+a.length, 0);
+document.getElementById('c-textures').textContent = totalTextures + ' dds';
+document.getElementById('c-models').textContent   = totalModels   + ' models';
 document.getElementById('c-vmds').textContent     = CENTER_VMDS.length + ' vmds';
-document.getElementById('c-variants').textContent = RIGHT_VMDS.length + ' variants';
+document.getElementById('c-variants').textContent = RIGHT_VMDS.length  + ' variants';
 </script>
 </body>
 </html>"""
 
 
 if __name__ == "__main__":
-    models_tree, center_vmds, right_vmds = build_data()
-    html = generate_html(models_tree, center_vmds, right_vmds)
+    models_tree, center_vmds, right_vmds, textures_tree, tex_to_models, model_to_textures = build_data()
+    html = generate_html(models_tree, center_vmds, right_vmds, textures_tree, tex_to_models, model_to_textures)
 
     out = Path(CONFIG.get("output", "vmd-viewer.html"))
     out.write_text(html, encoding="utf-8")
