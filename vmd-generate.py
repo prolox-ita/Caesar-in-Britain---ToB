@@ -103,12 +103,14 @@ def scan_right_vmds(root_str):
         return []
     result = []
     for f in sorted(root_path.glob("*.variantmeshdefinition")):
-        _, vmd_refs, parse_error = parse_vmd(f)
+        mesh_refs, vmd_refs, parse_error = parse_vmd(f)
         result.append({
             "id": f.stem,
             "file": f.name,
             "_raw_refs": vmd_refs,
+            "_raw_models": mesh_refs,
             "vmds": [],
+            "models": [],
             "parse_error": parse_error,
         })
     return result
@@ -197,6 +199,18 @@ def build_data():
                 unresolved_vmds += 1
         variant["missing_vmds"] = missing_vmds
         del variant["_raw_refs"]
+
+        # Risolvi anche i model refs diretti nella variante
+        resolved_m, missing_m = [], []
+        for ref in variant.pop("_raw_models", []):
+            name = Path(ref).name.lower()
+            if name in model_by_name:
+                resolved_m.append(model_by_name[name])
+            else:
+                missing_m.append(ref)
+                unresolved_models += 1
+        variant["models"]         = resolved_m
+        variant["missing_models"] = missing_m
 
     if unresolved_vmds:
         print(f"  ⚠  VMD ref non risolti   : {unresolved_vmds} (vmd non trovati nella cartella center)")
@@ -539,7 +553,10 @@ def generate_html(models_tree, center_vmds, right_vmds, textures_tree, tex_to_mo
 
 // ── Pre-calcolo unused ─────────────────────────────────────────
 const usedTexturePaths = new Set(Object.keys(TEX_TO_MODELS));
-const usedModelPaths   = new Set(CENTER_VMDS.flatMap(v => v.models));
+const usedModelPaths   = new Set([
+    ...CENTER_VMDS.flatMap(v => v.models),
+    ...RIGHT_VMDS.flatMap(v => v.models || []),
+]);
 const usedVmdIds       = new Set(RIGHT_VMDS.flatMap(v => v.vmds));
 
 // ── Mappe e liste per colonna ──────────────────────────────────
@@ -659,7 +676,9 @@ function renderCenterVmds() {{
 function renderRightVmds() {{
     const body = document.getElementById('col-variants');
     for (const v of RIGHT_VMDS) {{
-        const broken = (v.missing_vmds && v.missing_vmds.length > 0) || v.parse_error;
+        const broken = v.parse_error
+            || (v.missing_vmds  && v.missing_vmds.length  > 0)
+            || (v.missing_models && v.missing_models.length > 0);
         const el = mk('div', 'item' + (broken ? ' broken' : ''));
         el.style.paddingLeft = '12px';
         el.textContent = v.file;
@@ -667,6 +686,8 @@ function renderRightVmds() {{
         if (v.parse_error) tip += `\\n⚠ XML malformato: ${{v.parse_error}}`;
         if (v.missing_vmds && v.missing_vmds.length)
             tip += `\\n⚠ VMD ref. non trovati (${{v.missing_vmds.length}}):\\n` + v.missing_vmds.join('\\n');
+        if (v.missing_models && v.missing_models.length)
+            tip += `\\n⚠ Model ref. non trovati (${{v.missing_models.length}}):\\n` + v.missing_models.join('\\n');
         el.title = tip;
         el.dataset.variantId = v.id;
         el.dataset.col = 'col-variants';
@@ -689,6 +710,9 @@ function getConnectionEls(el) {{
         // model → VMD centrali che lo referenziano
         CENTER_VMDS.filter(v => v.models.includes(el.dataset.mp))
             .forEach(v => {{ const e = vmdMap.get(v.id); if (e) r.push(e); }});
+        // model → varianti destre che lo referenziano direttamente
+        RIGHT_VMDS.filter(v => (v.models || []).includes(el.dataset.mp))
+            .forEach(v => {{ const e = variantMap.get(v.id); if (e) r.push(e); }});
     }} else if (el.dataset.vmdId) {{
         const vmd = CENTER_VMDS.find(v => v.id === el.dataset.vmdId);
         if (vmd) {{
@@ -697,7 +721,10 @@ function getConnectionEls(el) {{
         }}
     }} else if (el.dataset.variantId) {{
         const v = RIGHT_VMDS.find(v => v.id === el.dataset.variantId);
-        if (v) v.vmds.forEach(id => {{ const e = vmdMap.get(id); if (e) r.push(e); }});
+        if (v) {{
+            v.vmds.forEach(id => {{ const e = vmdMap.get(id); if (e) r.push(e); }});
+            (v.models || []).forEach(mp => {{ const e = modelMap.get(mp); if (e) r.push(e); }});
+        }}
     }}
     return r;
 }}
