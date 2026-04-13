@@ -881,15 +881,27 @@ function drawArrows(conn) {{
             const cr = cel.getBoundingClientRect();
             if (!cr.height) continue;
             const cy = (cr.top + cr.bottom) / 2;
-            const toR = cr.left > sr.right - 4, toL = cr.right < sr.left + 4;
-            if (!toR && !toL) continue;
-            const x1 = toR ? sr.right : sr.left, x2 = toR ? cr.left : cr.right;
-            const mx = (x1 + x2) / 2;
+            const toR = cr.left > sr.right - 4;
+            const toL = cr.right < sr.left + 4;
+            const sameCol = !toR && !toL;
+            let d;
+            if (toR) {{
+                const x1 = sr.right, x2 = cr.left, mx = (x1+x2)/2;
+                d = `M${{x1}},${{sy}} C${{mx}},${{sy}} ${{mx}},${{cy}} ${{x2}},${{cy}}`;
+            }} else if (toL) {{
+                const x1 = sr.left, x2 = cr.right, mx = (x1+x2)/2;
+                d = `M${{x1}},${{sy}} C${{mx}},${{sy}} ${{mx}},${{cy}} ${{x2}},${{cy}}`;
+            }} else {{
+                // Stessa colonna: curva che esce a sinistra e rientra
+                const lx = sr.left - 30;
+                d = `M${{sr.left}},${{sy}} C${{lx}},${{sy}} ${{lx}},${{cy}} ${{cr.left}},${{cy}}`;
+            }}
             const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-            path.setAttribute('d', `M${{x1}},${{sy}} C${{mx}},${{sy}} ${{mx}},${{cy}} ${{x2}},${{cy}}`);
-            path.setAttribute('stroke','#C5B358');
-            path.setAttribute('stroke-width','1.2');
-            path.setAttribute('stroke-opacity','.5');
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', sameCol ? '#aaa' : '#C5B358');
+            path.setAttribute('stroke-width', '1');
+            path.setAttribute('stroke-opacity', sameCol ? '.35' : '.5');
+            path.setAttribute('stroke-dasharray', sameCol ? '4,3' : 'none');
             path.setAttribute('fill','none');
             path.setAttribute('marker-end','url(#ah)');
             svg.appendChild(path);
