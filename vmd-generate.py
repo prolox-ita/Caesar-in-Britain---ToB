@@ -196,15 +196,18 @@ def build_data():
     # Risolvi i model refs dei VMD centrali usando il nome file come chiave
     unresolved_models = 0
     for vmd in center_vmds:
-        resolved, missing = [], []
+        resolved, missing, vm_refs = [], [], []
         for ref in vmd["models"]:
             name = Path(ref).name.lower()
             if name in model_by_name:
                 resolved.append(model_by_name[name])
+            elif name.endswith(".variantmesh"):
+                vm_refs.append(ref)   # file intermedio — non è ⚠
             else:
                 missing.append(ref)
                 unresolved_models += 1
         vmd["models"]         = resolved
+        vmd["_raw_vm_refs"]   = vm_refs
         vmd["missing_models"] = missing
 
     if unresolved_models:
@@ -260,15 +263,18 @@ def build_data():
         del variant["_raw_refs"]
 
         # Risolvi anche i model refs diretti nella variante
-        resolved_m, missing_m = [], []
+        resolved_m, missing_m, vm_refs_v = [], [], []
         for ref in variant.pop("_raw_models", []):
             name = Path(ref).name.lower()
             if name in model_by_name:
                 resolved_m.append(model_by_name[name])
+            elif name.endswith(".variantmesh"):
+                vm_refs_v.append(ref)   # file intermedio — non è ⚠
             else:
                 missing_m.append(ref)
                 unresolved_models += 1
         variant["models"]         = resolved_m
+        variant["_raw_vm_refs"]   = vm_refs_v
         variant["missing_models"] = missing_m
 
     if unresolved_vmds:
@@ -279,13 +285,14 @@ def build_data():
     by_stem_all = {**by_stem, **by_stem_rv}
 
     vm_parsed = 0
-    def _resolve_vm_vmdrefs(model_list, sub_vmds_list, missing_list):
+    def _resolve_vm_vmdrefs(vm_refs_list, sub_vmds_list, missing_list):
         nonlocal vm_parsed
-        for model_path in model_list:
-            if not model_path.lower().endswith(".variantmesh"):
-                continue
+        for model_path in vm_refs_list:
             vm_file = vm_abs_by_name.get(Path(model_path).name.lower())
             if vm_file is None:
+                # .variantmesh non trovato su disco → segnala come ⚠
+                if model_path not in missing_list:
+                    missing_list.append(model_path)
                 continue
             vm_parsed += 1
             _, vm_vmd_refs, _ = parse_vmd(vm_file)
@@ -298,12 +305,12 @@ def build_data():
                         sub_vmds_list.append(m["id"])
                 else:
                     if ref not in missing_list:
-                        missing_list.append(ref)   # segnala come ⚠
+                        missing_list.append(ref)   # VMD ref dentro .variantmesh non trovato → ⚠
 
     for vmd in center_vmds:
-        _resolve_vm_vmdrefs(vmd["models"], vmd["sub_vmds"], vmd["missing_models"])
+        _resolve_vm_vmdrefs(vmd.pop("_raw_vm_refs", []), vmd["sub_vmds"], vmd["missing_models"])
     for variant in right_vmds:
-        _resolve_vm_vmdrefs(variant.get("models", []), variant["vmds"], variant["missing_vmds"])
+        _resolve_vm_vmdrefs(variant.pop("_raw_vm_refs", []), variant["vmds"], variant["missing_vmds"])
 
     if vm_parsed:
         print(f"  ✓  .variantmesh analizzati : {vm_parsed}")
