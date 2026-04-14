@@ -219,15 +219,20 @@ def build_data():
     by_file_rv = {v["file"].lower(): v for v in right_vmds}
     by_stem_rv = {v["id"].lower():   v for v in right_vmds}
 
-    # Risolvi i riferimenti VMD nei center VMD (center → center)
+    # Risolvi i riferimenti VMD nei center VMD (center → center o → right variant)
     for vmd in center_vmds:
         for ref in vmd.pop("_raw_sub_vmds", []):
             fname = Path(ref).name.lower()
             fstem = Path(ref).stem.lower()
-            m = by_file.get(fname) or by_stem.get(fstem)
-            if m and m["id"] not in vmd["sub_vmds"]:
-                vmd["sub_vmds"].append(m["id"])
-            # se non trovato, ignora silenziosamente (probabilmente file base-game)
+            m = (by_file.get(fname) or by_stem.get(fstem)
+                 or by_file_rv.get(fname) or by_stem_rv.get(fstem))
+            if m:
+                if m["id"] not in vmd["sub_vmds"]:
+                    vmd["sub_vmds"].append(m["id"])
+            else:
+                # non trovato tra i file mod → segnala come ⚠
+                if ref not in vmd["missing_models"]:
+                    vmd["missing_models"].append(ref)
 
     # ── Percorri i .variantmesh per trovare i loro VMD refs ────────
     # Fatto DOPO aver costruito tutti gli indici (by_file, by_file_rv, ecc.)
