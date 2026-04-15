@@ -34,7 +34,7 @@ MOD_ROOT = r"D:\Thrones of Britannia\modding\variantmeshes"
 # Prefisso cartella variant destre (relativo a MOD_ROOT)
 VARIANTS_PREFIX = "variantmeshdefinitions"
 
-UNITS_VARIANTS_FILE = r"C:\Users\loren\Desktop\MK1212-website\units_variants.txt"
+UNITS_VARIANTS_FILE = r"C:\Users\loren\Desktop\MK1212-website\units variants.txt"
 ADDED_FILES_FILE    = r"C:\Users\loren\Desktop\MK1212-website\added_files.txt"
 OUTPUT_FILE         = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
 CIB_DEST = r"C:\Users\loren\Desktop\MK1212-website\cib\da aggiungere\variantmeshes"
@@ -232,9 +232,11 @@ def _add_models(model_names, model_by_name, model_to_textures,
 def read_lines(path):
     p = Path(path)
     if not p.exists():
+        print(f"  ⚠  File non trovato: {path}")
         return []
-    return [l.strip() for l in p.read_text(encoding="utf-8", errors="replace").splitlines()
-            if l.strip() and not l.strip().startswith("#")]
+    lines = [l.strip() for l in p.read_text(encoding="utf-8", errors="replace").splitlines()
+             if l.strip() and not l.strip().startswith("#")]
+    return lines
 
 
 def sort_by_type(paths):
