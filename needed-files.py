@@ -276,8 +276,16 @@ def copy_files(present_files):
     return copied, not_found
 
 
+def norm_path(s):
+    """Normalizza un path: lowercase, slash, rimuove prefisso variantmeshes/ se presente."""
+    p = s.strip().replace("\\", "/").lower()
+    if p.startswith("variantmeshes/"):
+        p = p[len("variantmeshes/"):]
+    return p
+
+
 def load_added(path):
-    """Carica added_files.txt e restituisce un set di path normalizzati (lowercase, slash)."""
+    """Carica added_files.txt e restituisce un set di path normalizzati."""
     p = Path(path)
     if not p.exists():
         return set()
@@ -285,7 +293,7 @@ def load_added(path):
     for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
         line = line.strip()
         if line and not line.startswith("#"):
-            result.add(line.replace("\\", "/").lower())
+            result.add(norm_path(line))
     return result
 
 
@@ -315,7 +323,7 @@ def main():
         print(f"  ─  added_files.txt vuoto o non trovato — nessun filtro applicato\n")
 
     def already_added(path_str):
-        return path_str.replace("\\", "/").lower() in added
+        return norm_path(path_str) in added
 
     out = ["Needed Files", "═" * 62, ""]
 
@@ -411,7 +419,7 @@ def main():
                          if l.strip()]
         lines_after   = [l for l in lines_before
                          if l.strip().startswith("#")
-                         or l.strip().replace("\\", "/").lower() not in current_added]
+                         or norm_path(l.strip()) not in current_added]
         removed = len(lines_before) - len(lines_after)
         if removed:
             mp.write_text("\n".join(lines_after) + ("\n" if lines_after else ""), encoding="utf-8")
