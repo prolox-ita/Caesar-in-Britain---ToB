@@ -879,8 +879,10 @@ function renderCenterVmds() {{
             let tip = `${{vmd.folder}}/${{vmd.file}}`;
             if (unused) tip += '\\n⊘ Non in nessuna variante';
             if (vmd.parse_error) tip += `\\n⚠ XML malformato: ${{vmd.parse_error}}`;
-            if (vmd.missing_models && vmd.missing_models.length)
-                tip += `\\n⚠ Ref. non trovati (${{vmd.missing_models.length}}):\\n` + vmd.missing_models.join('\\n');
+            if (vmd.missing_models && vmd.missing_models.length) {{
+                const tot = vmd.missing_models.length + (vmd.models ? vmd.models.length : 0);
+                tip += `\\n⚠ Ref. non trovati (${{vmd.missing_models.length}}/${{tot}}):\\n` + vmd.missing_models.join('\\n');
+            }}
             el.title = tip;
             el.dataset.vmdId = vmd.id;
             el.dataset.col   = 'col-vmds';
@@ -905,10 +907,14 @@ function renderRightVmds() {{
         el.textContent = v.file;
         let tip = v.file;
         if (v.parse_error) tip += `\\n⚠ XML malformato: ${{v.parse_error}}`;
-        if (v.missing_vmds && v.missing_vmds.length)
-            tip += `\\n⚠ VMD ref. non trovati (${{v.missing_vmds.length}}):\\n` + v.missing_vmds.join('\\n');
-        if (v.missing_models && v.missing_models.length)
-            tip += `\\n⚠ Model ref. non trovati (${{v.missing_models.length}}):\\n` + v.missing_models.join('\\n');
+        if (v.missing_vmds && v.missing_vmds.length) {{
+            const tot = v.missing_vmds.length + (v.vmds ? v.vmds.length : 0);
+            tip += `\\n⚠ VMD ref. non trovati (${{v.missing_vmds.length}}/${{tot}}):\\n` + v.missing_vmds.join('\\n');
+        }}
+        if (v.missing_models && v.missing_models.length) {{
+            const tot = v.missing_models.length + (v.models ? v.models.length : 0);
+            tip += `\\n⚠ Model ref. non trovati (${{v.missing_models.length}}/${{tot}}):\\n` + v.missing_models.join('\\n');
+        }}
         el.title = tip;
         el.dataset.variantId = v.id;
         el.dataset.col = 'col-variants';
