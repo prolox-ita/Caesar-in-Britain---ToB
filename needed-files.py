@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 """
-Needed Files Checker
-────────────────────
-Partendo da "units_variants.txt" (lista di right-variant VMD, quarta colonna),
-risolve ricorsivamente tutte le dipendenze (VMD → models → textures)
-e produce "needed_files.txt" con solo i file ancora da aggiungere.
+Needed Files Checker + Copier
+──────────────────────────────
+Partendo da "units_variants.txt" (lista di right-variant VMD) risolve
+ricorsivamente tutte le dipendenze (VMD → models → textures), deduplica
+i file su base globale (ogni file una sola volta) e:
 
-Per ogni variant:
-  [PRESENTI - da aggiungere]  = file trovati nel mod ma non ancora nel pack
-  [ASSENTI  - non trovati]    = file referenziati ma non presenti nei folder scansionati
-
-I file già elencati in "added_files.txt" vengono rimossi dall'output.
+  1. Scrive needed_files.txt con PRESENTI e ASSENTI
+  2. Copia i file PRESENTI in:
+       <CIB_DEST>/variantmeshes/<percorso relativo>
+     mantenendo la struttura gerarchica
+  3. Aggiunge i file copiati ad added_files.txt
+  4. Riscrive needed_files.txt lasciando solo gli ASSENTI
+     (e gli eventuali file che non è stato possibile copiare)
 
 Usage:
   1. Scrivi in units_variants.txt un nome di variant per riga
-     (stem oppure nome completo con .variantmeshdefinition)
-  2. Scrivi in added_files.txt i file già aggiunti (uno per riga)
+     (stem o con .variantmeshdefinition; righe che iniziano con # sono ignorate)
+  2. Opzionalmente, scrivi in added_files.txt i file già presenti nel pack
   3. Esegui: python needed-files.py
 """
 
-import importlib.util
+import importlib.util, shutil
 from pathlib import Path
+from collections import defaultdict
 
 # ── Importa CONFIG e build_data da vmd-generate.py ──────────────
 _spec = importlib.util.spec_from_file_location(
@@ -35,6 +38,10 @@ _spec.loader.exec_module(_vmd)
 UNITS_VARIANTS_FILE = r"C:\Users\loren\Desktop\MK1212-website\units_variants.txt"
 ADDED_FILES_FILE    = r"C:\Users\loren\Desktop\MK1212-website\added_files.txt"
 OUTPUT_FILE         = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
+
+# Cartella di destinazione per la copia dei file presenti.
+# I file verranno copiati in:  CIB_DEST / <percorso relativo al mod root>
+CIB_DEST = r"C:\Users\loren\Desktop\MK1212-website\cib\da aggiungere\variantmeshes"
 # ═══════════════════════════════════════════════════════════════
 
 
@@ -42,7 +49,6 @@ def read_lines(filepath):
     """Legge un file testo, salta righe vuote e commenti (#)."""
     p = Path(filepath)
     if not p.exists():
-        print(f"  ⚠  File non trovato: {filepath}")
         return []
     return [
         line.strip()
@@ -53,32 +59,24 @@ def read_lines(filepath):
 
 def resolve_deps(variant, center_by_id, right_by_id, model_to_textures, known_tex):
     """
-    Risolve ricorsivamente tutte le dipendenze di un right-variant VMD.
-
-    Ritorna:
-      present  – set di path trovate nel mod (relative a models_root/vmds_root)
-      absent   – set di ref referenziate ma non trovate
+    Risolve ricorsivamente le dipendenze di un right-variant VMD.
+    Ritorna (present, absent) come set di path relative al mod root.
     """
     present = set()
     absent  = set()
 
-    def add_models_and_tex(node):
+    def add_node_files(node):
         for mp in node.get("models", []):
             present.add(mp)
             for tex in model_to_textures.get(mp, []):
-                if tex in known_tex:
-                    present.add(tex)
-                else:
-                    absent.add(tex)
+                (present if tex in known_tex else absent).add(tex)
         for ref in node.get("missing_models", []):
             absent.add(ref)
 
-    # Modelli diretti e missing della variant stessa
-    add_models_and_tex(variant)
+    add_node_files(variant)
     for ref in variant.get("missing_vmds", []):
         absent.add(ref)
 
-    # Percorri ricorsivamente tutti i VMD referenziati
     visited = set()
     queue   = list(variant.get("vmds", []))
 
@@ -90,17 +88,15 @@ def resolve_deps(variant, center_by_id, right_by_id, model_to_textures, known_te
 
         node = center_by_id.get(vid)
         if node:
-            # VMD centrale trovato
             present.add(f"{node['folder']}/{node['file']}")
-            add_models_and_tex(node)
+            add_node_files(node)
             for sub_id in node.get("sub_vmds", []):
                 if sub_id.lower() not in visited:
                     queue.append(sub_id)
         else:
-            # Prova tra le right variants (ref intra-variante)
             node = right_by_id.get(vid)
             if node and node["id"].lower() != variant["id"].lower():
-                add_models_and_tex(node)
+                add_node_files(node)
                 for ref in node.get("missing_vmds", []):
                     absent.add(ref)
                 for sub_id in node.get("vmds", []):
@@ -112,8 +108,62 @@ def resolve_deps(variant, center_by_id, right_by_id, model_to_textures, known_te
     return present, absent
 
 
+def source_and_dest(rel_path_str, source_root, dest_root):
+    """
+    Dato un path relativo come salvato da scan_* (che usa il nome della
+    root come prefisso per i file direttamente nella root), restituisce:
+      src  – Path assoluto del file sorgente
+      dst  – Path assoluto di destinazione sotto dest_root
+    """
+    root = Path(source_root)
+    p = rel_path_str.replace("\\", "/")
+    # Rimuovi eventuale prefisso "variantmeshes/" aggiunto per i file in root
+    root_prefix = root.name.lower() + "/"
+    stripped = p[len(root_prefix):] if p.lower().startswith(root_prefix) else p
+    src = root / stripped
+    dst = Path(dest_root) / stripped
+    return src, dst
+
+
+def sort_by_type(paths):
+    vmds     = sorted(p for p in paths if p.lower().endswith(".variantmeshdefinition"))
+    models   = sorted(p for p in paths if p.lower().endswith(".rigid_model_v2"))
+    textures = sorted(p for p in paths if p.lower().endswith(".dds"))
+    other    = sorted(p for p in paths
+                      if not any(p.lower().endswith(e)
+                                 for e in (".variantmeshdefinition", ".rigid_model_v2", ".dds")))
+    return vmds + models + textures + other
+
+
+def write_needed(output_path, present_map, absent_map, header_suffix=""):
+    """Scrive needed_files.txt. present/absent_map: {path → [variant, ...]}"""
+    SEP = "═" * 62
+    lines = [f"Needed Files Report{header_suffix}", SEP, ""]
+
+    if present_map:
+        lines.append(f"PRESENTI - da aggiungere al pack  ({len(present_map)} file)")
+        lines.append("─" * 62)
+        for p in sort_by_type(present_map):
+            variants_str = ", ".join(sorted(present_map[p]))
+            lines.append(f"  {p}   [{variants_str}]")
+        lines.append("")
+
+    if absent_map:
+        lines.append(f"ASSENTI - file non trovati nei folder mod  ({len(absent_map)} file)")
+        lines.append("─" * 62)
+        for a in sort_by_type(absent_map):
+            variants_str = ", ".join(sorted(absent_map[a]))
+            lines.append(f"  {a}   [{variants_str}]")
+        lines.append("")
+
+    lines += [SEP,
+              f"Presenti da aggiungere : {len(present_map)}",
+              f"Assenti (non trovati)  : {len(absent_map)}"]
+
+    Path(output_path).write_text("\n".join(lines), encoding="utf-8")
+
+
 def main():
-    # ── Scansione completa (riutilizza tutta la logica di vmd-generate) ──
     print("\n── Scansione ──────────────────────────────")
     (models_tree, center_vmds, right_vmds,
      textures_tree, tex_to_models, model_to_textures) = _vmd.build_data()
@@ -122,15 +172,12 @@ def main():
     right_by_id   = {v["id"].lower(): v for v in right_vmds}
     right_by_file = {v["file"].lower(): v for v in right_vmds}
 
-    # Set di tutti i path texture presenti nella cartella mod
     known_tex = {
         f"{folder}/{f}"
         for folder, files in textures_tree.items()
         for f in files
     }
 
-    # Calcola il prefisso relativo della cartella variants
-    # (per includere il file .variantmeshdefinition stesso nell'output)
     try:
         variants_prefix = str(
             Path(_vmd.CONFIG["variants_root"]).relative_to(
@@ -140,7 +187,9 @@ def main():
     except (ValueError, IndexError):
         variants_prefix = "variantmeshdefinitions"
 
-    # ── Leggi file di input ──────────────────────────────────────
+    source_root = _vmd.CONFIG["models_roots"][0]
+
+    # ── Input ────────────────────────────────────────────────────
     units     = read_lines(UNITS_VARIANTS_FILE)
     added_raw = read_lines(ADDED_FILES_FILE)
     added_names = {Path(a).name.lower() for a in added_raw}
@@ -151,8 +200,10 @@ def main():
     print(f"  →  Varianti da analizzare : {len(units)}")
     print(f"  →  File già aggiunti      : {len(added_raw)}\n")
 
-    # ── Risolvi dipendenze per ogni variant ─────────────────────
-    results = []
+    # ── Risolvi dipendenze con deduplicazione globale ────────────
+    # path → set di variant names che lo richiedono
+    all_present: dict[str, set] = defaultdict(set)
+    all_absent:  dict[str, set] = defaultdict(set)
 
     for unit in units:
         stem = Path(unit).stem.lower()
@@ -160,68 +211,72 @@ def main():
 
         variant = right_by_id.get(stem) or right_by_file.get(file)
         if variant is None:
-            results.append((unit, set(), {f"variant non trovata: {unit}"}))
+            all_absent[f"variant non trovata: {unit}"].add(unit)
             continue
 
         present, absent = resolve_deps(
             variant, center_by_id, right_by_id, model_to_textures, known_tex
         )
+        present.add(f"{variants_prefix}/{variant['file']}")
 
-        # Aggiungi il file della variant stessa
-        variant_file_path = f"{variants_prefix}/{variant['file']}"
-        present.add(variant_file_path)
+        for p in present:
+            if not is_added(p):
+                all_present[p].add(unit)
+        for a in absent:
+            if not is_added(a):
+                all_absent[a].add(unit)
 
-        # Rimuovi ciò che è già stato aggiunto
-        present_needed = {p for p in present if not is_added(p)}
-        absent_needed  = {a for a in absent  if not is_added(a)}
+    # ── Scrivi needed_files.txt iniziale ────────────────────────
+    write_needed(OUTPUT_FILE, all_present, all_absent)
+    print(f"✓  needed_files.txt scritto  ({len(all_present)} presenti, {len(all_absent)} assenti)")
 
-        results.append((unit, present_needed, absent_needed))
+    # ── Copia i file PRESENTI in CIB_DEST ───────────────────────
+    if not all_present:
+        print("   Nessun file da copiare.\n")
+        return
 
-    # ── Scrivi needed_files.txt ──────────────────────────────────
-    out = ["Needed Files Report", "=" * 62, ""]
-    total_p = total_a = 0
+    print(f"\n── Copia file → {CIB_DEST}")
+    copied  = []   # path copiati con successo
+    failed  = []   # path con errore di copia
 
-    for variant_name, present_needed, absent_needed in results:
-        out.append("─" * 62)
-        out.append(f"VARIANT: {variant_name}")
-        out.append("─" * 62)
+    for rel_path in sort_by_type(all_present):
+        src, dst = source_and_dest(rel_path, source_root, CIB_DEST)
+        if not src.exists():
+            print(f"  ⚠  Non trovato su disco: {src}")
+            failed.append(rel_path)
+            continue
+        try:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+            copied.append(rel_path)
+        except Exception as e:
+            print(f"  ⚠  Errore copia {rel_path}: {e}")
+            failed.append(rel_path)
 
-        # Suddividi per tipo di file per leggibilità
-        def split_by_type(paths):
-            vmds    = sorted(p for p in paths if p.lower().endswith(".variantmeshdefinition"))
-            models  = sorted(p for p in paths if p.lower().endswith(".rigid_model_v2"))
-            textures = sorted(p for p in paths if p.lower().endswith(".dds"))
-            other   = sorted(p for p in paths
-                             if not any(p.lower().endswith(e)
-                                        for e in (".variantmeshdefinition", ".rigid_model_v2", ".dds")))
-            return vmds + models + textures + other
+    print(f"  ✓  Copiati  : {len(copied)}")
+    if failed:
+        print(f"  ⚠  Falliti  : {len(failed)}")
 
-        if present_needed:
-            out.append(f"\n  [PRESENTI - da aggiungere al pack]  ({len(present_needed)})")
-            for p in split_by_type(present_needed):
-                out.append(f"    {p}")
-            total_p += len(present_needed)
-        else:
-            out.append("\n  [PRESENTI - nessuno da aggiungere]")
+    # ── Aggiorna added_files.txt ─────────────────────────────────
+    if copied:
+        existing_added = read_lines(ADDED_FILES_FILE)
+        new_added = existing_added + copied
+        Path(ADDED_FILES_FILE).write_text("\n".join(new_added) + "\n", encoding="utf-8")
+        print(f"  ✓  added_files.txt aggiornato (+{len(copied)} file)")
 
-        if absent_needed:
-            out.append(f"\n  [ASSENTI - file non trovati nei folder mod]  ({len(absent_needed)})")
-            for a in split_by_type(absent_needed):
-                out.append(f"    {a}")
-            total_a += len(absent_needed)
-
-        out.append("")
-
-    out += [
-        "=" * 62,
-        f"TOTALE presenti da aggiungere : {total_p}",
-        f"TOTALE assenti (non trovati)  : {total_a}",
-    ]
-
-    Path(OUTPUT_FILE).write_text("\n".join(out), encoding="utf-8")
-    print(f"✓  Scritto: {OUTPUT_FILE}")
-    print(f"   Presenti da aggiungere : {total_p}")
-    print(f"   Assenti (non trovati)  : {total_a}\n")
+    # ── Riscrive needed_files.txt: rimuovi i copiati ────────────
+    copied_set = set(copied)
+    present_remaining = {p: v for p, v in all_present.items() if p not in copied_set}
+    write_needed(
+        OUTPUT_FILE,
+        present_remaining,
+        all_absent,
+        header_suffix=" — aggiornato dopo copia",
+    )
+    print(f"  ✓  needed_files.txt aggiornato")
+    if present_remaining:
+        print(f"     Presenti ancora da copiare : {len(present_remaining)}")
+    print(f"     Assenti (non trovati)       : {len(all_absent)}\n")
 
 
 if __name__ == "__main__":
