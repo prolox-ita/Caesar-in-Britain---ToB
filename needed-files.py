@@ -1,136 +1,114 @@
 #!/usr/bin/env python3
 """
-Needed Files Checker + Copier
-──────────────────────────────
-Legge vmd-viewer.txt per la catena variant → VMD → modelli,
-MODEL_TO_TEXTURES dall'HTML per le texture, poi:
-
-  1. Scrive needed_files.txt separando PRESENTI e ASSENTI
-     (ogni file una sola volta; già in added_files.txt vengono rimossi)
-  2. Copia i PRESENTI in CIB_DEST mantenendo la gerarchia
-  3. Aggiunge i copiati ad added_files.txt
-  4. Riscrive needed_files.txt con solo ASSENTI e copia fallite
+Needed Files
+─────────────
+Legge units variants.txt, segue tutte le connessioni in vmd-viewer.txt
+(vmd → sub-vmd → ... → v2 → tex) e scrive needed_files.txt.
 
 Usage:
   1. Genera vmd-viewer.txt e vmd-viewer.html con vmd-generate.py
-  2. Scrivi in units_variants.txt i nomi delle variant (uno per riga)
-  3. Opzionalmente scrivi in added_files.txt i file già nel pack
-  4. Esegui: python needed-files.py
+  2. Scrivi in "units variants.txt" i nomi delle variant (una per riga)
+  3. Esegui: python needed-files.py
 """
 
-import json, re, shutil
+import json, re
 from pathlib import Path
-from collections import defaultdict
 
 # ═══════════════════════════════════════════════════════════════
 #  CONFIGURAZIONE
 # ═══════════════════════════════════════════════════════════════
 TXT_FILE   = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.txt"
 HTML_FILE  = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html"
-
-# Radice del mod: tutti i path relativi del txt partono da qui
-MOD_ROOT = r"D:\Thrones of Britannia\modding\variantmeshes"
-
-# Prefisso cartella variant destre (relativo a MOD_ROOT)
-VARIANTS_PREFIX = "variantmeshdefinitions"
-
-UNITS_VARIANTS_FILE = r"C:\Users\loren\Desktop\MK1212-website\units variants.txt"
-ADDED_FILES_FILE    = r"C:\Users\loren\Desktop\MK1212-website\added_files.txt"
-OUTPUT_FILE         = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
-CIB_DEST = r"C:\Users\loren\Desktop\MK1212-website\cib\da aggiungere\variantmeshes"
+UNITS_FILE = r"C:\Users\loren\Desktop\MK1212-website\units variants.txt"
+OUTPUT     = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
 # ═══════════════════════════════════════════════════════════════
 
 
-# ── Parsing di vmd-viewer.txt ────────────────────────────────────
+# ── Parsing vmd-viewer.txt ───────────────────────────────────────
 
-def parse_txt(txt_path):
+def parse_txt(path):
     """
-    Legge vmd-viewer.txt e restituisce 4 indici:
-      tex_by_name     : filename.lower() → "folder/filename"
-      model_by_name   : filename.lower() → "folder/filename"
-      center_by_id    : stem.lower()     → dict con file/folder/models/sub_vmds/missing
-      variant_by_id   : stem.lower()     → dict con file/vmds/models/missing_vmds/missing_models
+    Legge vmd-viewer.txt e restituisce 4 dizionari:
+      tex_by_name    : filename.lower() → "folder/filename"   (col 1)
+      model_by_name  : filename.lower() → "folder/filename"   (col 2)
+      center_by_id   : stem.lower()     → { file, folder,     (col 3)
+                                             models:[fname,…],
+                                             sub_vmds:[id,…],
+                                             missing:[ref,…] }
+      variant_by_id  : stem.lower()     → { file,             (col 4)
+                                             vmds:[id,…],
+                                             models:[fname,…],
+                                             missing_vmds:[…],
+                                             missing_models:[…] }
     """
-    tex_by_name    = {}
-    model_by_name  = {}
-    center_by_id   = {}
-    variant_by_id  = {}
+    tex_by_name   = {}
+    model_by_name = {}
+    center_by_id  = {}
+    variant_by_id = {}
 
-    col = 0          # 1=tex 2=models 3=center 4=variants
+    col      = 0
     folder   = ""
     cur_vmd  = None
     cur_var  = None
 
-    def _strip_parse_warn(s):
+    def strip_warn(s):
         return s[:-len(" ⚠parse")] if s.endswith(" ⚠parse") else s
 
-    for raw in Path(txt_path).read_text(encoding="utf-8", errors="replace").splitlines():
+    def csv(line, prefix):
+        return [x.strip() for x in line[len(prefix):].strip().split(",") if x.strip()]
+
+    for raw in Path(path).read_text(encoding="utf-8", errors="replace").splitlines():
         line = raw.rstrip()
 
-        # ── Rilevamento sezione ──────────────────────────────────
+        # sezione
         if   line.startswith("COLONNA 1"): col = 1; folder = ""; continue
         elif line.startswith("COLONNA 2"): col = 2; folder = ""; continue
         elif line.startswith("COLONNA 3"): col = 3; folder = ""; cur_vmd = None; continue
         elif line.startswith("COLONNA 4"): col = 4; cur_var = None; continue
         if col == 0: continue
-        if line.startswith("═") or line.startswith("─") or not line.strip(): continue
+        if not line.strip() or line.lstrip("═─").__len__() == 0: continue
 
-        # ── Col 1 e 2: textures e modelli ────────────────────────
+        # col 1 e 2 ─ textures e modelli
         if col in (1, 2):
             if line.startswith("  [") and line.endswith("]"):
                 folder = line.strip()[1:-1]
             elif line.startswith("    "):
                 fname = line.strip()
-                path  = f"{folder}/{fname}"
-                if col == 1: tex_by_name[fname.lower()]   = path
-                else:        model_by_name[fname.lower()]  = path
+                if col == 1: tex_by_name[fname.lower()]   = f"{folder}/{fname}"
+                else:        model_by_name[fname.lower()] = f"{folder}/{fname}"
 
-        # ── Col 3: VMD centrali ──────────────────────────────────
+        # col 3 ─ VMD centrali
         elif col == 3:
             if line.startswith("  [") and line.endswith("]"):
-                folder  = line.strip()[1:-1]
-                cur_vmd = None
+                folder = line.strip()[1:-1]; cur_vmd = None
             elif line.startswith("    ") and not line.startswith("      "):
-                fname = _strip_parse_warn(line.strip())
+                fname = strip_warn(line.strip())
                 if fname.lower().endswith(".variantmeshdefinition"):
                     cur_vmd = {"file": fname, "folder": folder,
                                "models": [], "sub_vmds": [], "missing": []}
                     center_by_id[Path(fname).stem.lower()] = cur_vmd
             elif line.startswith("      ") and cur_vmd is not None:
-                content = line.strip()
-                if content.startswith("modelli    :"):
-                    cur_vmd["models"]   = _csv(content, "modelli    :")
-                elif content.startswith("sub-vmd    :"):
-                    cur_vmd["sub_vmds"] = _csv(content, "sub-vmd    :")
-                elif content.startswith("⚠ mancante :"):
-                    cur_vmd["missing"].append(content[len("⚠ mancante :"):].strip())
+                c = line.strip()
+                if   c.startswith("modelli    :"): cur_vmd["models"]   = csv(c, "modelli    :")
+                elif c.startswith("sub-vmd    :"): cur_vmd["sub_vmds"] = csv(c, "sub-vmd    :")
+                elif c.startswith("⚠ mancante :"): cur_vmd["missing"].append(c[len("⚠ mancante :"):].strip())
 
-        # ── Col 4: varianti destre ───────────────────────────────
+        # col 4 ─ varianti destre
         elif col == 4:
             if line.startswith("  ") and not line.startswith("    "):
-                fname = _strip_parse_warn(line.strip())
+                fname = strip_warn(line.strip())
                 if fname.lower().endswith(".variantmeshdefinition"):
                     cur_var = {"file": fname, "vmds": [], "models": [],
                                "missing_vmds": [], "missing_models": []}
                     variant_by_id[Path(fname).stem.lower()] = cur_var
             elif line.startswith("    ") and cur_var is not None:
-                content = line.strip()
-                if content.startswith("vmd         :"):
-                    cur_var["vmds"]           = _csv(content, "vmd         :")
-                elif content.startswith("modelli     :"):
-                    cur_var["models"]          = _csv(content, "modelli     :")
-                elif content.startswith("⚠ vmd mancante   :"):
-                    cur_var["missing_vmds"].append(content[len("⚠ vmd mancante   :"):].strip())
-                elif content.startswith("⚠ model mancante :"):
-                    cur_var["missing_models"].append(content[len("⚠ model mancante :"):].strip())
+                c = line.strip()
+                if   c.startswith("vmd         :"): cur_var["vmds"]           = csv(c, "vmd         :")
+                elif c.startswith("modelli     :"): cur_var["models"]          = csv(c, "modelli     :")
+                elif c.startswith("⚠ vmd mancante   :"): cur_var["missing_vmds"].append(c[len("⚠ vmd mancante   :"):].strip())
+                elif c.startswith("⚠ model mancante :"): cur_var["missing_models"].append(c[len("⚠ model mancante :"):].strip())
 
     return tex_by_name, model_by_name, center_by_id, variant_by_id
-
-
-def _csv(line, prefix):
-    """Estrae lista CSV dopo un prefisso."""
-    rest = line[len(prefix):].strip()
-    return [x.strip() for x in rest.split(",") if x.strip()]
 
 
 # ── MODEL_TO_TEXTURES dall'HTML ──────────────────────────────────
@@ -144,37 +122,38 @@ def load_model_to_textures(html_path):
         val, _ = json.JSONDecoder().raw_decode(html, m.end())
         return val
     except Exception as e:
-        print(f"  ⚠  Impossibile leggere MODEL_TO_TEXTURES dall'HTML: {e}")
+        print(f"  ⚠  MODEL_TO_TEXTURES non leggibile: {e}")
         return {}
 
 
-# ── Risoluzione dipendenze ────────────────────────────────────────
+# ── Raccolta dipendenze ricorsiva ────────────────────────────────
 
-def resolve(unit_stem, variant_by_id, center_by_id,
+def collect(variant_stem, variant_by_id, center_by_id,
             model_by_name, tex_by_name, model_to_textures):
     """
-    Risolve tutte le dipendenze di una variante.
-    Ritorna (present, absent) — set di path (o ref) univoche.
+    Raccoglie ricorsivamente tutti i file necessari per una variant.
+    Ritorna:
+      vmds    – set di path VMD  (folder/file.variantmeshdefinition)
+      v2s     – set di path V2   (folder/file.rigid_model_v2)
+      texs    – set di filename texture (.dds)
+      missing – set di ref non trovate
     """
-    present = set()   # path relativa trovata nel mod
-    absent  = set()   # ref non trovata
+    vmds    = set()
+    v2s     = set()
+    texs    = set()
+    missing = set()
 
-    variant = variant_by_id.get(unit_stem)
+    variant = variant_by_id.get(variant_stem)
     if variant is None:
-        return present, absent
+        return None
 
-    # Il file della variante stessa
-    present.add(f"{VARIANTS_PREFIX}/{variant['file']}")
-
-    # Modelli diretti nella variante
+    # Modelli diretti della variant
     _add_models(variant.get("models", []), model_by_name,
-                model_to_textures, tex_by_name, present, absent)
-    for ref in variant.get("missing_vmds", []):
-        absent.add(ref)
-    for ref in variant.get("missing_models", []):
-        absent.add(ref)
+                model_to_textures, tex_by_name, v2s, texs)
+    for r in variant.get("missing_models", []): missing.add(r)
+    for r in variant.get("missing_vmds",   []): missing.add(r)
 
-    # VMD centrali referenziati (ricorsivo via sub_vmds)
+    # Percorri i VMD referenziati ricorsivamente
     visited = set()
     queue   = [v.lower() for v in variant.get("vmds", [])]
 
@@ -184,47 +163,44 @@ def resolve(unit_stem, variant_by_id, center_by_id,
             continue
         visited.add(vid)
 
-        vmd = center_by_id.get(vid)
-        if vmd:
-            present.add(f"{vmd['folder']}/{vmd['file']}")
-            _add_models(vmd.get("models", []), model_by_name,
-                        model_to_textures, tex_by_name, present, absent)
-            for ref in vmd.get("missing", []):
-                absent.add(ref)
-            for sub in vmd.get("sub_vmds", []):
+        node = center_by_id.get(vid)
+        if node:
+            vmds.add(f"{node['folder']}/{node['file']}")
+            _add_models(node.get("models", []), model_by_name,
+                        model_to_textures, tex_by_name, v2s, texs)
+            for r in node.get("missing", []): missing.add(r)
+            for sub in node.get("sub_vmds", []):
                 if sub.lower() not in visited:
                     queue.append(sub.lower())
         else:
-            # Potrebbe essere un'altra right variant
-            if vid in variant_by_id:
-                other = variant_by_id[vid]
+            # Ref intra-variante o non trovata
+            other = variant_by_id.get(vid)
+            if other:
                 _add_models(other.get("models", []), model_by_name,
-                            model_to_textures, tex_by_name, present, absent)
-                for ref in other.get("missing_models", []):
-                    absent.add(ref)
+                            model_to_textures, tex_by_name, v2s, texs)
+                for r in other.get("missing_models", []): missing.add(r)
                 for sub in other.get("vmds", []):
                     if sub.lower() not in visited:
                         queue.append(sub.lower())
             else:
-                absent.add(vid + ".variantmeshdefinition")
+                missing.add(vid + ".variantmeshdefinition")
 
-    return present, absent
+    return vmds, v2s, texs, missing
 
 
-def _add_models(model_names, model_by_name, model_to_textures,
-                tex_by_name, present, absent):
-    for fname in model_names:
-        full = model_by_name.get(fname.lower())
-        if full:
-            present.add(full)
-            for tex in model_to_textures.get(full, []):
-                tname = Path(tex).name.lower()
-                if tname in tex_by_name:
-                    present.add(tex_by_name[tname])
-                else:
-                    absent.add(tex)
-        else:
-            absent.add(fname)
+def _add_models(names, model_by_name, model_to_textures,
+                tex_by_name, v2s, texs):
+    for fname in names:
+        # Il modello è presente nel mod (è nella lista "models" del vmd)
+        full = model_by_name.get(fname.lower(), fname)
+        v2s.add(full)
+        # Texture associate
+        for tex in model_to_textures.get(full, []):
+            tname = Path(tex).name.lower()
+            if tname in tex_by_name:
+                texs.add(tex_by_name[tname])
+            else:
+                texs.add(Path(tex).name)   # path base-game: solo filename
 
 
 # ── Utilità ──────────────────────────────────────────────────────
@@ -234,45 +210,8 @@ def read_lines(path):
     if not p.exists():
         print(f"  ⚠  File non trovato: {path}")
         return []
-    lines = [l.strip() for l in p.read_text(encoding="utf-8", errors="replace").splitlines()
-             if l.strip() and not l.strip().startswith("#")]
-    return lines
-
-
-def sort_by_type(paths):
-    ext_order = (".variantmeshdefinition", ".rigid_model_v2", ".dds")
-    out = []
-    for e in ext_order:
-        out += sorted(p for p in paths if p.lower().endswith(e))
-    out += sorted(p for p in paths if not any(p.lower().endswith(e) for e in ext_order))
-    return out
-
-
-def source_dest(rel_path):
-    root   = Path(MOD_ROOT)
-    p      = rel_path.replace("\\", "/")
-    prefix = root.name.lower() + "/"
-    stripped = p[len(prefix):] if p.lower().startswith(prefix) else p
-    return root / stripped, Path(CIB_DEST) / stripped
-
-
-def write_needed(path, present_map, absent_map, suffix=""):
-    SEP = "═" * 62
-    lines = [f"Needed Files Report{suffix}", SEP, ""]
-    if present_map:
-        lines += [f"PRESENTI - da aggiungere  ({len(present_map)} file)", "─" * 62]
-        for f in sort_by_type(present_map):
-            lines.append(f"  {f}   [{', '.join(sorted(present_map[f]))}]")
-        lines.append("")
-    if absent_map:
-        lines += [f"ASSENTI - non trovati nei folder mod  ({len(absent_map)} file)", "─" * 62]
-        for f in sort_by_type(absent_map):
-            lines.append(f"  {f}   [{', '.join(sorted(absent_map[f]))}]")
-        lines.append("")
-    lines += [SEP,
-              f"Presenti da aggiungere : {len(present_map)}",
-              f"Assenti (non trovati)  : {len(absent_map)}"]
-    Path(path).write_text("\n".join(lines), encoding="utf-8")
+    return [l.strip() for l in p.read_text(encoding="utf-8", errors="replace").splitlines()
+            if l.strip() and not l.strip().startswith("#")]
 
 
 # ── Main ─────────────────────────────────────────────────────────
@@ -286,80 +225,66 @@ def main():
     print(f"  ✓  Varianti   : {len(variant_by_id)}")
 
     model_to_textures = load_model_to_textures(HTML_FILE)
-    print(f"  ✓  MODEL_TO_TEXTURES: {len(model_to_textures)} entries")
+    print(f"  ✓  Model→Tex  : {len(model_to_textures)} entries")
 
-    units     = read_lines(UNITS_VARIANTS_FILE)
-    added_raw = read_lines(ADDED_FILES_FILE)
-    added_names = {Path(a).name.lower() for a in added_raw}
+    units = read_lines(UNITS_FILE)
+    if not units:
+        print("\n  ⚠  units variants.txt vuoto o non trovato.\n")
+        return
+    print(f"\n  →  Varianti richieste: {len(units)}\n")
 
-    def is_added(p): return Path(p).name.lower() in added_names
+    out = ["Needed Files", "═" * 62, ""]
 
-    print(f"\n  →  Varianti : {len(units)}   già aggiunti : {len(added_raw)}\n")
-
-    # ── Risolvi ──────────────────────────────────────────────────
-    all_present: dict = defaultdict(set)
-    all_absent:  dict = defaultdict(set)
+    total_vmd = total_v2 = total_tex = total_miss = 0
 
     for unit in units:
         stem = Path(unit).stem.lower()
-        if stem not in variant_by_id:
-            print(f"  ⚠  [{unit}] non trovata nel txt (rigenerare vmd-viewer con vmd-generate.py)")
-            all_absent[f"variant non trovata: {unit}"].add(unit)
+        result = collect(stem, variant_by_id, center_by_id,
+                         model_by_name, tex_by_name, model_to_textures)
+
+        out.append("─" * 62)
+        out.append(f"VARIANT: {unit}")
+        out.append("─" * 62)
+
+        if result is None:
+            out.append(f"  ⚠  Non trovata in vmd-viewer.txt (rigenerare con vmd-generate.py)")
+            out.append("")
+            print(f"  ⚠  [{unit}] non trovata")
             continue
 
-        v = variant_by_id[stem]
-        present, absent = resolve(stem, variant_by_id, center_by_id,
-                                  model_by_name, tex_by_name, model_to_textures)
+        vmds, v2s, texs, missing = result
+        print(f"  ✓  [{unit}]  vmd={len(vmds)}  v2={len(v2s)}  tex={len(texs)}  missing={len(missing)}")
 
-        n_filtered = sum(1 for p in present if is_added(p))
-        print(f"  ✓  [{unit}]  vmds={len(v['vmds'])} models={len(v['models'])} "
-              f"→ {len(present)} presenti, {len(absent)} assenti"
-              + (f"  ({n_filtered} già in added_files)" if n_filtered else ""))
+        if vmds:
+            out.append(f"\n  VMD  ({len(vmds)})")
+            for f in sorted(vmds): out.append(f"    {f}")
 
-        for p in present:
-            if not is_added(p): all_present[p].add(unit)
-        for a in absent:
-            if not is_added(a): all_absent[a].add(unit)
+        if v2s:
+            out.append(f"\n  V2   ({len(v2s)})")
+            for f in sorted(v2s): out.append(f"    {f}")
 
-    # ── Scrivi needed_files.txt ──────────────────────────────────
-    write_needed(OUTPUT_FILE, all_present, all_absent)
-    print(f"\n✓  needed_files.txt  ({len(all_present)} presenti, {len(all_absent)} assenti)")
+        if texs:
+            out.append(f"\n  TEX  ({len(texs)})")
+            for f in sorted(texs): out.append(f"    {f}")
 
-    if not all_present:
-        print("   Nessun file presente da copiare.\n")
-        return
+        if missing:
+            out.append(f"\n  ⚠ NON TROVATI  ({len(missing)})")
+            for f in sorted(missing): out.append(f"    {f}")
 
-    # ── Copia PRESENTI → CIB_DEST ────────────────────────────────
-    print(f"\n── Copia → {CIB_DEST}")
-    copied, failed = [], []
+        out.append("")
+        total_vmd  += len(vmds)
+        total_v2   += len(v2s)
+        total_tex  += len(texs)
+        total_miss += len(missing)
 
-    for rel in sort_by_type(all_present):
-        src, dst = source_dest(rel)
-        if not src.exists():
-            print(f"  ⚠  Non su disco: {src}")
-            failed.append(rel)
-            continue
-        try:
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src, dst)
-            copied.append(rel)
-        except Exception as e:
-            print(f"  ⚠  Errore: {rel}: {e}")
-            failed.append(rel)
+    out += ["═" * 62,
+            f"Totale VMD        : {total_vmd}",
+            f"Totale V2         : {total_v2}",
+            f"Totale TEX        : {total_tex}",
+            f"Totale non trovati: {total_miss}"]
 
-    print(f"  ✓  Copiati : {len(copied)}" + (f"   Falliti : {len(failed)}" if failed else ""))
-
-    # ── Aggiorna added_files.txt ─────────────────────────────────
-    if copied:
-        Path(ADDED_FILES_FILE).write_text(
-            "\n".join(read_lines(ADDED_FILES_FILE) + copied) + "\n", encoding="utf-8")
-        print(f"  ✓  added_files.txt +{len(copied)}")
-
-    # ── Riscrive needed_files.txt finale ─────────────────────────
-    remaining = {p: v for p, v in all_present.items() if p not in set(copied)}
-    write_needed(OUTPUT_FILE, remaining, all_absent, suffix=" — post copia")
-    print(f"  ✓  needed_files.txt aggiornato  "
-          f"(rimasti: {len(remaining)} presenti, {len(all_absent)} assenti)\n")
+    Path(OUTPUT).write_text("\n".join(out), encoding="utf-8")
+    print(f"\n✓  Scritto: {OUTPUT}\n")
 
 
 if __name__ == "__main__":
