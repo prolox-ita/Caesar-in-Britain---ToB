@@ -25,7 +25,7 @@ MISSING_FILE = r"C:\Users\loren\Desktop\MK1212-website\missing_files.txt"
 OUTPUT       = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
 
 # Cartella radice da cui copiare i file (es. dati estratti del gioco o della mod sorgente)
-SOURCE_DIR   = r"D:\Thrones of Britannia\modding"
+SOURCE_DIR   = r"D:\Thrones of Britannia\modding\variantmeshes"
 # Destinazione copia — sottocartelle preservate
 CIB_DIR      = r"D:\Thrones of Britannia\modding\cib\da aggiungere"
 # ═══════════════════════════════════════════════════════════════
@@ -238,17 +238,33 @@ def append_lines(path, lines):
 def copy_files(present_files):
     """
     Copia i file da SOURCE_DIR/path → CIB_DIR/path preservando le sottocartelle.
+
+    SOURCE_DIR punta a variantmeshes\. I file nella root di quella cartella
+    vengono salvati con il prefisso "variantmeshes/" (es. "variantmeshes/foo.vmd"):
+    in quel caso strippiamo quel prefisso per costruire il path sorgente corretto,
+    mantenendolo però nel percorso di destinazione.
+
     Restituisce (copiati, non_trovati).
     """
     copied    = []
     not_found = []
     src_root  = Path(SOURCE_DIR)
     dst_root  = Path(CIB_DIR)
+    src_name  = src_root.name.lower()   # "variantmeshes"
 
     for rel_path in sorted(present_files):
-        norm = rel_path.replace("\\", "/")
-        src  = src_root / norm.replace("/", "\\")
-        dst  = dst_root / norm.replace("/", "\\")
+        norm  = rel_path.replace("\\", "/")
+        parts = norm.split("/")
+
+        # I file nella root di variantmeshes hanno folder="variantmeshes":
+        # strippiamo quel prefisso solo per il percorso sorgente.
+        if parts[0].lower() == src_name and len(parts) > 1:
+            src_rel = "/".join(parts[1:])
+        else:
+            src_rel = norm
+
+        src = src_root / src_rel.replace("/", "\\")
+        dst = dst_root / norm.replace("/", "\\")
 
         if not src.exists():
             not_found.append(rel_path)
