@@ -27,7 +27,7 @@ OUTPUT       = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
 # Cartella radice da cui copiare i file (es. dati estratti del gioco o della mod sorgente)
 SOURCE_DIR   = r"D:\Thrones of Britannia\modding\variantmeshes"
 # Destinazione copia — sottocartelle preservate
-CIB_DIR      = r"D:\Thrones of Britannia\modding\cib\da aggiungere"
+CIB_DIR      = r"D:\Thrones of Britannia\modding\cib\da aggiungere\variantmeshes"
 # ═══════════════════════════════════════════════════════════════
 
 
