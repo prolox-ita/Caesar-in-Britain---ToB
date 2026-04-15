@@ -11,17 +11,23 @@ Usage:
   3. Esegui: python needed-files.py
 """
 
-import json, re
+import json, re, shutil
 from pathlib import Path
 
 # ═══════════════════════════════════════════════════════════════
 #  CONFIGURAZIONE
 # ═══════════════════════════════════════════════════════════════
-TXT_FILE    = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.txt"
-HTML_FILE   = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html"
-UNITS_FILE  = r"C:\Users\loren\Desktop\MK1212-website\units variants.txt"
-ADDED_FILE  = r"C:\Users\loren\Desktop\MK1212-website\added_files.txt"
-OUTPUT      = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
+TXT_FILE     = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.txt"
+HTML_FILE    = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html"
+UNITS_FILE   = r"C:\Users\loren\Desktop\MK1212-website\units variants.txt"
+ADDED_FILE   = r"C:\Users\loren\Desktop\MK1212-website\added_files.txt"
+MISSING_FILE = r"C:\Users\loren\Desktop\MK1212-website\missing_files.txt"
+OUTPUT       = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
+
+# Cartella radice da cui copiare i file (es. dati estratti del gioco o della mod sorgente)
+SOURCE_DIR   = r"C:\Users\loren\Desktop\CARTELLA_SORGENTE"
+# Destinazione copia — sottocartelle preservate
+CIB_DIR      = r"C:\Users\loren\Desktop\MK1212-website\cib\da aggiungere"
 # ═══════════════════════════════════════════════════════════════
 
 
@@ -215,6 +221,43 @@ def read_lines(path):
             if l.strip() and not l.strip().startswith("#")]
 
 
+def append_lines(path, lines):
+    """Aggiunge righe al file (senza duplicati rispetto al contenuto esistente)."""
+    p = Path(path)
+    existing = set()
+    if p.exists():
+        existing = {l.strip() for l in p.read_text(encoding="utf-8", errors="replace").splitlines()
+                    if l.strip() and not l.strip().startswith("#")}
+    new_lines = [l for l in sorted(lines) if l not in existing]
+    if new_lines:
+        with p.open("a", encoding="utf-8") as f:
+            f.write("\n".join(new_lines) + "\n")
+    return len(new_lines)
+
+
+def copy_files(present_files):
+    """
+    Copia i file da SOURCE_DIR/path → CIB_DIR/path preservando le sottocartelle.
+    Restituisce (copiati, non_trovati).
+    """
+    copied      = []
+    not_found   = []
+    src_root    = Path(SOURCE_DIR)
+    dst_root    = Path(CIB_DIR)
+
+    for rel_path in sorted(present_files):
+        src = src_root / rel_path.replace("/", "\\")
+        dst = dst_root / rel_path.replace("/", "\\")
+        if not src.exists():
+            not_found.append(rel_path)
+            continue
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        copied.append(rel_path)
+
+    return copied, not_found
+
+
 def load_added(path):
     """Carica added_files.txt e restituisce un set di path normalizzati (lowercase, slash)."""
     p = Path(path)
@@ -259,6 +302,8 @@ def main():
     out = ["Needed Files", "═" * 62, ""]
 
     total_vmd = total_v2 = total_tex = total_miss = 0
+    all_present = set()   # tutti i file trovati (VMD + V2 + TEX), da copiare
+    all_missing = set()   # tutti i NON TROVATI, da loggare in missing_files.txt
 
     for unit in units:
         stem = Path(unit).stem.lower()
@@ -305,6 +350,8 @@ def main():
         total_v2   += len(v2s)
         total_tex  += len(texs)
         total_miss += len(missing)
+        all_present.update(vmds, v2s, texs)
+        all_missing.update(missing)
 
     out += ["═" * 62,
             f"Totale VMD        : {total_vmd}",
@@ -314,6 +361,29 @@ def main():
 
     Path(OUTPUT).write_text("\n".join(out), encoding="utf-8")
     print(f"\n✓  Scritto: {OUTPUT}\n")
+
+    # ── 1. NON TROVATI → missing_files.txt ──────────────────────────
+    if all_missing:
+        n = append_lines(MISSING_FILE, all_missing)
+        print(f"  ✓  missing_files.txt  (+{n} nuovi, {len(all_missing)} totali questa run)")
+    else:
+        print(f"  ─  Nessun file mancante da registrare")
+
+    # ── 2. Copia file presenti → cib/da aggiungere ──────────────────
+    print(f"\n── Copia file ({len(all_present)}) → {CIB_DIR}")
+    copied, not_found_on_disk = copy_files(all_present)
+    print(f"  ✓  Copiati    : {len(copied)}")
+    if not_found_on_disk:
+        print(f"  ⚠  Non trovati su disco ({len(not_found_on_disk)}):")
+        for f in not_found_on_disk:
+            print(f"       {f}")
+
+    # ── 3. File copiati → added_files.txt ───────────────────────────
+    if copied:
+        n = append_lines(ADDED_FILE, copied)
+        print(f"\n  ✓  added_files.txt  (+{n} nuovi aggiunti)\n")
+    else:
+        print(f"\n  ─  Nessun file da aggiungere ad added_files.txt\n")
 
 
 if __name__ == "__main__":
