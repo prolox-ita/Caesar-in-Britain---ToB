@@ -213,20 +213,33 @@ def main():
         stem = Path(unit).stem.lower()
         variant = right_by_id.get(stem) or right_by_file.get(stem + ".variantmeshdefinition")
         if variant is None:
+            print(f"  ⚠  [{unit}] non trovata in RIGHT_VMDS — la variante non è stata scansionata dall'HTML")
             all_absent[f"variant non trovata: {unit}"].add(unit)
             continue
+
+        print(f"  ✓  [{unit}]")
+        print(f"       vmds={len(variant.get('vmds', []))}  "
+              f"models={len(variant.get('models', []))}  "
+              f"missing_vmds={len(variant.get('missing_vmds', []))}  "
+              f"missing_models={len(variant.get('missing_models', []))}")
 
         present, absent = resolve_deps(
             variant, center_by_id, right_by_id, model_to_textures, known_tex
         )
         present.add(f"{VARIANTS_PREFIX}/{variant['file']}")
 
-        for p in present:
-            if not is_added(p):
-                all_present[p].add(unit)
-        for a in absent:
-            if not is_added(a):
-                all_absent[a].add(unit)
+        present_new = {p for p in present  if not is_added(p)}
+        absent_new  = {a for a in absent   if not is_added(a)}
+        filtered    = len(present) - len(present_new)
+
+        print(f"       dipendenze risolte: {len(present)} presenti, {len(absent)} assenti")
+        if filtered:
+            print(f"       già in added_files: {filtered} rimossi")
+
+        for p in present_new:
+            all_present[p].add(unit)
+        for a in absent_new:
+            all_absent[a].add(unit)
 
     # ── Scrivi needed_files.txt iniziale ────────────────────────
     write_needed(OUTPUT_FILE, all_present, all_absent)
