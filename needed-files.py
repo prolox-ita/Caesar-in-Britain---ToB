@@ -403,6 +403,22 @@ def main():
     else:
         print(f"\n  ─  Nessun file da aggiungere ad added_files.txt\n")
 
+    # ── 4. Rimuovi da missing_files.txt i file ora in added_files.txt ─
+    mp = Path(MISSING_FILE)
+    if mp.exists():
+        current_added = load_added(ADDED_FILE)
+        lines_before  = [l for l in mp.read_text(encoding="utf-8", errors="replace").splitlines()
+                         if l.strip()]
+        lines_after   = [l for l in lines_before
+                         if l.strip().startswith("#")
+                         or l.strip().replace("\\", "/").lower() not in current_added]
+        removed = len(lines_before) - len(lines_after)
+        if removed:
+            mp.write_text("\n".join(lines_after) + ("\n" if lines_after else ""), encoding="utf-8")
+            print(f"  ✓  missing_files.txt  (-{removed} rimossi perché ora in added_files.txt)\n")
+        else:
+            print(f"  ─  missing_files.txt invariato\n")
+
 
 if __name__ == "__main__":
     main()
