@@ -400,6 +400,77 @@ def build_data():
     return models_tree, center_vmds, right_vmds, textures_tree, tex_to_models, model_to_textures
 
 
+def generate_txt_report(models_tree, center_vmds, right_vmds, textures_tree):
+    """Genera un report testuale raggruppato per le 4 colonne del viewer."""
+    SEP  = "═" * 62
+    SEP2 = "─" * 62
+    lines = [
+        "VMD Viewer – Report",
+        SEP, "",
+    ]
+
+    # ── Colonna 1 – Textures ─────────────────────────────────────
+    total_tex = sum(len(v) for v in textures_tree.values())
+    lines += [f"COLONNA 1 – TEXTURES (.dds)   [{total_tex} file]", SEP2]
+    for folder in sorted(textures_tree):
+        lines.append(f"\n  [{folder}]")
+        for f in textures_tree[folder]:
+            lines.append(f"    {f}")
+    lines += ["", ""]
+
+    # ── Colonna 2 – Modelli ──────────────────────────────────────
+    total_mod = sum(len(v) for v in models_tree.values())
+    lines += [f"COLONNA 2 – MODELLI (.rigid_model_v2)   [{total_mod} file]", SEP2]
+    for folder in sorted(models_tree):
+        lines.append(f"\n  [{folder}]")
+        for f in models_tree[folder]:
+            lines.append(f"    {f}")
+    lines += ["", ""]
+
+    # ── Colonna 3 – VMD Centrali ─────────────────────────────────
+    lines += [f"COLONNA 3 – VMD CENTRALI   [{len(center_vmds)} file]", SEP2]
+    # Raggruppa per folder
+    from collections import defaultdict
+    by_folder = defaultdict(list)
+    for v in center_vmds:
+        by_folder[v["folder"]].append(v)
+    for folder in sorted(by_folder):
+        lines.append(f"\n  [{folder}]")
+        for v in sorted(by_folder[folder], key=lambda x: x["file"]):
+            err = " ⚠parse" if v.get("parse_error") else ""
+            lines.append(f"    {v['file']}{err}")
+            if v["models"]:
+                lines.append(f"      modelli    : {', '.join(Path(m).name for m in v['models'])}")
+            if v["sub_vmds"]:
+                lines.append(f"      sub-vmd    : {', '.join(v['sub_vmds'])}")
+            if v["in_variants"]:
+                lines.append(f"      in_variants: {', '.join(v['in_variants'])}")
+            if v["missing_models"]:
+                for ref in v["missing_models"]:
+                    lines.append(f"      ⚠ mancante : {ref}")
+    lines += ["", ""]
+
+    # ── Colonna 4 – Varianti Destre ──────────────────────────────
+    lines += [f"COLONNA 4 – VARIANTI DESTRE   [{len(right_vmds)} file]", SEP2, ""]
+    for v in sorted(right_vmds, key=lambda x: x["file"]):
+        err = " ⚠parse" if v.get("parse_error") else ""
+        lines.append(f"  {v['file']}{err}")
+        if v["vmds"]:
+            lines.append(f"    vmd         : {', '.join(v['vmds'])}")
+        if v["models"]:
+            lines.append(f"    modelli     : {', '.join(Path(m).name for m in v['models'])}")
+        if v.get("missing_vmds"):
+            for ref in v["missing_vmds"]:
+                lines.append(f"    ⚠ vmd mancante   : {ref}")
+        if v.get("missing_models"):
+            for ref in v["missing_models"]:
+                lines.append(f"    ⚠ model mancante : {ref}")
+        lines.append("")
+
+    lines.append(SEP)
+    return "\n".join(lines)
+
+
 def generate_html(models_tree, center_vmds, right_vmds, textures_tree, tex_to_models, model_to_textures):
     data_js = (
         f"const TEXTURES_TREE    = {json.dumps(textures_tree,     ensure_ascii=False, indent=2)};\n\n"
@@ -1133,4 +1204,10 @@ if __name__ == "__main__":
     out = Path(CONFIG.get("output", "vmd-viewer.html"))
     out.write_text(html, encoding="utf-8")
     print(f"  ✓  Generato: {out.resolve()}")
+
+    # Report testuale accanto all'HTML (sempre aggiornato)
+    txt_out = out.with_suffix(".txt")
+    txt = generate_txt_report(models_tree, center_vmds, right_vmds, textures_tree)
+    txt_out.write_text(txt, encoding="utf-8")
+    print(f"  ✓  Report  : {txt_out.resolve()}")
     print(f"     Aprilo nel browser con doppio click.\n")
