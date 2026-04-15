@@ -25,7 +25,7 @@ MISSING_FILE = r"C:\Users\loren\Desktop\MK1212-website\missing_files.txt"
 OUTPUT       = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
 
 # Cartella radice da cui copiare i file (es. dati estratti del gioco o della mod sorgente)
-SOURCE_DIR   = r"C:\Users\loren\Desktop\CARTELLA_SORGENTE"
+SOURCE_DIR   = r"D:\Thrones of Britannia\modding"
 # Destinazione copia — sottocartelle preservate
 CIB_DIR      = r"C:\Users\loren\Desktop\MK1212-website\cib\da aggiungere"
 # ═══════════════════════════════════════════════════════════════
@@ -240,14 +240,16 @@ def copy_files(present_files):
     Copia i file da SOURCE_DIR/path → CIB_DIR/path preservando le sottocartelle.
     Restituisce (copiati, non_trovati).
     """
-    copied      = []
-    not_found   = []
-    src_root    = Path(SOURCE_DIR)
-    dst_root    = Path(CIB_DIR)
+    copied    = []
+    not_found = []
+    src_root  = Path(SOURCE_DIR)
+    dst_root  = Path(CIB_DIR)
 
     for rel_path in sorted(present_files):
-        src = src_root / rel_path.replace("/", "\\")
-        dst = dst_root / rel_path.replace("/", "\\")
+        norm = rel_path.replace("\\", "/")
+        src  = src_root / norm.replace("/", "\\")
+        dst  = dst_root / norm.replace("/", "\\")
+
         if not src.exists():
             not_found.append(rel_path)
             continue
