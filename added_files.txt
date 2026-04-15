@@ -1,0 +1,3 @@
+# File già aggiunti al mod.
+# Uno per riga, stesso formato di needed_files.txt (es: variantmeshes/units/foo.variantmeshdefinition)
+# I file qui elencati vengono esclusi automaticamente da needed_files.txt.

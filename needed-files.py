@@ -17,10 +17,11 @@ from pathlib import Path
 # ═══════════════════════════════════════════════════════════════
 #  CONFIGURAZIONE
 # ═══════════════════════════════════════════════════════════════
-TXT_FILE   = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.txt"
-HTML_FILE  = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html"
-UNITS_FILE = r"C:\Users\loren\Desktop\MK1212-website\units variants.txt"
-OUTPUT     = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
+TXT_FILE    = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.txt"
+HTML_FILE   = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html"
+UNITS_FILE  = r"C:\Users\loren\Desktop\MK1212-website\units variants.txt"
+ADDED_FILE  = r"C:\Users\loren\Desktop\MK1212-website\added_files.txt"
+OUTPUT      = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
 # ═══════════════════════════════════════════════════════════════
 
 
@@ -214,6 +215,19 @@ def read_lines(path):
             if l.strip() and not l.strip().startswith("#")]
 
 
+def load_added(path):
+    """Carica added_files.txt e restituisce un set di path normalizzati (lowercase, slash)."""
+    p = Path(path)
+    if not p.exists():
+        return set()
+    result = set()
+    for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            result.add(line.replace("\\", "/").lower())
+    return result
+
+
 # ── Main ─────────────────────────────────────────────────────────
 
 def main():
@@ -232,6 +246,15 @@ def main():
         print("\n  ⚠  units variants.txt vuoto o non trovato.\n")
         return
     print(f"\n  →  Varianti richieste: {len(units)}\n")
+
+    added = load_added(ADDED_FILE)
+    if added:
+        print(f"  ✓  File già aggiunti (added_files.txt): {len(added)}\n")
+    else:
+        print(f"  ─  added_files.txt vuoto o non trovato — nessun filtro applicato\n")
+
+    def already_added(path_str):
+        return path_str.replace("\\", "/").lower() in added
 
     out = ["Needed Files", "═" * 62, ""]
 
@@ -253,6 +276,12 @@ def main():
             continue
 
         vmds, v2s, texs, missing = result
+
+        # Filtra i file già presenti in added_files.txt (solo VMD, V2, TEX — non missing)
+        vmds    = {f for f in vmds  if not already_added(f)}
+        v2s     = {f for f in v2s   if not already_added(f)}
+        texs    = {f for f in texs  if not already_added(f)}
+
         print(f"  ✓  [{unit}]  vmd={len(vmds)}  v2={len(v2s)}  tex={len(texs)}  missing={len(missing)}")
 
         if vmds:
