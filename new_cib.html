@@ -24,7 +24,7 @@
         #factionCanvas, #lavorataCanvas, #overlayCanvas, #interactiveCanvas {
             position:absolute; top:3px; left:3px; border-radius:5px;
         }
-        #factionCanvas, #lavorataCanvas, #overlayCanvas { pointer-events:none; }
+        #factionCanvas, #lavorataCanvas, #overlayCanvas, #markersCanvas { pointer-events:none; }
         #interactiveCanvas { cursor:crosshair; }
         .view-toggle {
             display:flex; padding:12px 20px 10px;
@@ -205,6 +205,7 @@
                 <canvas id="factionCanvas"></canvas>
                 <canvas id="lavorataCanvas"></canvas>
                 <canvas id="overlayCanvas"></canvas>
+                <canvas id="markersCanvas"></canvas>
                 <canvas id="interactiveCanvas"></canvas>
             </div>
         </div>
@@ -530,6 +531,129 @@ try {
     console.error("Decode failed:", e);
 }
 
+// ── MARKERS (settlement / port icons) ──────────────────────────
+
+const PORTO_KEY   = 'cib_porto_v1';
+const MARKERS_KEY = 'cib_markers_v1';
+
+let portoSet  = new Set(JSON.parse(localStorage.getItem(PORTO_KEY)  || '[]'));
+let markerPos = JSON.parse(localStorage.getItem(MARKERS_KEY) || '{}');
+
+function savePorto()   { localStorage.setItem(PORTO_KEY,   JSON.stringify([...portoSet])); }
+function saveMarkers() { localStorage.setItem(MARKERS_KEY, JSON.stringify(markerPos)); }
+
+function calcCentroid(hexIdx) {
+    if (!REGION_RUNS) return null;
+    const runs = REGION_RUNS[hexIdx];
+    if (!runs || runs.length === 0) return null;
+    let sumX = 0, sumY = 0, count = 0;
+    for (let i = 0; i < runs.length; i += 3) {
+        const y = runs[i], x0 = runs[i+1], x1 = runs[i+2];
+        const len = x1 - x0 + 1;
+        sumX += (x0 + x1) / 2 * len;
+        sumY += y * len;
+        count += len;
+    }
+    return count > 0 ? {x: sumX / count, y: sumY / count} : null;
+}
+
+function getMarkerPos(hexIdx) {
+    return markerPos[hexIdx] || calcCentroid(hexIdx);
+}
+
+function drawTemple(ctx, cx, cy, sz) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    const s = sz / 18;
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur  = 3;
+    ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1;
+    ctx.fillStyle   = '#cc1111';
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.lineWidth   = 1;
+    ctx.lineJoin    = 'miter';
+    // Roof
+    ctx.beginPath();
+    ctx.moveTo(0, -9*s); ctx.lineTo(9*s, -3*s); ctx.lineTo(-9*s, -3*s);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Frieze
+    ctx.fillRect(-9*s, -3*s, 18*s, 2.5*s);
+    ctx.strokeRect(-9*s, -3*s, 18*s, 2.5*s);
+    // Columns (3)
+    for (let i = 0; i < 3; i++) {
+        const x = -5.5*s + i * 5.5*s;
+        ctx.fillRect(x - 1.5*s, -0.5*s, 3*s, 7*s);
+        ctx.strokeRect(x - 1.5*s, -0.5*s, 3*s, 7*s);
+    }
+    // Base
+    ctx.fillRect(-9*s, 6.5*s, 18*s, 2.5*s);
+    ctx.strokeRect(-9*s, 6.5*s, 18*s, 2.5*s);
+    ctx.restore();
+}
+
+function drawAnchor(ctx, cx, cy, sz) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    const s = sz / 18;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur  = 3;
+    ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1;
+
+    function anchorStrokes(lw, color) {
+        ctx.strokeStyle = color; ctx.lineWidth = lw;
+        ctx.beginPath(); ctx.moveTo(0, -5*s); ctx.lineTo(0, 7*s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-6*s, -1.5*s); ctx.lineTo(6*s, -1.5*s); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 3.5*s, 4.5*s, Math.PI, 0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-4.5*s, 3.5*s); ctx.lineTo(-6*s, 5.5*s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(4.5*s,  3.5*s); ctx.lineTo(6*s,  5.5*s); ctx.stroke();
+    }
+    anchorStrokes(3.5*s, 'rgba(255,255,255,0.85)');
+    anchorStrokes(2*s,   '#1144bb');
+    // Ring
+    ctx.beginPath(); ctx.arc(0, -7*s, 2*s, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 3*s; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, -7*s, 2*s, 0, Math.PI*2);
+    ctx.strokeStyle = '#1144bb'; ctx.lineWidth = 2*s; ctx.stroke();
+    ctx.restore();
+}
+
+function drawMarkers() {
+    const ctx = markersCanvas.getContext('2d');
+    ctx.clearRect(0, 0, markersCanvas.width, markersCanvas.height);
+    if (!REGION_RUNS || markersCanvas.width === 0) return;
+    const scaleX = markersCanvas.width  / MAP_W;
+    const scaleY = markersCanvas.height / MAP_H;
+    const sz = Math.max(16, Math.min(26, markersCanvas.width / 45));
+    HEX_LIST.forEach((hex, hexIdx) => {
+        const region = COLOR_MAP[hex];
+        if (!region || region.sea) return;
+        const pos = getMarkerPos(hexIdx);
+        if (!pos) return;
+        if (portoSet.has(region.new_key)) drawAnchor(ctx, pos.x * scaleX, pos.y * scaleY, sz);
+        else                               drawTemple(ctx, pos.x * scaleX, pos.y * scaleY, sz);
+    });
+}
+
+// ── Marker drag state ──────────────────────────────────────────
+let dragHexIdx  = -1;
+let dragMapX0   = 0, dragMapY0   = 0;
+let dragPosX0   = 0, dragPosY0   = 0;
+let wasDragging = false;
+const MARKER_HIT_R = 14; // raggio hit in coordinate MAP
+
+function markerHitTest(mx, my) {
+    for (let i = 0; i < HEX_LIST.length; i++) {
+        const region = COLOR_MAP[HEX_LIST[i]];
+        if (!region || region.sea) continue;
+        const pos = getMarkerPos(i);
+        if (!pos) continue;
+        const dx = mx - pos.x, dy = my - pos.y;
+        if (dx*dx + dy*dy <= MARKER_HIT_R * MARKER_HIT_R) return i;
+    }
+    return -1;
+}
+
 // --- Build autocomplete index ---
 // SEARCH_ENTRIES: [{idx, name, new_key, old_key, searchText}, ...]
 const SEARCH_ENTRIES = [];
@@ -687,6 +811,7 @@ const mapImage       = document.getElementById("mapImage");
 const factionCanvas  = document.getElementById("factionCanvas");
 const lavorataCanvas = document.getElementById("lavorataCanvas");
 const overlayCanvas  = document.getElementById("overlayCanvas");
+const markersCanvas  = document.getElementById("markersCanvas");
 const interactiveCanvas = document.getElementById("interactiveCanvas");
 const infoPanel      = document.getElementById("infoBody");
 const searchInput    = document.getElementById("searchInput");
@@ -701,13 +826,14 @@ function resizeCanvases() {
     const h = mapImage.clientHeight;
     if (w === 0 || h === 0) { requestAnimationFrame(resizeCanvases); return; }
     if (interactiveCanvas.width === w && interactiveCanvas.height === h) return;
-    [factionCanvas, lavorataCanvas, overlayCanvas, interactiveCanvas].forEach(c => {
+    [factionCanvas, lavorataCanvas, overlayCanvas, markersCanvas, interactiveCanvas].forEach(c => {
         c.width = w; c.height = h;
         c.style.width = w + "px"; c.style.height = h + "px";
     });
     if (viewMode === 'factions') drawFactions();
     drawLavorata();
     if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
+    drawMarkers();
 }
 
 function drawFactions() {
@@ -863,13 +989,21 @@ function showRegionInfo(hexIdx) {
                         ${Object.entries(FACTIONS).map(([k,f])=>`<option value="${escapeHtml(k)}" ${FACTION_DATA[region.new_key]===k?'selected':''}>${escapeHtml(f.label)}</option>`).join('')}
                     </select>
                 </div>
-                <div class="detail-row" style="border-bottom:none;padding-top:16px;">
+                <div class="detail-row" style="padding-top:16px;">
                     <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#5a4a2f;font-size:1rem;">
                         <input type="checkbox" id="lavorataCheck" ${isLavorata ? "checked" : ""}
                                style="width:18px;height:18px;cursor:pointer;accent-color:#5a4a2f;">
                         Lavorata
                     </label>
                 </div>
+                ${!region.sea ? `
+                <div class="detail-row" style="border-bottom:none;padding-top:8px;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#1144bb;font-size:1rem;">
+                        <input type="checkbox" id="portoCheck" ${portoSet.has(region.new_key) ? "checked" : ""}
+                               style="width:18px;height:18px;cursor:pointer;accent-color:#1144bb;">
+                        Porto
+                    </label>
+                </div>` : ''}
             </div>
         </div>
     `;
@@ -879,6 +1013,14 @@ function showRegionInfo(hexIdx) {
         saveLavorata();
         drawLavorata();
     });
+    if (!region.sea) {
+        document.getElementById("portoCheck").addEventListener("change", function() {
+            if (this.checked) portoSet.add(region.new_key);
+            else portoSet.delete(region.new_key);
+            savePorto();
+            drawMarkers();
+        });
+    }
 }
 
 function clearInfoPanel() {
@@ -983,10 +1125,42 @@ searchInput.addEventListener("blur", function() {
 });
 
 // --- Mouse events ---
+interactiveCanvas.addEventListener("mousedown", function(e) {
+    if (!ROWS) return;
+    const rect = interactiveCanvas.getBoundingClientRect();
+    const {x, y} = toLookupCoords(e.clientX - rect.left, e.clientY - rect.top);
+    const hit = markerHitTest(x, y);
+    if (hit >= 0) {
+        dragHexIdx = hit;
+        const pos = getMarkerPos(hit);
+        dragMapX0 = x; dragMapY0 = y;
+        dragPosX0 = pos.x; dragPosY0 = pos.y;
+        interactiveCanvas.style.cursor = 'grabbing';
+        e.preventDefault();
+    }
+});
+
+interactiveCanvas.addEventListener("mouseup", function() {
+    if (dragHexIdx >= 0) {
+        saveMarkers();
+        dragHexIdx = -1;
+    }
+});
+
 interactiveCanvas.addEventListener("mousemove", function(e) {
     if (!ROWS) return;
     const rect = interactiveCanvas.getBoundingClientRect();
     const {x, y} = toLookupCoords(e.clientX - rect.left, e.clientY - rect.top);
+    if (dragHexIdx >= 0) {
+        markerPos[dragHexIdx] = {
+            x: Math.max(0, Math.min(MAP_W, dragPosX0 + (x - dragMapX0))),
+            y: Math.max(0, Math.min(MAP_H, dragPosY0 + (y - dragMapY0)))
+        };
+        wasDragging = true;
+        drawMarkers();
+        interactiveCanvas.style.cursor = 'grabbing';
+        return;
+    }
     const idx = getRegionIdxAt(x, y);
     if (idx < 0) {
         interactiveCanvas.style.cursor = "default";
@@ -1024,6 +1198,7 @@ interactiveCanvas.addEventListener("mouseleave", function() {
 
 interactiveCanvas.addEventListener("click", function(e) {
     if (!ROWS) return;
+    if (wasDragging) { wasDragging = false; return; }
     const rect = interactiveCanvas.getBoundingClientRect();
     const {x, y} = toLookupCoords(e.clientX - rect.left, e.clientY - rect.top);
     const idx = getRegionIdxAt(x, y);
@@ -1051,6 +1226,7 @@ if (typeof ResizeObserver !== "undefined") {
 }
 mapImage.addEventListener("load", function() { requestAnimationFrame(resizeCanvases); });
 if (mapImage.complete && mapImage.naturalWidth > 0) { requestAnimationFrame(resizeCanvases); }
+requestAnimationFrame(drawMarkers);
 </script>
 </body>
 </html>
