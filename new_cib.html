@@ -26,13 +26,18 @@
         .map-area {
             flex: 1;
             position: relative;
-            overflow: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow: hidden;
             background: #1a1410;
-            padding: 20px;
         }
+
+        #mapZoomContainer {
+            position: absolute;
+            top: 0; left: 0;
+            transform-origin: 0 0;
+            cursor: grab;
+        }
+
+        #mapZoomContainer.panning { cursor: grabbing; }
 
         .map-wrapper {
             position: relative;
@@ -538,6 +543,7 @@
     <a href="index.html" class="back-button">&#8592; Back to Home</a>
     <div class="map-container">
         <div class="map-area">
+            <div id="mapZoomContainer">
             <div class="map-wrapper" id="mapWrapper">
                 <img src="background_cib_scaled.jpg" alt="New CIB Campaign Map" class="map-image" id="mapImage">
                 <canvas id="factionCanvas"></canvas>
@@ -546,6 +552,7 @@
                 <canvas id="overlayCanvas"></canvas>
                 <canvas id="markersCanvas"></canvas>
                 <canvas id="interactiveCanvas"></canvas>
+            </div>
             </div>
         </div>
         <div class="info-panel" id="infoPanel">
@@ -936,6 +943,8 @@
         }
 
         // --- DOM refs ---
+        const mapArea          = document.getElementById("mapArea");
+        const mapZoomContainer = document.getElementById("mapZoomContainer");
         const mapImage = document.getElementById("mapImage");
         const factionCanvas  = document.getElementById("factionCanvas");
         const bordersCanvas  = document.getElementById("bordersCanvas");
@@ -1031,9 +1040,10 @@
         }
 
         function toLookupCoords(cx, cy) {
+            const r = interactiveCanvas.getBoundingClientRect();
             return {
-                x: Math.round(cx * MAP_W / interactiveCanvas.width),
-                y: Math.round(cy * MAP_H / interactiveCanvas.height)
+                x: Math.round(cx * MAP_W / r.width),
+                y: Math.round(cy * MAP_H / r.height)
             };
         }
 
@@ -1255,6 +1265,37 @@
             setTimeout(closeDropdown, 150);
         });
 
+        // --- Zoom & Pan ---
+        let zoom = 1, panX = 0, panY = 0;
+        const MIN_ZOOM = 0.4, MAX_ZOOM = 10;
+        let isPanning = false, panX0 = 0, panY0 = 0, panMx0 = 0, panMy0 = 0, panMoved = false;
+
+        function applyTransform() {
+            mapZoomContainer.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
+        }
+
+        function initPan() {
+            const aW = mapArea.clientWidth, aH = mapArea.clientHeight;
+            const mW = mapImage.clientWidth, mH = mapImage.clientHeight;
+            if (!mW || !mH) return;
+            panX = (aW - mW) / 2;
+            panY = (aH - mH) / 2;
+            applyTransform();
+        }
+
+        mapArea.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const rect   = mapArea.getBoundingClientRect();
+            const mx     = e.clientX - rect.left;
+            const my     = e.clientY - rect.top;
+            const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+            const newZ   = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * factor));
+            panX = mx - (mx - panX) * (newZ / zoom);
+            panY = my - (my - panY) * (newZ / zoom);
+            zoom = newZ;
+            applyTransform();
+        }, { passive: false });
+
         // --- Mouse events ---
         interactiveCanvas.addEventListener("mousedown", function (e) {
             if (!ROWS) return;
@@ -1268,18 +1309,36 @@
                 dragPosX0 = pos.x; dragPosY0 = pos.y;
                 interactiveCanvas.style.cursor = 'grabbing';
                 e.preventDefault();
+                return;
             }
+            // Start pan
+            isPanning = true; panMoved = false;
+            panX0 = panX; panY0 = panY;
+            panMx0 = e.clientX; panMy0 = e.clientY;
         });
 
         interactiveCanvas.addEventListener("mouseup", function () {
-            if (dragHexIdx >= 0) {
-                saveMarkers();
-                dragHexIdx = -1;
-            }
+            if (dragHexIdx >= 0) { saveMarkers(); dragHexIdx = -1; }
+            if (isPanning && panMoved) wasDragging = true;
+            isPanning = false;
+            mapZoomContainer.classList.remove('panning');
         });
 
         interactiveCanvas.addEventListener("mousemove", function (e) {
             if (!ROWS) return;
+            // Pan
+            if (isPanning && dragHexIdx < 0) {
+                const dx = e.clientX - panMx0, dy = e.clientY - panMy0;
+                if (!panMoved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+                    panMoved = true;
+                    mapZoomContainer.classList.add('panning');
+                }
+                if (panMoved) {
+                    panX = panX0 + dx; panY = panY0 + dy;
+                    applyTransform();
+                    return;
+                }
+            }
             const rect = interactiveCanvas.getBoundingClientRect();
             const { x, y } = toLookupCoords(e.clientX - rect.left, e.clientY - rect.top);
             if (dragHexIdx >= 0) {
@@ -1322,6 +1381,8 @@
         });
 
         interactiveCanvas.addEventListener("mouseleave", function () {
+            isPanning = false;
+            mapZoomContainer.classList.remove('panning');
             currentHoverIdx = -1;
             if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
             else overlayCanvas.getContext("2d").clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
@@ -1355,8 +1416,12 @@
         if (typeof ResizeObserver !== "undefined") {
             new ResizeObserver(function () { resizeCanvases(); }).observe(mapImage);
         }
-        mapImage.addEventListener("load", function () { requestAnimationFrame(resizeCanvases); });
-        if (mapImage.complete && mapImage.naturalWidth > 0) { requestAnimationFrame(resizeCanvases); }
+        mapImage.addEventListener("load", function () {
+            requestAnimationFrame(() => { resizeCanvases(); initPan(); });
+        });
+        if (mapImage.complete && mapImage.naturalWidth > 0) {
+            requestAnimationFrame(() => { resizeCanvases(); initPan(); });
+        }
         buildBorders();
         requestAnimationFrame(drawMarkers);
     </script>
