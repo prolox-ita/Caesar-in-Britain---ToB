@@ -652,10 +652,15 @@
                     }
                 }
             }
+            const sharp = document.createElement('canvas');
+            sharp.width = W; sharp.height = H;
+            sharp.getContext('2d').putImageData(new ImageData(bd, W, H), 0, 0);
             borderOffscreen = document.createElement('canvas');
-            borderOffscreen.width = W;
-            borderOffscreen.height = H;
-            borderOffscreen.getContext('2d').putImageData(new ImageData(bd, W, H), 0, 0);
+            borderOffscreen.width = W; borderOffscreen.height = H;
+            const bctx = borderOffscreen.getContext('2d');
+            bctx.filter = 'blur(1.2px)';
+            bctx.drawImage(sharp, 0, 0);
+            bctx.filter = 'none';
         }
 
         function drawBorders() {
