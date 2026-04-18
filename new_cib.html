@@ -621,8 +621,9 @@
         let REGION_RUNS = null;
         let borderOffscreen = null;
 
-        function buildBorders() {
+        function buildBorders(W, H) {
             if (!ROWS) return;
+            W = W || MAP_W; H = H || MAP_H;
             const idxMap = new Uint16Array(MAP_W * MAP_H);
             for (let y = 0; y < ROWS.length; y++) {
                 const row = ROWS[y];
@@ -631,7 +632,8 @@
                     idxMap.fill(row[i + 2] + 1, base + row[i], base + row[i + 1] + 1);
                 }
             }
-            const bd = new Uint8ClampedArray(MAP_W * MAP_H * 4);
+            const sx = W / MAP_W, sy = H / MAP_H;
+            const bd = new Uint8ClampedArray(W * H * 4);
             for (let y = 1; y < MAP_H - 1; y++) {
                 for (let x = 1; x < MAP_W - 1; x++) {
                     const off = y * MAP_W + x;
@@ -639,15 +641,21 @@
                     if (!v) continue;
                     if (idxMap[off - 1] !== v || idxMap[off + 1] !== v ||
                         idxMap[off - MAP_W] !== v || idxMap[off + MAP_W] !== v) {
-                        const p = off * 4;
-                        bd[p] = 210; bd[p + 1] = 210; bd[p + 2] = 215; bd[p + 3] = 180;
+                        const px = Math.round(x * sx), py = Math.round(y * sy);
+                        const px1 = Math.round((x + 1) * sx), py1 = Math.round((y + 1) * sy);
+                        for (let iy = py; iy < py1; iy++) {
+                            for (let ix = px; ix < px1; ix++) {
+                                const p = (iy * W + ix) * 4;
+                                bd[p] = 210; bd[p + 1] = 210; bd[p + 2] = 215; bd[p + 3] = 180;
+                            }
+                        }
                     }
                 }
             }
             borderOffscreen = document.createElement('canvas');
-            borderOffscreen.width = MAP_W;
-            borderOffscreen.height = MAP_H;
-            borderOffscreen.getContext('2d').putImageData(new ImageData(bd, MAP_W, MAP_H), 0, 0);
+            borderOffscreen.width = W;
+            borderOffscreen.height = H;
+            borderOffscreen.getContext('2d').putImageData(new ImageData(bd, W, H), 0, 0);
         }
 
         function drawBorders() {
@@ -968,6 +976,7 @@
                 c.style.width = w + "px"; c.style.height = h + "px";
             });
             if (viewMode === 'factions') drawFactions();
+            buildBorders(w, h);
             drawBorders();
             drawLavorata();
             if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
@@ -1422,7 +1431,6 @@
         if (mapImage.complete && mapImage.naturalWidth > 0) {
             requestAnimationFrame(() => { resizeCanvases(); initPan(); });
         }
-        buildBorders();
         requestAnimationFrame(drawMarkers);
     </script>
 </body>
