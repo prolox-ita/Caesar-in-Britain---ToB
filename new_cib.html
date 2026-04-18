@@ -712,7 +712,7 @@
             if (!REGION_RUNS || markersCanvas.width === 0) return;
             const scaleX = markersCanvas.width / MAP_W;
             const scaleY = markersCanvas.height / MAP_H;
-            const sz = Math.max(16, Math.min(26, markersCanvas.width / 45));
+            const sz = Math.max(10, Math.min(16, markersCanvas.width / 70));
             HEX_LIST.forEach((hex, hexIdx) => {
                 const region = COLOR_MAP[hex];
                 if (!region || region.sea) return;
