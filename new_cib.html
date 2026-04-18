@@ -51,6 +51,7 @@
         }
 
         #factionCanvas,
+        #bordersCanvas,
         #lavorataCanvas,
         #overlayCanvas,
         #markersCanvas,
@@ -62,6 +63,7 @@
         }
 
         #factionCanvas,
+        #bordersCanvas,
         #lavorataCanvas,
         #overlayCanvas,
         #markersCanvas {
@@ -539,6 +541,7 @@
             <div class="map-wrapper" id="mapWrapper">
                 <img src="background_cib_scaled.jpg" alt="New CIB Campaign Map" class="map-image" id="mapImage">
                 <canvas id="factionCanvas"></canvas>
+                <canvas id="bordersCanvas"></canvas>
                 <canvas id="lavorataCanvas"></canvas>
                 <canvas id="overlayCanvas"></canvas>
                 <canvas id="markersCanvas"></canvas>
@@ -611,6 +614,44 @@
 
         let ROWS = null;
         let REGION_RUNS = null;
+        let borderOffscreen = null;
+
+        function buildBorders() {
+            if (!ROWS) return;
+            const idxMap = new Uint16Array(MAP_W * MAP_H);
+            for (let y = 0; y < ROWS.length; y++) {
+                const row = ROWS[y];
+                const base = y * MAP_W;
+                for (let i = 0; i < row.length; i += 3) {
+                    idxMap.fill(row[i + 2] + 1, base + row[i], base + row[i + 1] + 1);
+                }
+            }
+            const bd = new Uint8ClampedArray(MAP_W * MAP_H * 4);
+            for (let y = 1; y < MAP_H - 1; y++) {
+                for (let x = 1; x < MAP_W - 1; x++) {
+                    const off = y * MAP_W + x;
+                    const v = idxMap[off];
+                    if (!v) continue;
+                    if (idxMap[off - 1] !== v || idxMap[off + 1] !== v ||
+                        idxMap[off - MAP_W] !== v || idxMap[off + MAP_W] !== v) {
+                        const p = off * 4;
+                        bd[p] = 210; bd[p + 1] = 210; bd[p + 2] = 215; bd[p + 3] = 180;
+                    }
+                }
+            }
+            borderOffscreen = document.createElement('canvas');
+            borderOffscreen.width = MAP_W;
+            borderOffscreen.height = MAP_H;
+            borderOffscreen.getContext('2d').putImageData(new ImageData(bd, MAP_W, MAP_H), 0, 0);
+        }
+
+        function drawBorders() {
+            const ctx = bordersCanvas.getContext('2d');
+            ctx.clearRect(0, 0, bordersCanvas.width, bordersCanvas.height);
+            if (!borderOffscreen || bordersCanvas.width === 0) return;
+            ctx.drawImage(borderOffscreen, 0, 0, bordersCanvas.width, bordersCanvas.height);
+        }
+
         try {
             ROWS = decodeRowData(ROW_DATA_B64);
             REGION_RUNS = buildRegionIndex(ROWS);
@@ -896,7 +937,8 @@
 
         // --- DOM refs ---
         const mapImage = document.getElementById("mapImage");
-        const factionCanvas = document.getElementById("factionCanvas");
+        const factionCanvas  = document.getElementById("factionCanvas");
+        const bordersCanvas  = document.getElementById("bordersCanvas");
         const lavorataCanvas = document.getElementById("lavorataCanvas");
         const overlayCanvas = document.getElementById("overlayCanvas");
         const markersCanvas = document.getElementById("markersCanvas");
@@ -914,11 +956,12 @@
             const h = mapImage.clientHeight;
             if (w === 0 || h === 0) { requestAnimationFrame(resizeCanvases); return; }
             if (interactiveCanvas.width === w && interactiveCanvas.height === h) return;
-            [factionCanvas, lavorataCanvas, overlayCanvas, markersCanvas, interactiveCanvas].forEach(c => {
+            [factionCanvas, bordersCanvas, lavorataCanvas, overlayCanvas, markersCanvas, interactiveCanvas].forEach(c => {
                 c.width = w; c.height = h;
                 c.style.width = w + "px"; c.style.height = h + "px";
             });
             if (viewMode === 'factions') drawFactions();
+            drawBorders();
             drawLavorata();
             if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
             drawMarkers();
@@ -1314,6 +1357,7 @@
         }
         mapImage.addEventListener("load", function () { requestAnimationFrame(resizeCanvases); });
         if (mapImage.complete && mapImage.naturalWidth > 0) { requestAnimationFrame(resizeCanvases); }
+        buildBorders();
         requestAnimationFrame(drawMarkers);
     </script>
 </body>
