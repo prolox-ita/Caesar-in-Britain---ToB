@@ -45,8 +45,6 @@
         }
 
         .map-image {
-            max-width: 90vw;
-            max-height: 90vh;
             display: block;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             border: 3px solid #d4af37;
@@ -1276,10 +1274,12 @@
 
         function initPan() {
             const aW = mapArea.clientWidth, aH = mapArea.clientHeight;
-            const mW = mapImage.clientWidth, mH = mapImage.clientHeight;
+            const mW = mapImage.naturalWidth || mapImage.clientWidth;
+            const mH = mapImage.naturalHeight || mapImage.clientHeight;
             if (!mW || !mH) return;
-            panX = (aW - mW) / 2;
-            panY = (aH - mH) / 2;
+            zoom = Math.min((aW - 40) / mW, (aH - 40) / mH, 1);
+            panX = (aW - mW * zoom) / 2;
+            panY = (aH - mH * zoom) / 2;
             applyTransform();
         }
 
