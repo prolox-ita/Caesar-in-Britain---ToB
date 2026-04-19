@@ -156,7 +156,7 @@ def collect(variant_stem, variant_by_id, center_by_id,
 
     # Modelli diretti della variant
     _add_models(variant.get("models", []), model_by_name,
-                model_to_textures, tex_by_name, v2s, texs)
+                model_to_textures, tex_by_name, v2s, texs, missing)
     for r in variant.get("missing_models", []): missing.add(r)
     for r in variant.get("missing_vmds",   []): missing.add(r)
 
@@ -174,7 +174,7 @@ def collect(variant_stem, variant_by_id, center_by_id,
         if node:
             vmds.add(f"{node['folder']}/{node['file']}")
             _add_models(node.get("models", []), model_by_name,
-                        model_to_textures, tex_by_name, v2s, texs)
+                        model_to_textures, tex_by_name, v2s, texs, missing)
             for r in node.get("missing", []): missing.add(r)
             for sub in node.get("sub_vmds", []):
                 if sub.lower() not in visited:
@@ -184,7 +184,7 @@ def collect(variant_stem, variant_by_id, center_by_id,
             other = variant_by_id.get(vid)
             if other:
                 _add_models(other.get("models", []), model_by_name,
-                            model_to_textures, tex_by_name, v2s, texs)
+                            model_to_textures, tex_by_name, v2s, texs, missing)
                 for r in other.get("missing_models", []): missing.add(r)
                 for sub in other.get("vmds", []):
                     if sub.lower() not in visited:
@@ -196,7 +196,7 @@ def collect(variant_stem, variant_by_id, center_by_id,
 
 
 def _add_models(names, model_by_name, model_to_textures,
-                tex_by_name, v2s, texs):
+                tex_by_name, v2s, texs, missing):
     for fname in names:
         # Il modello è presente nel mod (è nella lista "models" del vmd)
         full = model_by_name.get(fname.lower(), fname)
@@ -207,7 +207,7 @@ def _add_models(names, model_by_name, model_to_textures,
             if tname in tex_by_name:
                 texs.add(tex_by_name[tname])
             else:
-                texs.add(Path(tex).name)   # path base-game: solo filename
+                missing.add(Path(tex).name)
 
 
 # ── Utilità ──────────────────────────────────────────────────────
