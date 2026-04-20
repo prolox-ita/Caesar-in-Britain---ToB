@@ -1,0 +1,11 @@
+{
+  "appId": "com.mk1212.unitstool",
+  "appName": "Units Tool",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Units Tool</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;color:#bbb;font-family:'Consolas','Courier New',monospace;font-size:13px;min-height:100vh;display:flex;flex-direction:column}
+header{padding:14px 20px;background:#1a1a1a;border-bottom:1px solid #333;display:flex;align-items:center;gap:14px;flex-shrink:0}
+header h1{font-size:.9rem;letter-spacing:.2em;color:#C5B358;font-weight:normal}
+header p{font-size:.72rem;color:#444}
+.page-nav{display:flex;gap:2px;background:#161616;padding:4px 12px;border-bottom:1px solid #1a1a1a;flex-shrink:0;overflow-x:auto}
+.nav-link{padding:7px 12px;font-size:.75rem;color:#555;text-decoration:none;border-radius:3px;letter-spacing:.06em;white-space:nowrap}
+.nav-link:hover{color:#bbb;background:rgba(255,255,255,.04)}
+.nav-link.active{color:#C5B358;background:rgba(197,179,88,.08)}
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:28px 16px;gap:16px}
+.tools-grid{display:grid;grid-template-columns:1fr;gap:12px;width:100%;max-width:480px}
+@media(min-width:500px){.tools-grid{grid-template-columns:1fr 1fr}}
+.tool-card{background:#161616;border:1px solid #222;border-radius:6px;padding:20px 18px;text-decoration:none;color:inherit;display:block;-webkit-tap-highlight-color:transparent}
+.tool-card:active{background:#1e1e1e}
+.tool-card.accent-gold{border-top:3px solid #C5B358}
+.tool-card.accent-red {border-top:3px solid #8B0000}
+.tool-card.accent-teal{border-top:3px solid #2a6a6a;opacity:.55}
+.tool-icon{font-size:1.6rem;margin-bottom:10px;display:block}
+.tool-title{font-size:.82rem;letter-spacing:.1em;color:#ddd;margin-bottom:6px}
+.tool-desc{font-size:.7rem;color:#555;line-height:1.55}
+.tool-badge{display:inline-block;margin-top:10px;padding:3px 8px;font-size:.62rem;border-radius:2px;background:#1e1e1e;color:#444;border:1px solid #1e1e1e}
+.tool-note{font-size:.65rem;color:#3a5a3a;margin-top:5px}
+.tool-note.warn{color:#5a3a3a}
+.footnote{font-size:.68rem;color:#2a2a2a;text-align:center;padding-bottom:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>&#9881; UNITS TOOL</h1>
+  <p>Gestione file mod</p>
+</header>
+<nav class="page-nav">
+  <a href="index.html" class="nav-link active">&#8962; Home</a>
+  <a href="missing-files.html" class="nav-link">&#9888; Missing Files</a>
+  <a href="unit-report.html" class="nav-link">&#9776; Unit Report</a>
+</nav>
+<main>
+  <div class="tools-grid">
+    <a href="missing-files.html" class="tool-card accent-red">
+      <span class="tool-icon">&#9888;</span>
+      <div class="tool-title">Missing Files</div>
+      <div class="tool-desc">File mancanti (TEX / V2 / VMD) con connessioni tra le colonne.</div>
+      <span class="tool-badge">missing-files.html</span>
+      <div class="tool-note">Generato da needed-files.py</div>
+    </a>
+    <a href="unit-report.html" class="tool-card accent-gold">
+      <span class="tool-icon">&#9776;</span>
+      <div class="tool-title">Unit Report</div>
+      <div class="tool-desc">Completezza per unità: file presenti (verde) e mancanti (rosso).</div>
+      <span class="tool-badge">unit-report.html</span>
+      <div class="tool-note">Generato da needed-files.py</div>
+    </a>
+    <div class="tool-card accent-teal" style="cursor:default">
+      <span class="tool-icon">&#9671;</span>
+      <div class="tool-title">VMD Viewer</div>
+      <div class="tool-desc">Non disponibile nell'app — richiede il server Python.</div>
+      <span class="tool-badge">vmd-viewer.html</span>
+      <div class="tool-note warn">Richiede: python vmd-server.py</div>
+    </div>
+  </div>
+  <p class="footnote">Rigenera gli HTML eseguendo <code>needed-files.py</code>, poi <code>sync-www.py</code></p>
+</main>
+</body>
+</html>
