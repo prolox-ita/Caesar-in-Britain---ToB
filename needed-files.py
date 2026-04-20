@@ -480,6 +480,10 @@ header h1{font-size:.8rem;letter-spacing:.18em;color:#cc4444;font-weight:normal}
 .item.connected{background:rgba(197,179,88,.1);border-left-color:#C5B358;color:#F5E6BE!important}
 .empty{padding:12px;color:#3a3a3a;font-style:italic;font-size:.75rem}
 #svg-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999}
+.page-nav{display:flex;gap:2px;background:#161616;padding:3px 14px;border-bottom:1px solid #1a1a1a;flex-shrink:0}
+.nav-link{padding:3px 10px;font-size:.68rem;color:#555;text-decoration:none;border-radius:2px;letter-spacing:.06em;transition:color .12s,background .12s}
+.nav-link:hover{color:#bbb;background:rgba(255,255,255,.04)}
+.nav-link.active{color:#cc4444;background:rgba(139,0,0,.08)}
 </style>
 </head>
 <body>
@@ -488,6 +492,10 @@ header h1{font-size:.8rem;letter-spacing:.18em;color:#cc4444;font-weight:normal}
   <span class="hint">&#9632; <span style="color:#cc6666">mancante</span> &nbsp;&#9632; <span style="color:#8a7830">presente con dipendenze mancanti</span></span>
   <span class="ts">__TS__</span>
 </header>
+<nav class="page-nav">
+  <a href="missing-files.html" class="nav-link active">&#9888; Missing Files</a>
+  <a href="unit-report.html" class="nav-link">&#9776; Unit Report</a>
+</nav>
 <div class="toolbar">
   <input id="search" type="text" placeholder="Cerca…" oninput="onSearch(this.value)">
   <button class="tb-btn" id="btn-filter" onclick="toggleFilter()">&#9672; Solo selezionati</button>
@@ -718,13 +726,21 @@ td.files-cell{min-width:180px;max-width:280px}
 .prog-fill{height:100%;border-radius:2px;transition:width .3s}
 .stats{font-size:.68rem}
 .error-note{font-size:.68rem;color:#cc4444;margin-top:3px}
-.file-list{max-height:120px;overflow-y:auto}
-.file-list::-webkit-scrollbar{width:2px}
-.file-list::-webkit-scrollbar-thumb{background:#2a2a2a}
+.fl-wrap{position:relative}
+.fl-head{display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.fl-ok{font-size:10px;color:#4a8a4a}
+.fl-miss{font-size:10px;color:#cc4444}
+.fl-tog{margin-left:auto;background:transparent;border:none;color:#333;cursor:pointer;font-size:9px;padding:0 2px;line-height:1;flex-shrink:0}
+.fl-tog:hover{color:#888}
+.file-list{}
 .file{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0;font-size:11px;cursor:default}
 .file.ok{color:#4a8a4a}
 .file.miss{color:#cc4444}
 .empty-cell{color:#2a2a2a;font-style:italic}
+.page-nav{display:flex;gap:2px;background:#161616;padding:3px 14px;border-bottom:1px solid #1a1a1a;flex-shrink:0}
+.nav-link{padding:3px 10px;font-size:.68rem;color:#555;text-decoration:none;border-radius:2px;letter-spacing:.06em;transition:color .12s,background .12s}
+.nav-link:hover{color:#bbb;background:rgba(255,255,255,.04)}
+.nav-link.active{color:#C5B358;background:rgba(197,179,88,.08)}
 </style>
 </head>
 <body>
@@ -733,11 +749,17 @@ td.files-cell{min-width:180px;max-width:280px}
   <span class="hint">Completezza file per unità &mdash; da units_report.csv</span>
   <span class="ts">__TS__</span>
 </header>
+<nav class="page-nav">
+  <a href="missing-files.html" class="nav-link">&#9888; Missing Files</a>
+  <a href="unit-report.html" class="nav-link active">&#9776; Unit Report</a>
+</nav>
 <div class="toolbar">
   <input id="search" type="text" placeholder="Cerca unità…" oninput="onSearch(this.value)">
   <button class="sort-btn" onclick="sortBy('name')">&#8597; Nome</button>
   <button class="sort-btn" onclick="sortBy('pct')">&#8597; %</button>
   <button class="sort-btn" onclick="sortBy('miss')">&#8597; Mancanti</button>
+  <button class="sort-btn" onclick="toggleAll(true)">&#9660; Espandi</button>
+  <button class="sort-btn" onclick="toggleAll(false)">&#9656; Comprimi</button>
   <span class="summary" id="summary"></span>
 </div>
 <div class="wrap">
@@ -757,16 +779,37 @@ td.files-cell{min-width:180px;max-width:280px}
 <script>
 'use strict';
 const DATA=__DATA__;
-let sortKey='name',sortDir=1;
+let sortKey='name',sortDir=1,_fid=0;
 
 function pctColor(p){return p===100?'#4a8a4a':p>=70?'#C5B358':'#cc4444';}
 
 function fileList(ok,miss){
   if(!ok.length&&!miss.length)return '<span class="empty-cell">\u2014</span>';
-  return '<div class="file-list">'
+  const id='fl'+(++_fid);
+  const okL=ok.length?`<span class="fl-ok">\u2713${ok.length}</span>`:'';
+  const miL=miss.length?`<span class="fl-miss">\u2717${miss.length}</span>`:'';
+  return `<div class="fl-wrap"><div class="fl-head">${okL}${miL}<button class="fl-tog" data-fl="${id}" onclick="toggleFL(this)" title="Comprimi">\u25bc</button></div>`
+    +`<div class="file-list" id="${id}">`
     +ok.map(f=>`<div class="file ok" title="${f}">\u2713 ${f.split('/').pop()}</div>`).join('')
     +miss.map(f=>`<div class="file miss" title="${f}">\u2717 ${f.split('/').pop()}</div>`).join('')
-    +'</div>';
+    +`</div></div>`;
+}
+
+function toggleFL(btn){
+  const el=document.getElementById(btn.dataset.fl);
+  const show=el.style.display==='none';
+  el.style.display=show?'':'none';
+  btn.textContent=show?'\u25bc':'\u25b6';
+  btn.title=show?'Comprimi':'Espandi';
+}
+
+function toggleAll(expand){
+  document.querySelectorAll('.fl-tog').forEach(btn=>{
+    const el=document.getElementById(btn.dataset.fl);if(!el)return;
+    el.style.display=expand?'':'none';
+    btn.textContent=expand?'\u25bc':'\u25b6';
+    btn.title=expand?'Comprimi':'Espandi';
+  });
 }
 
 function buildRow(u){
@@ -793,6 +836,7 @@ function buildRow(u){
 }
 
 function render(){
+  _fid=0;
   const tbody=document.getElementById('tbody');
   tbody.innerHTML='';
   const sorted=[...DATA].sort((a,b)=>{
