@@ -427,6 +427,13 @@ header{padding:7px 14px;background:#1a1a1a;border-bottom:1px solid #8B0000;displ
 header h1{font-size:.8rem;letter-spacing:.18em;color:#cc4444;font-weight:normal}
 .hint{font-size:.68rem;color:#4a4a4a;flex:1}
 .ts{font-size:.65rem;color:#3a5a3a;flex-shrink:0;white-space:nowrap}
+.toolbar{padding:5px 14px;background:#161616;border-bottom:1px solid #1e1e1e;display:flex;gap:8px;flex-shrink:0;align-items:center}
+#search{flex:1;background:#0d0d0d;border:1px solid #2a2a2a;color:#bbb;padding:4px 9px;font-family:inherit;font-size:11px;outline:none;border-radius:2px}
+#search:focus{border-color:#444}
+#search::placeholder{color:#333}
+.tb-btn{padding:4px 11px;background:transparent;border:1px solid #2a2a2a;color:#666;cursor:pointer;font-family:inherit;font-size:.7rem;letter-spacing:.08em;border-radius:2px;transition:all .15s;white-space:nowrap}
+.tb-btn:hover{border-color:#C5B358;color:#C5B358}
+.tb-btn.active{background:rgba(197,179,88,.12);border-color:#C5B358;color:#C5B358}
 .columns{display:flex;flex:1;overflow:hidden}
 .col{flex:1;display:flex;flex-direction:column;border-right:1px solid #222;min-width:0}
 .col:last-child{border-right:none}
@@ -452,14 +459,20 @@ header h1{font-size:.8rem;letter-spacing:.18em;color:#cc4444;font-weight:normal}
 .item.selected{background:rgba(255,255,255,.1);border-left-color:#ddd;color:#fff!important}
 .item.connected{background:rgba(197,179,88,.1);border-left-color:#C5B358;color:#F5E6BE!important}
 .empty{padding:12px;color:#3a3a3a;font-style:italic;font-size:.75rem}
+#svg-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999}
 </style>
 </head>
 <body>
 <header>
   <h1>&#9888; MISSING FILES</h1>
-  <span class="hint">&#9632; <span style="color:#cc6666">mancante</span> &nbsp;&#9632; <span style="color:#8a7830">presente ma contiene dipendenze mancanti</span> &mdash; click per vedere le connessioni</span>
+  <span class="hint">&#9632; <span style="color:#cc6666">mancante</span> &nbsp;&#9632; <span style="color:#8a7830">presente con dipendenze mancanti</span></span>
   <span class="ts">__TS__</span>
 </header>
+<div class="toolbar">
+  <input id="search" type="text" placeholder="Cerca…" oninput="onSearch(this.value)">
+  <button class="tb-btn" id="btn-filter" onclick="toggleFilter()">&#9672; Solo selezionati</button>
+  <button class="tb-btn" onclick="clearAll()">&#10005; Deseleziona</button>
+</div>
 <div class="columns">
   <div class="col">
     <div class="col-head">
@@ -483,12 +496,16 @@ header h1{font-size:.8rem;letter-spacing:.18em;color:#cc4444;font-weight:normal}
     <div class="col-body" id="col-vmd"></div>
   </div>
 </div>
+<svg id="svg-overlay"></svg>
 <script>
 'use strict';
 const DATA=__DATA__;
 const elMap={};
 let lastKey=null;
+let filterActive=false;
+
 function mk(t,c){const e=document.createElement(t);if(c)e.className=c;return e;}
+
 function render(items,colId,cmId,cpId,pfx){
   const col=document.getElementById(colId);
   let nm=0,np=0;
@@ -507,7 +524,7 @@ function render(items,colId,cmId,cpId,pfx){
       el.title=it.id+(it.missing?'\n\u26a0 File mancante':'\n\u25cb Presente \u2014 ha dipendenze mancanti');
       const key=pfx+':'+it.id;
       el.dataset.key=key;
-      el.onclick=()=>handleClick(key);
+      el.addEventListener('click',e=>{e.stopPropagation();handleClick(key);});
       elMap[key]=el;
       ce.appendChild(el);
       it.missing?nm++:np++;
@@ -518,13 +535,113 @@ function render(items,colId,cmId,cpId,pfx){
   document.getElementById(cmId).textContent=nm?nm+' miss':'';
   document.getElementById(cpId).textContent=np?(nm?' \u00b7 ':'')+np+' par':'';
 }
-function clearAll(){for(const el of Object.values(elMap))el.classList.remove('selected','connected');}
-function handleClick(key){
-  if(lastKey===key){clearAll();lastKey=null;return;}
-  clearAll();lastKey=key;
-  const el=elMap[key];if(el)el.classList.add('selected');
-  for(const lk of(DATA.links[key]||[])){const le=elMap[lk];if(le)le.classList.add('connected');}
+
+/* ── selezione & frecce ─────────────────────────────── */
+function clearAll(){
+  for(const el of Object.values(elMap))el.classList.remove('selected','connected');
+  document.getElementById('svg-overlay').innerHTML='';
+  lastKey=null;
+  if(filterActive){filterActive=false;document.getElementById('btn-filter').classList.remove('active');applyFilter();}
 }
+
+function handleClick(key){
+  if(lastKey===key){clearAll();return;}
+  for(const el of Object.values(elMap))el.classList.remove('selected','connected');
+  document.getElementById('svg-overlay').innerHTML='';
+  lastKey=key;
+  const selEl=elMap[key];
+  if(selEl)selEl.classList.add('selected');
+  const connEls=new Set();
+  for(const lk of(DATA.links[key]||[])){
+    const le=elMap[lk];
+    if(!le)continue;
+    le.classList.add('connected');
+    for(let p=le.parentElement;p;p=p.parentElement)
+      if(p.classList.contains('folder'))p.classList.add('open');
+    le.scrollIntoView({block:'nearest'});
+    connEls.add(le);
+  }
+  drawArrows(selEl,connEls);
+  if(filterActive)applyFilter();
+}
+
+function drawArrows(selEl,connEls){
+  const svg=document.getElementById('svg-overlay');
+  svg.innerHTML='<defs><marker id="ah" markerWidth="7" markerHeight="7" refX="6.5" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#C5B358" fill-opacity=".7"/></marker></defs>';
+  if(!selEl)return;
+  const sr=selEl.getBoundingClientRect();
+  if(!sr.height)return;
+  const sy=(sr.top+sr.bottom)/2;
+  for(const cel of connEls){
+    const cr=cel.getBoundingClientRect();
+    if(!cr.height)continue;
+    const cy=(cr.top+cr.bottom)/2;
+    const goRight=cr.left>sr.right-4;
+    const goLeft=cr.right<sr.left+4;
+    if(!goRight&&!goLeft)continue;
+    const x1=goRight?sr.right:sr.left;
+    const x2=goRight?cr.left:cr.right;
+    const mx=(x1+x2)/2;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${sy} C${mx},${sy} ${mx},${cy} ${x2},${cy}`);
+    path.setAttribute('stroke','#C5B358');
+    path.setAttribute('stroke-width','1.2');
+    path.setAttribute('stroke-opacity','.55');
+    path.setAttribute('fill','none');
+    path.setAttribute('marker-end','url(#ah)');
+    svg.appendChild(path);
+  }
+}
+
+function redrawArrows(){
+  if(!lastKey)return;
+  drawArrows(elMap[lastKey],new Set(document.querySelectorAll('.item.connected')));
+}
+
+/* ── ricerca ────────────────────────────────────────── */
+function onSearch(val){
+  const q=val.toLowerCase();
+  for(const colId of['col-tex','col-v2','col-vmd']){
+    for(const fe of document.getElementById(colId).querySelectorAll('.folder')){
+      let any=false;
+      for(const it of fe.querySelectorAll('.item')){
+        const m=!q||it.textContent.toLowerCase().includes(q);
+        it.style.display=m?'':'none';
+        if(m)any=true;
+      }
+      fe.style.display=any?'':'none';
+    }
+  }
+}
+
+/* ── filtro selezionati ─────────────────────────────── */
+function toggleFilter(){
+  filterActive=!filterActive;
+  document.getElementById('btn-filter').classList.toggle('active',filterActive);
+  applyFilter();
+}
+
+function applyFilter(){
+  for(const el of Object.values(elMap)){
+    el.style.display=(!filterActive||el.classList.contains('selected')||el.classList.contains('connected'))?'':'none';
+  }
+  for(const colId of['col-tex','col-v2','col-vmd']){
+    for(const fe of document.getElementById(colId).querySelectorAll('.folder')){
+      const any=[...fe.querySelectorAll('.item')].some(it=>it.style.display!=='none');
+      fe.style.display=any?'':'none';
+    }
+  }
+}
+
+/* ── scroll / resize ────────────────────────────────── */
+['col-tex','col-v2','col-vmd'].forEach(id=>
+  document.getElementById(id).addEventListener('scroll',redrawArrows,{passive:true}));
+window.addEventListener('resize',redrawArrows);
+
+document.querySelector('.columns').addEventListener('click',e=>{
+  if(!e.target.closest('.item'))clearAll();
+});
+
 render(DATA.tex,'col-tex','cm-tex','cp-tex','tex');
 render(DATA.v2,'col-v2','cm-v2','cp-v2','v2');
 render(DATA.vmd,'col-vmd','cm-vmd','cp-vmd','vmd');
