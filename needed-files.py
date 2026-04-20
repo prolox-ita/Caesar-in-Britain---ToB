@@ -493,8 +493,10 @@ header h1{font-size:.8rem;letter-spacing:.18em;color:#cc4444;font-weight:normal}
   <span class="ts">__TS__</span>
 </header>
 <nav class="page-nav">
+  <a href="file-tools.html" class="nav-link">&#8962; Home</a>
   <a href="missing-files.html" class="nav-link active">&#9888; Missing Files</a>
   <a href="unit-report.html" class="nav-link">&#9776; Unit Report</a>
+  <a href="vmd-viewer.html" class="nav-link">&#9671; VMD Viewer</a>
 </nav>
 <div class="toolbar">
   <input id="search" type="text" placeholder="Cerca…" oninput="onSearch(this.value)">
@@ -750,8 +752,10 @@ td.files-cell{min-width:180px;max-width:280px}
   <span class="ts">__TS__</span>
 </header>
 <nav class="page-nav">
+  <a href="file-tools.html" class="nav-link">&#8962; Home</a>
   <a href="missing-files.html" class="nav-link">&#9888; Missing Files</a>
   <a href="unit-report.html" class="nav-link active">&#9776; Unit Report</a>
+  <a href="vmd-viewer.html" class="nav-link">&#9671; VMD Viewer</a>
 </nav>
 <div class="toolbar">
   <input id="search" type="text" placeholder="Cerca unità…" oninput="onSearch(this.value)">
