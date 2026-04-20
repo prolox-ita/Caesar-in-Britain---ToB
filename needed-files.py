@@ -836,7 +836,8 @@ def parse_csv(path):
 
 
 def generate_unit_report(csv_rows, variant_by_id, center_by_id,
-                         model_by_name, tex_by_name, model_to_textures, html_path):
+                         model_by_name, tex_by_name, model_to_textures,
+                         added_set, html_path):
     import datetime
     units = []
     for unit_name, variant_stem in csv_rows:
@@ -855,24 +856,33 @@ def generate_unit_report(csv_rows, variant_by_id, center_by_id,
         variant = variant_by_id.get(variant_stem)
         variant_file = variant["file"] if variant else (variant_stem + ".variantmeshdefinition")
 
+        def split(files):
+            ok   = sorted(f for f in files if norm_path(f) in added_set)
+            todo = sorted(f for f in files if norm_path(f) not in added_set)
+            return ok, todo
+
         def by_ext(ext):
             return sorted(f for f in missing if f.lower().endswith(ext))
 
-        miss_vmds  = by_ext(".variantmeshdefinition")
-        miss_v2s   = by_ext(".rigid_model_v2")
-        miss_texs  = by_ext(".dds")
+        vmds_ok, vmds_todo = split(vmds)
+        v2s_ok,  v2s_todo  = split(v2s)
+        texs_ok, texs_todo = split(texs)
+
+        miss_vmds  = vmds_todo + by_ext(".variantmeshdefinition")
+        miss_v2s   = v2s_todo  + by_ext(".rigid_model_v2")
+        miss_texs  = texs_todo + by_ext(".dds")
         miss_other = sorted(f for f in missing
                             if not any(f.lower().endswith(e)
                                        for e in (".variantmeshdefinition", ".rigid_model_v2", ".dds")))
 
-        present = len(vmds) + len(v2s) + len(texs)
-        total   = present + len(missing)
+        present = len(vmds_ok) + len(v2s_ok) + len(texs_ok)
+        total   = len(vmds) + len(v2s) + len(texs) + len(missing)
         pct     = round(present / total * 100) if total else 100
 
         units.append({
             "name": unit_name, "variant_file": variant_file, "error": False,
             "present": present, "total": total, "pct": pct,
-            "vmds_ok": sorted(vmds), "v2s_ok": sorted(v2s), "texs_ok": sorted(texs),
+            "vmds_ok": vmds_ok, "v2s_ok": v2s_ok, "texs_ok": texs_ok,
             "miss_vmds": miss_vmds, "miss_v2s": miss_v2s,
             "miss_texs": miss_texs, "miss_other": miss_other,
         })
@@ -1026,7 +1036,8 @@ def main():
     csv_rows = parse_csv(CSV_FILE)
     if csv_rows:
         generate_unit_report(csv_rows, variant_by_id, center_by_id,
-                             model_by_name, tex_by_name, model_to_textures, UNIT_REPORT)
+                             model_by_name, tex_by_name, model_to_textures,
+                             load_added(ADDED_FILE), UNIT_REPORT)
 
 
 if __name__ == "__main__":
