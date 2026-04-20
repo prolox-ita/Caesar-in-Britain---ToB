@@ -24,6 +24,8 @@ ADDED_FILE   = r"C:\Users\loren\Desktop\MK1212-website\added_files.txt"
 MISSING_FILE = r"C:\Users\loren\Desktop\MK1212-website\missing_files.txt"
 MISSING_HTML = r"C:\Users\loren\Desktop\MK1212-website\missing-files.html"
 OUTPUT       = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
+CSV_FILE     = r"C:\Users\loren\Desktop\MK1212-website\units_report.csv"
+UNIT_REPORT  = r"C:\Users\loren\Desktop\MK1212-website\unit-report.html"
 
 # Cartella radice da cui copiare i file (es. dati estratti del gioco o della mod sorgente)
 SOURCE_DIR   = r"D:\Thrones of Britannia\modding\variantmeshes"
@@ -662,6 +664,228 @@ def generate_missing_html(tex_items, v2_items, vmd_items, links, html_path):
     print(f"  ✓  missing-files.html  ({n_miss} mancanti + {n_par} genitori)")
 
 
+# ── Genera unit-report.html ──────────────────────────────────────
+
+_REPORT_TMPL = r"""<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Unit Report</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;color:#bbb;font-family:'Consolas','Courier New',monospace;font-size:12px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{padding:7px 14px;background:#1a1a1a;border-bottom:1px solid #C5B358;display:flex;align-items:center;gap:14px;flex-shrink:0}
+header h1{font-size:.8rem;letter-spacing:.18em;color:#C5B358;font-weight:normal}
+.hint{font-size:.68rem;color:#4a4a4a;flex:1}
+.ts{font-size:.65rem;color:#3a5a3a;flex-shrink:0}
+.toolbar{padding:5px 14px;background:#161616;border-bottom:1px solid #1e1e1e;display:flex;gap:10px;align-items:center;flex-shrink:0}
+#search{flex:1;max-width:320px;background:#0d0d0d;border:1px solid #2a2a2a;color:#bbb;padding:4px 9px;font-family:inherit;font-size:11px;outline:none;border-radius:2px}
+#search:focus{border-color:#444}
+#search::placeholder{color:#333}
+.sort-btn{padding:3px 9px;background:transparent;border:1px solid #2a2a2a;color:#555;cursor:pointer;font-family:inherit;font-size:.7rem;border-radius:2px;transition:all .15s}
+.sort-btn:hover,.sort-btn.active{border-color:#C5B358;color:#C5B358}
+.summary{font-size:.68rem;color:#444;margin-left:auto}
+.wrap{flex:1;overflow:auto}
+table{border-collapse:collapse;width:100%;min-width:900px}
+thead th{position:sticky;top:0;z-index:10;padding:6px 10px;background:#161616;border-bottom:2px solid #222;font-size:.68rem;letter-spacing:.12em;color:#C5B358;text-transform:uppercase;text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid #1a1a1a;transition:background .08s}
+tbody tr:hover{background:#161616}
+tbody tr.hidden{display:none}
+td{padding:6px 10px;vertical-align:top}
+td.unit-cell{min-width:180px;max-width:220px}
+td.def-cell{min-width:200px;max-width:260px;color:#888;font-size:11px;word-break:break-all}
+td.files-cell{min-width:180px;max-width:280px}
+.unit-name{color:#ddd;font-weight:bold;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog-wrap{height:4px;background:#1e1e1e;border-radius:2px;margin-bottom:3px}
+.prog-fill{height:100%;border-radius:2px;transition:width .3s}
+.stats{font-size:.68rem}
+.error-note{font-size:.68rem;color:#cc4444;margin-top:3px}
+.file-list{max-height:120px;overflow-y:auto}
+.file-list::-webkit-scrollbar{width:2px}
+.file-list::-webkit-scrollbar-thumb{background:#2a2a2a}
+.file{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0;font-size:11px;cursor:default}
+.file.ok{color:#4a8a4a}
+.file.miss{color:#cc4444}
+.empty-cell{color:#2a2a2a;font-style:italic}
+</style>
+</head>
+<body>
+<header>
+  <h1>&#9776; UNIT REPORT</h1>
+  <span class="hint">Completezza file per unità &mdash; da units_report.csv</span>
+  <span class="ts">__TS__</span>
+</header>
+<div class="toolbar">
+  <input id="search" type="text" placeholder="Cerca unità…" oninput="onSearch(this.value)">
+  <button class="sort-btn" onclick="sortBy('name')">&#8597; Nome</button>
+  <button class="sort-btn" onclick="sortBy('pct')">&#8597; %</button>
+  <button class="sort-btn" onclick="sortBy('miss')">&#8597; Mancanti</button>
+  <span class="summary" id="summary"></span>
+</div>
+<div class="wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Unità</th>
+      <th>Variant Definition</th>
+      <th>VMDs</th>
+      <th>Models (.v2)</th>
+      <th>Textures (.dds)</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+<script>
+'use strict';
+const DATA=__DATA__;
+let sortKey='name',sortDir=1;
+
+function pctColor(p){return p===100?'#4a8a4a':p>=70?'#C5B358':'#cc4444';}
+
+function fileList(ok,miss){
+  if(!ok.length&&!miss.length)return '<span class="empty-cell">\u2014</span>';
+  return '<div class="file-list">'
+    +ok.map(f=>`<div class="file ok" title="${f}">\u2713 ${f.split('/').pop()}</div>`).join('')
+    +miss.map(f=>`<div class="file miss" title="${f}">\u2717 ${f.split('/').pop()}</div>`).join('')
+    +'</div>';
+}
+
+function buildRow(u){
+  const tr=document.createElement('tr');
+  tr.dataset.name=u.name.toLowerCase();
+  tr.dataset.pct=u.error?-1:u.pct;
+  tr.dataset.miss=u.error?9999:(u.miss_vmds.length+u.miss_v2s.length+u.miss_texs.length+u.miss_other.length);
+  if(u.error){
+    tr.innerHTML=`<td class="unit-cell"><div class="unit-name">${u.name}</div><div class="error-note">\u26a0 Non trovata</div></td>`
+      +`<td class="def-cell">${u.variant_file}</td><td colspan="3" class="empty-cell" style="padding:8px 10px">Unità non trovata in vmd-viewer.txt — rigenerare con vmd-generate.py</td>`;
+  } else {
+    const c=pctColor(u.pct);
+    tr.innerHTML=`<td class="unit-cell">`
+      +`<div class="unit-name" title="${u.name}">${u.name}</div>`
+      +`<div class="prog-wrap"><div class="prog-fill" style="width:${u.pct}%;background:${c}"></div></div>`
+      +`<div class="stats" style="color:${c}">${u.present}/${u.total} &nbsp;(${u.pct}%)</div>`
+      +`</td>`
+      +`<td class="def-cell" title="${u.variant_file}">${u.variant_file}</td>`
+      +`<td class="files-cell">${fileList(u.vmds_ok,u.miss_vmds)}</td>`
+      +`<td class="files-cell">${fileList(u.v2s_ok,u.miss_v2s)}</td>`
+      +`<td class="files-cell">${fileList(u.texs_ok,u.miss_texs)}</td>`;
+  }
+  return tr;
+}
+
+function render(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  const sorted=[...DATA].sort((a,b)=>{
+    let va,vb;
+    if(sortKey==='name'){va=a.name.toLowerCase();vb=b.name.toLowerCase();return va<vb?-sortDir:va>vb?sortDir:0;}
+    if(sortKey==='pct'){va=a.error?-1:a.pct;vb=b.error?-1:b.pct;return (va-vb)*sortDir;}
+    if(sortKey==='miss'){
+      va=a.error?9999:(a.miss_vmds.length+a.miss_v2s.length+a.miss_texs.length+(a.miss_other||[]).length);
+      vb=b.error?9999:(b.miss_vmds.length+b.miss_v2s.length+b.miss_texs.length+(b.miss_other||[]).length);
+      return (va-vb)*sortDir;
+    }
+    return 0;
+  });
+  sorted.forEach(u=>tbody.appendChild(buildRow(u)));
+  updateSummary();
+}
+
+function sortBy(k){
+  if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=k==='name'?1:-1;}
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  render();
+}
+
+function onSearch(val){
+  const q=val.toLowerCase();
+  for(const tr of document.getElementById('tbody').rows)
+    tr.classList.toggle('hidden',!!q&&!tr.dataset.name.includes(q));
+  updateSummary();
+}
+
+function updateSummary(){
+  const rows=[...document.getElementById('tbody').rows].filter(r=>!r.classList.contains('hidden'));
+  const tot=rows.length;
+  const complete=rows.filter(r=>r.dataset.pct==='100').length;
+  document.getElementById('summary').textContent=`${tot} unità \u2022 ${complete} complete`;
+}
+
+render();
+</script>
+</body>
+</html>"""
+
+
+def parse_csv(path):
+    """Legge units_report.csv → [(display_name, variant_stem), ...]"""
+    import csv as _csv
+    result = []
+    p = Path(path)
+    if not p.exists():
+        print(f"  ─  {path} non trovato — salto unit-report")
+        return result
+    with open(p, encoding="utf-8-sig", errors="replace") as f:
+        for row in _csv.reader(f):
+            row = [c.strip() for c in row]
+            if len(row) >= 2 and row[0] and not row[0].startswith("#"):
+                stem = Path(row[1]).stem.lower()
+                result.append((row[0], stem))
+    return result
+
+
+def generate_unit_report(csv_rows, variant_by_id, center_by_id,
+                         model_by_name, tex_by_name, model_to_textures, html_path):
+    import datetime
+    units = []
+    for unit_name, variant_stem in csv_rows:
+        result = collect(variant_stem, variant_by_id, center_by_id,
+                         model_by_name, tex_by_name, model_to_textures)
+        if result is None:
+            units.append({"name": unit_name,
+                          "variant_file": variant_stem + ".variantmeshdefinition",
+                          "error": True,
+                          "present": 0, "total": 0, "pct": 0,
+                          "vmds_ok": [], "v2s_ok": [], "texs_ok": [],
+                          "miss_vmds": [], "miss_v2s": [], "miss_texs": [], "miss_other": []})
+            continue
+
+        vmds, v2s, texs, missing = result
+        variant = variant_by_id.get(variant_stem)
+        variant_file = variant["file"] if variant else (variant_stem + ".variantmeshdefinition")
+
+        def by_ext(ext):
+            return sorted(f for f in missing if f.lower().endswith(ext))
+
+        miss_vmds  = by_ext(".variantmeshdefinition")
+        miss_v2s   = by_ext(".rigid_model_v2")
+        miss_texs  = by_ext(".dds")
+        miss_other = sorted(f for f in missing
+                            if not any(f.lower().endswith(e)
+                                       for e in (".variantmeshdefinition", ".rigid_model_v2", ".dds")))
+
+        present = len(vmds) + len(v2s) + len(texs)
+        total   = present + len(missing)
+        pct     = round(present / total * 100) if total else 100
+
+        units.append({
+            "name": unit_name, "variant_file": variant_file, "error": False,
+            "present": present, "total": total, "pct": pct,
+            "vmds_ok": sorted(vmds), "v2s_ok": sorted(v2s), "texs_ok": sorted(texs),
+            "miss_vmds": miss_vmds, "miss_v2s": miss_v2s,
+            "miss_texs": miss_texs, "miss_other": miss_other,
+        })
+
+    ts  = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    html = _REPORT_TMPL \
+        .replace("__DATA__", json.dumps(units, ensure_ascii=False, separators=(',', ':'))) \
+        .replace("__TS__", ts)
+    Path(html_path).write_text(html, encoding="utf-8")
+    n_ok = sum(1 for u in units if not u["error"] and u["pct"] == 100)
+    print(f"  ✓  unit-report.html  ({len(units)} unità, {n_ok} complete)")
+
+
 # ── Main ─────────────────────────────────────────────────────────
 
 def main():
@@ -797,6 +1021,12 @@ def main():
     tex_it, v2_it, vmd_it, links = build_relations(
         all_miss_lines, model_to_textures, model_by_name, center_by_id)
     generate_missing_html(tex_it, v2_it, vmd_it, links, MISSING_HTML)
+
+    # ── 6. Genera unit-report.html ──────────────────────────────────
+    csv_rows = parse_csv(CSV_FILE)
+    if csv_rows:
+        generate_unit_report(csv_rows, variant_by_id, center_by_id,
+                             model_by_name, tex_by_name, model_to_textures, UNIT_REPORT)
 
 
 if __name__ == "__main__":
