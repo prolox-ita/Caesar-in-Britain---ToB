@@ -194,7 +194,7 @@ def read_missing():
     return cats
 
 
-
+class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(Path(__file__).parent), **kwargs)
 
