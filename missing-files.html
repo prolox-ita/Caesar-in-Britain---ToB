@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missing Files</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #111;
+            color: #bbb;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 12px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 7px 14px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #8B0000;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+        header h1 { font-size: 0.8rem; letter-spacing: 0.18em; color: #cc4444; font-weight: normal; }
+        .hint { font-size: 0.68rem; color: #4a4a4a; flex: 1; }
+
+        #btn-reload {
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #777;
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-family: inherit;
+            letter-spacing: 0.08em;
+            transition: border-color 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        #btn-reload:hover { border-color: #cc4444; color: #cc4444; }
+        #btn-reload.loading { color: #555; border-color: #2a2a2a; pointer-events: none; }
+
+        #status {
+            font-size: 0.65rem;
+            color: #555;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        #status.ok  { color: #4a7a4a; }
+        #status.err { color: #7a3a3a; }
+
+        .columns { display: flex; flex: 1; overflow: hidden; }
+
+        .col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #222;
+            min-width: 0;
+        }
+        .col:last-child { border-right: none; }
+
+        .col-head { padding: 7px 12px; background: #161616; border-bottom: 1px solid #222; flex-shrink: 0; }
+        .col-head-title { font-size: 0.68rem; letter-spacing: 0.14em; color: #cc4444; text-transform: uppercase; }
+        .col-head-sub { font-size: 0.6rem; color: #444; margin-top: 2px; }
+        .col-count { float: right; color: #555; font-size: 0.6rem; margin-top: 1px; }
+
+        .col-body { flex: 1; overflow-y: auto; padding: 3px 0; }
+        .col-body::-webkit-scrollbar { width: 3px; }
+        .col-body::-webkit-scrollbar-track { background: #111; }
+        .col-body::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+        .folder { user-select: none; }
+        .folder-label {
+            display: flex; align-items: center; gap: 5px;
+            padding: 3px 10px; cursor: pointer; color: #666; white-space: nowrap;
+        }
+        .folder-label:hover { background: rgba(255,255,255,0.03); }
+        .folder-arrow { font-size: 8px; color: #444; transition: transform 0.12s; flex-shrink: 0; width: 10px; }
+        .folder.open > .folder-label > .folder-arrow { transform: rotate(90deg); }
+        .folder-children { display: none; }
+        .folder.open > .folder-children { display: block; }
+
+        .item {
+            padding: 3px 10px 3px 36px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #cc6666;
+            border-left: 2px solid transparent;
+        }
+
+        #overlay {
+            position: absolute; inset: 40px 0 0 0;
+            display: flex; align-items: center; justify-content: center;
+            background: #111; z-index: 100;
+            font-size: 0.8rem; color: #555;
+        }
+        #overlay.hidden { display: none; }
+
+        .empty { padding: 12px 12px; color: #3a3a3a; font-style: italic; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>&#9888; MISSING FILES</h1>
+    <span class="hint">File referenziati ma non trovati nel mod — generato da needed-files.py</span>
+    <span id="status"></span>
+    <button id="btn-reload" onclick="loadData()">&#8635; Ricarica</button>
+</header>
+
+<div style="position:relative; flex:1; display:flex; flex-direction:column; overflow:hidden;">
+    <div id="overlay">Caricamento…</div>
+
+    <div class="columns">
+        <div class="col">
+            <div class="col-head">
+                <span class="col-count" id="cnt-tex"></span>
+                <div class="col-head-title">Textures</div>
+                <div class="col-head-sub">.dds</div>
+            </div>
+            <div class="col-body" id="col-tex"></div>
+        </div>
+        <div class="col">
+            <div class="col-head">
+                <span class="col-count" id="cnt-v2"></span>
+                <div class="col-head-title">Models</div>
+                <div class="col-head-sub">.rigid_model_v2</div>
+            </div>
+            <div class="col-body" id="col-v2"></div>
+        </div>
+        <div class="col">
+            <div class="col-head">
+                <span class="col-count" id="cnt-vmd"></span>
+                <div class="col-head-title">Definitions</div>
+                <div class="col-head-sub">.variantmeshdefinition</div>
+            </div>
+            <div class="col-body" id="col-vmd"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+function mk(tag, cls) {
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    return el;
+}
+
+function renderTree(grouped, container, countEl) {
+    container.innerHTML = '';
+    const total = Object.values(grouped).reduce((s, a) => s + a.length, 0);
+    countEl.textContent = total;
+
+    if (total === 0) {
+        const empty = mk('div', 'empty');
+        empty.textContent = 'Nessun file mancante';
+        container.appendChild(empty);
+        return;
+    }
+
+    for (const [folder, files] of Object.entries(grouped).sort()) {
+        const folderEl   = mk('div', 'folder open');
+        const labelEl    = mk('div', 'folder-label');
+        labelEl.innerHTML = `<span class="folder-arrow">&#9654;</span>`
+                          + `<span style="opacity:.4;margin-right:3px">&#128193;</span>`
+                          + folder + '/';
+        labelEl.onclick = () => folderEl.classList.toggle('open');
+        folderEl.appendChild(labelEl);
+
+        const childrenEl = mk('div', 'folder-children');
+        for (const fname of files) {
+            const item = mk('div', 'item');
+            item.textContent = fname;
+            item.title = folder !== '(root)' ? `${folder}/${fname}` : fname;
+            childrenEl.appendChild(item);
+        }
+        folderEl.appendChild(childrenEl);
+        container.appendChild(folderEl);
+    }
+}
+
+async function loadData() {
+    const btn     = document.getElementById('btn-reload');
+    const status  = document.getElementById('status');
+    const overlay = document.getElementById('overlay');
+
+    btn.classList.add('loading');
+    btn.textContent = '… carico';
+    overlay.classList.remove('hidden');
+    overlay.textContent = 'Lettura missing_files.txt…';
+    status.className = '';
+    status.textContent = '';
+
+    try {
+        const res = await fetch('/api/missing');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        renderTree(data.tex || {}, document.getElementById('col-tex'), document.getElementById('cnt-tex'));
+        renderTree(data.v2  || {}, document.getElementById('col-v2'),  document.getElementById('cnt-v2'));
+        renderTree(data.vmd || {}, document.getElementById('col-vmd'), document.getElementById('cnt-vmd'));
+
+        overlay.classList.add('hidden');
+        status.className = 'ok';
+        status.textContent = `✓ ${new Date().toLocaleTimeString()}`;
+    } catch (e) {
+        overlay.textContent = `Errore: ${e.message} — assicurati che vmd-server.py sia in esecuzione`;
+        status.className = 'err';
+        status.textContent = '✗ errore';
+    } finally {
+        btn.classList.remove('loading');
+        btn.textContent = '↺ Ricarica';
+    }
+}
+
+loadData();
+</script>
+</body>
+</html>

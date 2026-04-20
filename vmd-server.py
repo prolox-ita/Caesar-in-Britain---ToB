@@ -165,12 +165,50 @@ def build_data():
     }
 
 
-class Handler(SimpleHTTPRequestHandler):
+MISSING_FILE = Path(__file__).parent / "missing_files.txt"
+
+
+def read_missing():
+    cats = {"tex": {}, "v2": {}, "vmd": {}}
+    if not MISSING_FILE.exists():
+        return cats
+    for line in MISSING_FILE.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        norm   = line.replace("\\", "/")
+        name   = norm.split("/")[-1]
+        folder = norm[: len(norm) - len(name) - 1] if "/" in norm else "(root)"
+        if name.endswith(".dds"):
+            cat = "tex"
+        elif name.endswith(".rigid_model_v2"):
+            cat = "v2"
+        elif name.endswith(".variantmeshdefinition"):
+            cat = "vmd"
+        else:
+            continue
+        cats[cat].setdefault(folder, []).append(name)
+    for cat in cats:
+        for folder in cats[cat]:
+            cats[cat][folder].sort()
+    return cats
+
+
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(Path(__file__).parent), **kwargs)
 
     def do_GET(self):
-        if urlparse(self.path).path == "/api/data":
+        if urlparse(self.path).path == "/api/missing":
+            data = read_missing()
+            body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", len(body))
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(body)
+        elif urlparse(self.path).path == "/api/data":
             data = build_data()
             body = json.dumps(data, ensure_ascii=False).encode("utf-8")
             self.send_response(200)
