@@ -121,7 +121,7 @@ def parse_txt(path):
     return tex_by_name, model_by_name, center_by_id, variant_by_id
 
 
-# ── MODEL_TO_TEXTURES dall'HTML ──────────────────────────────────
+# ── MODEL_TO_TEXTURES dall'HTML (o per convenzione nome) ─────────
 
 def load_model_to_textures(html_path):
     try:
@@ -134,6 +134,24 @@ def load_model_to_textures(html_path):
     except Exception as e:
         print(f"  ⚠  MODEL_TO_TEXTURES non leggibile: {e}")
         return {}
+
+
+def build_model_to_textures_by_name(model_by_name, tex_by_name):
+    """
+    Associa textures ai modelli per convenzione nome Total War:
+    model 'unit_body_lod0.variantmesh' → strip _lod\d+ → base 'unit_body'
+    → textures il cui stem == base oppure inizia con base + '_'
+    (es. 'unit_body_diffuse.dds', 'unit_body_normal.dds', ecc.)
+    """
+    tex_by_stem = {Path(fn).stem: fp for fn, fp in tex_by_name.items()}
+    result = {}
+    for fname, model_full in model_by_name.items():
+        base = re.sub(r'_lod\d+$', '', Path(fname).stem, flags=re.IGNORECASE)
+        matches = [fp for ts, fp in tex_by_stem.items()
+                   if ts == base or ts.startswith(base + '_')]
+        if matches:
+            result[model_full] = matches
+    return result
 
 
 # ── Raccolta dipendenze ricorsiva ────────────────────────────────
@@ -868,12 +886,14 @@ def generate_unit_report(csv_rows, variant_by_id, center_by_id,
         v2s_ok,  v2s_todo  = split(v2s)
         texs_ok, texs_todo = split(texs)
 
+        _MODEL_EXTS = (".variantmesh", ".rigid_model_v2")
         miss_vmds  = vmds_todo + by_ext(".variantmeshdefinition")
-        miss_v2s   = v2s_todo  + by_ext(".rigid_model_v2")
+        miss_v2s   = v2s_todo  + by_ext(".variantmesh") + by_ext(".rigid_model_v2")
         miss_texs  = texs_todo + by_ext(".dds")
         miss_other = sorted(f for f in missing
                             if not any(f.lower().endswith(e)
-                                       for e in (".variantmeshdefinition", ".rigid_model_v2", ".dds")))
+                                       for e in (".variantmeshdefinition", ".variantmesh",
+                                                 ".rigid_model_v2", ".dds")))
 
         present = len(vmds_ok) + len(v2s_ok) + len(texs_ok)
         total   = len(vmds) + len(v2s) + len(texs) + len(missing)
@@ -907,7 +927,11 @@ def main():
     print(f"  ✓  Varianti   : {len(variant_by_id)}")
 
     model_to_textures = load_model_to_textures(HTML_FILE)
-    print(f"  ✓  Model→Tex  : {len(model_to_textures)} entries")
+    if not model_to_textures:
+        model_to_textures = build_model_to_textures_by_name(model_by_name, tex_by_name)
+        print(f"  ✓  Model→Tex  : {len(model_to_textures)} entries (naming convention)")
+    else:
+        print(f"  ✓  Model→Tex  : {len(model_to_textures)} entries")
 
     units = read_lines(UNITS_FILE)
     if not units:
