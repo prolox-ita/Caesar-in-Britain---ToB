@@ -484,6 +484,24 @@ header h1{font-size:.8rem;letter-spacing:.18em;color:#cc4444;font-weight:normal}
 .nav-link{padding:3px 10px;font-size:.68rem;color:#555;text-decoration:none;border-radius:2px;letter-spacing:.06em;transition:color .12s,background .12s}
 .nav-link:hover{color:#bbb;background:rgba(255,255,255,.04)}
 .nav-link.active{color:#cc4444;background:rgba(139,0,0,.08)}
+.mob-tabs{display:none}
+@media(max-width:640px){
+  body{font-size:13px}
+  .hint,.ts{display:none}
+  .nav-link{padding:6px 8px;font-size:.75rem}
+  #search{font-size:16px;padding:9px 10px}
+  .tb-btn{padding:9px 12px;font-size:.78rem;flex:1}
+  .toolbar{flex-wrap:wrap;gap:6px;padding:7px 10px}
+  .mob-tabs{display:flex;gap:4px;padding:6px 10px;background:#161616;border-bottom:1px solid #222;flex-shrink:0}
+  .mob-tab{flex:1;padding:11px 4px;background:transparent;border:1px solid #2a2a2a;color:#555;font-size:.8rem;border-radius:3px;cursor:pointer;font-family:inherit}
+  .mob-tab.active{border-color:#cc4444;color:#cc4444;background:rgba(139,0,0,.08)}
+  .columns{flex-direction:column;overflow-y:auto}
+  .col{flex:none;border-right:none;border-bottom:1px solid #222;display:none}
+  .col.mob-active{display:flex;flex:1;min-height:60vh}
+  #svg-overlay{display:none!important}
+  .item{padding:9px 14px 9px 42px;font-size:.82rem}
+  .folder-label{padding:9px 10px;font-size:.8rem}
+}
 </style>
 </head>
 <body>
@@ -498,13 +516,18 @@ header h1{font-size:.8rem;letter-spacing:.18em;color:#cc4444;font-weight:normal}
   <a href="unit-report.html" class="nav-link">&#9776; Unit Report</a>
   <a href="vmd-viewer.html" class="nav-link">&#9671; VMD Viewer</a>
 </nav>
+<div class="mob-tabs">
+  <button class="mob-tab active" onclick="switchTab(0)">TEX</button>
+  <button class="mob-tab" onclick="switchTab(1)">Models</button>
+  <button class="mob-tab" onclick="switchTab(2)">Defs</button>
+</div>
 <div class="toolbar">
   <input id="search" type="text" placeholder="Cerca…" oninput="onSearch(this.value)">
   <button class="tb-btn" id="btn-filter" onclick="toggleFilter()">&#9672; Solo selezionati</button>
   <button class="tb-btn" onclick="clearAll()">&#10005; Deseleziona</button>
 </div>
 <div class="columns">
-  <div class="col">
+  <div class="col mob-active">
     <div class="col-head">
       <span class="col-count"><span class="n-miss" id="cm-tex"></span><span class="n-par" id="cp-tex"></span></span>
       <div class="col-head-title">Textures</div><div class="col-head-sub">.dds</div>
@@ -675,6 +698,11 @@ document.querySelector('.columns').addEventListener('click',e=>{
 render(DATA.tex,'col-tex','cm-tex','cp-tex','tex');
 render(DATA.v2,'col-v2','cm-v2','cp-v2','v2');
 render(DATA.vmd,'col-vmd','cm-vmd','cp-vmd','vmd');
+
+function switchTab(i){
+  document.querySelectorAll('.col').forEach((c,j)=>c.classList.toggle('mob-active',j===i));
+  document.querySelectorAll('.mob-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+}
 </script>
 </body>
 </html>"""
@@ -743,6 +771,26 @@ td.files-cell{min-width:180px;max-width:280px}
 .nav-link{padding:3px 10px;font-size:.68rem;color:#555;text-decoration:none;border-radius:2px;letter-spacing:.06em;transition:color .12s,background .12s}
 .nav-link:hover{color:#bbb;background:rgba(255,255,255,.04)}
 .nav-link.active{color:#C5B358;background:rgba(197,179,88,.08)}
+@media(max-width:640px){
+  body{font-size:13px}
+  .hint,.ts{display:none}
+  .nav-link{padding:6px 8px;font-size:.75rem}
+  table,thead,tbody,th,tr,td{display:block;width:100%}
+  table{min-width:0!important}
+  thead tr{position:absolute;top:-9999px;left:-9999px}
+  tr{margin:8px;border:1px solid #222;border-radius:4px;background:#161616;overflow:hidden}
+  tbody tr.hidden{display:none}
+  tbody tr:hover{background:#161616}
+  td{padding:9px 13px;border-bottom:1px solid #1a1a1a;max-width:none!important;min-width:0!important}
+  td:last-child{border-bottom:none}
+  td[data-label]::before{content:attr(data-label);display:block;font-size:.62rem;color:#555;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+  .unit-name{white-space:normal;font-size:.88rem}
+  .toolbar{flex-wrap:wrap;padding:8px 10px;gap:6px}
+  .sort-btn{flex:1;min-width:75px;padding:9px 6px;font-size:.75rem}
+  #search{max-width:100%!important;width:100%;font-size:16px;padding:9px 10px}
+  .summary{width:100%;margin-left:0;text-align:center}
+  .fl-tog{padding:3px 6px;font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -823,7 +871,7 @@ function buildRow(u){
   tr.dataset.miss=u.error?9999:(u.miss_vmds.length+u.miss_v2s.length+u.miss_texs.length+u.miss_other.length);
   if(u.error){
     tr.innerHTML=`<td class="unit-cell"><div class="unit-name">${u.name}</div><div class="error-note">\u26a0 Non trovata</div></td>`
-      +`<td class="def-cell">${u.variant_file}</td><td colspan="3" class="empty-cell" style="padding:8px 10px">Unità non trovata in vmd-viewer.txt — rigenerare con vmd-generate.py</td>`;
+      +`<td class="def-cell" data-label="Variant Definition">${u.variant_file}</td><td colspan="3" class="empty-cell" style="padding:8px 10px">Unità non trovata in vmd-viewer.txt — rigenerare con vmd-generate.py</td>`;
   } else {
     const c=pctColor(u.pct);
     tr.innerHTML=`<td class="unit-cell">`
@@ -831,10 +879,10 @@ function buildRow(u){
       +`<div class="prog-wrap"><div class="prog-fill" style="width:${u.pct}%;background:${c}"></div></div>`
       +`<div class="stats" style="color:${c}">${u.present}/${u.total} &nbsp;(${u.pct}%)</div>`
       +`</td>`
-      +`<td class="def-cell" title="${u.variant_file}">${u.variant_file}</td>`
-      +`<td class="files-cell">${fileList(u.vmds_ok,u.miss_vmds)}</td>`
-      +`<td class="files-cell">${fileList(u.v2s_ok,u.miss_v2s)}</td>`
-      +`<td class="files-cell">${fileList(u.texs_ok,u.miss_texs)}</td>`;
+      +`<td class="def-cell" data-label="Variant Definition" title="${u.variant_file}">${u.variant_file}</td>`
+      +`<td class="files-cell" data-label="VMDs">${fileList(u.vmds_ok,u.miss_vmds)}</td>`
+      +`<td class="files-cell" data-label="Models">${fileList(u.v2s_ok,u.miss_v2s)}</td>`
+      +`<td class="files-cell" data-label="Textures">${fileList(u.texs_ok,u.miss_texs)}</td>`;
   }
   return tr;
 }
