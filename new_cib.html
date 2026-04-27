@@ -560,6 +560,7 @@
             </div>
             <div class="faction-toolbar">
                 <button class="ft-btn" onclick="exportJSON()">&#11015; Export</button>
+                <button class="ft-btn" onclick="saveRegionStatus()">&#128190; Salva JSON</button>
                 <label class="ft-btn ft-import">&#11014; Import
                     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
                 </label>
@@ -826,6 +827,45 @@
 
         function saveLavorata() {
             try { localStorage.setItem(LAVORATA_STORAGE_KEY, JSON.stringify([...lavorataSet])); } catch (e) { }
+        }
+
+        // --- Region status JSON ---
+        let regionStatus = {};
+        const keyToHexIdx = {};
+        HEX_LIST.forEach((hex, idx) => {
+            const r = COLOR_MAP[hex];
+            if (r && r.new_key) keyToHexIdx[r.new_key] = idx;
+        });
+
+        async function loadRegionStatus() {
+            try {
+                const resp = await fetch('regions_status.json');
+                if (!resp.ok) return;
+                regionStatus = await resp.json();
+                lavorataSet.clear();
+                portoSet.clear();
+                for (const [key, data] of Object.entries(regionStatus)) {
+                    const idx = keyToHexIdx[key];
+                    if (data.edited && idx !== undefined) lavorataSet.add(idx);
+                    if (data.porto) portoSet.add(key);
+                }
+                saveLavorata();
+                savePorto();
+            } catch (e) { /* fallback: localStorage already loaded */ }
+        }
+
+        function saveRegionStatus() {
+            for (const key of Object.keys(regionStatus)) {
+                const idx = keyToHexIdx[key];
+                regionStatus[key].edited = idx !== undefined && lavorataSet.has(idx);
+                regionStatus[key].porto  = portoSet.has(key);
+            }
+            const blob = new Blob([JSON.stringify(regionStatus, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'regions_status.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
         }
 
         // --- Stripe pattern ---
@@ -1163,6 +1203,7 @@
             document.getElementById("lavorataCheck").addEventListener("change", function () {
                 if (this.checked) lavorataSet.add(hexIdx);
                 else lavorataSet.delete(hexIdx);
+                if (regionStatus[region.new_key]) regionStatus[region.new_key].edited = this.checked;
                 saveLavorata();
                 drawLavorata();
             });
@@ -1170,6 +1211,7 @@
                 document.getElementById("portoCheck").addEventListener("change", function () {
                     if (this.checked) portoSet.add(region.new_key);
                     else portoSet.delete(region.new_key);
+                    if (regionStatus[region.new_key]) regionStatus[region.new_key].porto = this.checked;
                     savePorto();
                     drawMarkers();
                 });
@@ -1436,7 +1478,9 @@
         if (mapImage.complete && mapImage.naturalWidth > 0) {
             requestAnimationFrame(() => { resizeCanvases(); initPan(); });
         }
-        requestAnimationFrame(drawMarkers);
+        loadRegionStatus().then(() => {
+            requestAnimationFrame(() => { drawLavorata(); drawMarkers(); });
+        });
     </script>
 </body>
 
