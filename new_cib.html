@@ -561,6 +561,9 @@
             <div class="faction-toolbar">
                 <button class="ft-btn" onclick="exportJSON()">&#11015; Export</button>
                 <button class="ft-btn" onclick="saveRegionStatus()">&#128190; Salva JSON</button>
+                <label class="ft-btn ft-import">&#128194; Carica JSON
+                    <input type="file" id="regionStatusFile" accept=".json" style="display:none" onchange="loadRegionStatusFromFile(this)">
+                </label>
                 <label class="ft-btn ft-import">&#11014; Import
                     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
                 </label>
@@ -837,20 +840,38 @@
             if (r && r.new_key) keyToHexIdx[r.new_key] = idx;
         });
 
+        function applyRegionStatus(json) {
+            regionStatus = json;
+            lavorataSet.clear();
+            portoSet.clear();
+            for (const [key, data] of Object.entries(regionStatus)) {
+                const idx = keyToHexIdx[key];
+                if (data.edited && idx !== undefined) lavorataSet.add(idx);
+                if (data.porto) portoSet.add(key);
+            }
+            saveLavorata();
+            savePorto();
+            drawLavorata();
+            drawMarkers();
+        }
+
+        function loadRegionStatusFromFile(inp) {
+            const f = inp.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = e => {
+                try { applyRegionStatus(JSON.parse(e.target.result)); }
+                catch (ex) { alert('JSON non valido: ' + ex); }
+            };
+            r.readAsText(f);
+            inp.value = '';
+        }
+
         async function loadRegionStatus() {
             try {
                 const resp = await fetch('regions_status.json');
                 if (!resp.ok) return;
-                regionStatus = await resp.json();
-                lavorataSet.clear();
-                portoSet.clear();
-                for (const [key, data] of Object.entries(regionStatus)) {
-                    const idx = keyToHexIdx[key];
-                    if (data.edited && idx !== undefined) lavorataSet.add(idx);
-                    if (data.porto) portoSet.add(key);
-                }
-                saveLavorata();
-                savePorto();
+                applyRegionStatus(await resp.json());
             } catch (e) { /* fallback: localStorage already loaded */ }
         }
 
