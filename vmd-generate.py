@@ -19,18 +19,18 @@ CONFIG = {
     # Una o più cartelle che contengono i .rigid_model_v2.
     # Vengono scansionate ricorsivamente.
      "models_roots": [
-        r"D:\Thrones of Britannia\modding\variantmeshes",
+        r"D:\SteamLibrary\steamapps\common\Total War Saga Thrones of Britannia\assembly_kit\working_data\VariantMeshes",
     ],
 
     # Cartella dei VMD centrali (.variantmeshdefinition delle unità).
     # Scansionata ricorsivamente.
-    "vmds_root": r"D:\Thrones of Britannia\modding\variantmeshes",
+    "vmds_root": r"D:\SteamLibrary\steamapps\common\Total War Saga Thrones of Britannia\assembly_kit\working_data\VariantMeshes",
 
     # Cartella delle varianti destra (.variantmeshdefinition che referenziano i VMD centrali).
-    "variants_root": r"D:\Thrones of Britannia\modding\variantmeshes\variantmeshdefinitions",
+    "variants_root": r"D:\SteamLibrary\steamapps\common\Total War Saga Thrones of Britannia\assembly_kit\raw_data\VariantMeshes\variantmeshdefinitions",
 
     # File HTML da generare
-    "output": r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html",
+    "output": r"D:\units-tool\vmd-viewer.html",
 }
 # ═══════════════════════════════════════════════════════════════
 

@@ -17,18 +17,18 @@ from pathlib import Path
 # ═══════════════════════════════════════════════════════════════
 #  CONFIGURAZIONE
 # ═══════════════════════════════════════════════════════════════
-TXT_FILE     = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.txt"
-HTML_FILE    = r"C:\Users\loren\Desktop\MK1212-website\vmd-viewer.html"
-UNITS_FILE   = r"C:\Users\loren\Desktop\MK1212-website\units variants.txt"
-ADDED_FILE   = r"C:\Users\loren\Desktop\MK1212-website\added_files.txt"
-MISSING_FILE = r"C:\Users\loren\Desktop\MK1212-website\missing_files.txt"
-MISSING_HTML = r"C:\Users\loren\Desktop\MK1212-website\missing-files.html"
-OUTPUT       = r"C:\Users\loren\Desktop\MK1212-website\needed_files.txt"
-CSV_FILE     = r"C:\Users\loren\Desktop\MK1212-website\units_report.csv"
-UNIT_REPORT  = r"C:\Users\loren\Desktop\MK1212-website\unit-report.html"
+TXT_FILE     = r"D:\units-tool\vmd-viewer.txt"
+HTML_FILE    = r"D:\units-tool\vmd-viewer.html"
+UNITS_FILE   = r"D:\units-tool\units variants.txt"
+ADDED_FILE   = r"D:\units-tool\added_files.txt"
+MISSING_FILE = r"D:\units-tool\missing_files.txt"
+MISSING_HTML = r"D:\units-tool\missing-files.html"
+OUTPUT       = r"D:\units-tool\needed_files.txt"
+CSV_FILE     = r"D:\units-tool\units_report.csv"
+UNIT_REPORT  = r"D:\units-tool\unit-report.html"
 
 # Cartella radice da cui copiare i file (es. dati estratti del gioco o della mod sorgente)
-SOURCE_DIR   = r"D:\Thrones of Britannia\modding\variantmeshes"
+SOURCE_DIR   = r"D:\SteamLibrary\steamapps\common\Total War Saga Thrones of Britannia\assembly_kit\working_data\VariantMeshes"
 # Destinazione copia — sottocartelle preservate
 CIB_DIR      = r"D:\Thrones of Britannia\modding\cib\da aggiungere\variantmeshes"
 # ═══════════════════════════════════════════════════════════════
