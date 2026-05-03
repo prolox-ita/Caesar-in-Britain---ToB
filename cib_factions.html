@@ -147,8 +147,8 @@
         </div>
         <div class="info-panel" id="infoPanel">
             <div class="search-box">
-                <label>Cerca regione</label>
-                <input type="text" id="searchInput" placeholder="nome, new key, old key..." spellcheck="false" autocomplete="off">
+                <label>Search region</label>
+                <input type="text" id="searchInput" placeholder="name, key…" spellcheck="false" autocomplete="off">
                 <div id="searchDropdown"></div>
             </div>
             <div class="panel-body" id="panelBody">
@@ -624,13 +624,13 @@
             const query=searchInput.value.trim().toLowerCase();
             if(!query){closeDropdown();return;}
             const matches=SEARCH_ENTRIES.filter(e=>e.searchText.includes(query));
-            if(!matches.length){searchDropdown.innerHTML='<div class="drop-item" style="color:#888;cursor:default;">Nessun risultato</div>';searchDropdown.classList.add("open");return;}
+            if(!matches.length){searchDropdown.innerHTML='<div class="drop-item" style="color:#888;cursor:default;">No results</div>';searchDropdown.classList.add("open");return;}
             const MAX=15, shown=matches.slice(0,MAX);
             searchDropdown.innerHTML=shown.map((e,i)=>{
                 const hasOld=e.old_key&&e.old_key!=="nuova regione";
                 return `<div class="drop-item" data-i="${i}"><div class="drop-item-name">${highlight(e.name,query)}</div><div class="drop-item-key">${highlight(e.new_key,query)}</div>${hasOld?`<div class="drop-item-oldkey">${highlight(e.old_key,query)}</div>`:""}</div>`;
             }).join("");
-            if(matches.length>MAX) searchDropdown.innerHTML+=`<div class="drop-item" style="color:#888;cursor:default;font-size:.8rem;">...e altri ${matches.length-MAX}</div>`;
+            if(matches.length>MAX) searchDropdown.innerHTML+=`<div class="drop-item" style="color:#888;cursor:default;font-size:.8rem;">...and ${matches.length-MAX} more</div>`;
             searchDropdown.classList.add("open"); dropActiveIdx=-1;
             searchDropdown.querySelectorAll(".drop-item[data-i]").forEach(el=>{
                 el.addEventListener("mousedown",function(e){e.preventDefault();selectDropItem(shown[parseInt(this.dataset.i)]);});
@@ -663,23 +663,15 @@
                     <div class="faction-swatch" style="background:${faction.color}"></div>
                     <div class="faction-name">${escapeHtml(fname)}</div>
                   </div>`
-                : `<div class="faction-banner"><div class="faction-unassigned">— Non assegnata —</div></div>`;
+                : `<div class="faction-banner"><div class="faction-unassigned">— Unassigned —</div></div>`;
             panelBody.innerHTML = `
                 <h2>${escapeHtml(region.name)}</h2>
                 ${factionHtml}
                 <div class="info-content">
                   <div class="region-details">
                     <div class="detail-row">
-                      <span class="detail-label">New Key:</span>
+                      <span class="detail-label">Key:</span>
                       <span class="detail-value" style="font-family:monospace;font-size:.8rem">${escapeHtml(region.new_key||"")}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Old Key:</span>
-                      <span class="detail-value" style="font-family:monospace;font-size:.8rem">${escapeHtml(region.old_key||"")}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Mare:</span>
-                      <span class="detail-value">${region.sea ? "Sì" : "No"}</span>
                     </div>
                   </div>
                 </div>`;
@@ -696,7 +688,7 @@
                     <span class="fl-count">${counts[name]||0}</span>
                 </div>`;
             }).join("");
-            panelBody.innerHTML = `<div class="faction-legend"><h3>Fazioni</h3>${items}</div>`;
+            panelBody.innerHTML = `<div class="faction-legend"><h3>Factions</h3>${items}</div>`;
         }
 
         // ── Zoom & Pan ────────────────────────────────────────────────────
