@@ -980,6 +980,51 @@ body {
             background: linear-gradient(135deg, #b8962e, #d4af37);
             transform: translateY(-2px);
         }
+
+        .view-slider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-bottom: 1px solid rgba(212,175,55,.3);
+            background: rgba(255,252,245,.6);
+            font-family: 'Cinzel', serif;
+            font-size: .72rem;
+            font-weight: 700;
+            color: #5a4a2f;
+            letter-spacing: .06em;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            background: #c8a84b;
+            border-radius: 22px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .toggle-track::before {
+            content: '';
+            position: absolute;
+            width: 16px; height: 16px;
+            left: 3px; top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform .2s;
+        }
+        .toggle-switch input:checked + .toggle-track { background: #5a4a2f; }
+        .toggle-switch input:checked + .toggle-track::before { transform: translateX(22px); }
+        .vs-label { transition: color .2s; }
+        .vs-label.active { color: #3a2a10; }
+        .vs-label.inactive { color: #a08860; }
     </style>
 </head>
 
@@ -997,6 +1042,14 @@ body {
             </div>
         </div>
         <div class="info-panel" id="infoPanel">
+            <div class="view-slider">
+                <span class="vs-label active" id="vsLabelFactions">Factions</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cultureToggle" onchange="setViewMode(this.checked)">
+                    <span class="toggle-track"></span>
+                </label>
+                <span class="vs-label inactive" id="vsLabelCultures">Cultures</span>
+            </div>
             <div class="search-box">
                 <label>Search region</label>
                 <input type="text" id="searchInput" placeholder="name, key…" spellcheck="false" autocomplete="off">
@@ -1650,6 +1703,50 @@ body {
             ctx.drawImage(borderOffscreen, 0, 0, bordersCanvas.width, bordersCanvas.height);
         }
 
+
+        // ── Culture data ──────────────────────────────────────────────────
+        let viewMode = 'factions';
+
+        const CULTURES = {
+            "Picti":     { color: "#3B5BA5", label: "Picti" },
+            "Hiberni":   { color: "#3A8C4A", label: "Hiberni" },
+            "Brittones": { color: "#B87040", label: "Brittones" },
+            "Belgae":    { color: "#2C6C2C", label: "Belgae" },
+            "Roma":      { color: "#8B1010", label: "Roma" }
+        };
+
+        const CULTURE_MAP = {
+            "Caledoni":    "Picti",   "Taexali":    "Picti",   "Vacomagi":  "Picti",
+            "Venicones":   "Picti",   "Epidii":     "Picti",   "Carnonacae":"Picti",
+            "Creones":     "Picti",   "Smertae":    "Picti",   "Decantae":  "Picti",
+            "Lugi":        "Picti",   "Caereni":    "Picti",   "Cornavii":  "Picti",
+            "Volunti":     "Hiberni", "Darini":     "Hiberni", "Robogdii":  "Hiberni",
+            "Coriondi":    "Hiberni", "Ebdani":     "Hiberni", "Menapi":    "Hiberni",
+            "Gangani":     "Hiberni", "Vodiae":     "Hiberni", "Cauci":     "Hiberni",
+            "Iverni":      "Hiberni", "Auteni":     "Hiberni", "Erdin":     "Hiberni",
+            "Velabri":     "Hiberni", "Nagnate":    "Hiberni", "Luceni":    "Hiberni",
+            "Votadini":    "Brittones","Selgovae":  "Brittones","Novantae": "Brittones",
+            "Brigantes":   "Brittones","Parisi":    "Brittones","Setanti":  "Brittones",
+            "Coritani":    "Brittones","Iceni":     "Brittones","Trinovantes":"Brittones",
+            "Catuvellauni":"Brittones","Regni":     "Brittones","Cantiaci": "Brittones",
+            "Silures":     "Brittones","Ordovices": "Brittones","Demetae":  "Brittones",
+            "Deceangli":   "Brittones","Dumnonii":  "Brittones","Cornovii": "Brittones",
+            "Dobunni":     "Brittones","Carvetii":  "Brittones","Damnonii": "Brittones",
+            "Atrebates":   "Belgae",  "Ambiani":   "Belgae",  "Remi":      "Belgae",
+            "Bellovaci":   "Belgae",  "Caletes":   "Belgae",  "Venellii":  "Belgae",
+            "Morini":      "Belgae",  "Veliocasses":"Belgae", "Lexovii":   "Belgae",
+            "Rome":        "Roma"
+        };
+
+        function setViewMode(isCulture) {
+            viewMode = isCulture ? 'cultures' : 'factions';
+            document.getElementById('vsLabelFactions').className = 'vs-label ' + (isCulture ? 'inactive' : 'active');
+            document.getElementById('vsLabelCultures').className = 'vs-label ' + (isCulture ? 'active' : 'inactive');
+            drawFactions();
+            if (currentSelectedIdx >= 0) { drawHighlight(currentSelectedIdx, true); showRegionInfo(currentSelectedIdx); }
+            else showLegend();
+        }
+
         // ── Faction drawing ───────────────────────────────────────────────
         function drawFactions() {
             const ctx = factionCanvas.getContext("2d");
@@ -1660,8 +1757,16 @@ body {
                 const region = COLOR_MAP[hex];
                 if (!region || region.sea) return;
                 const fname = FACTION_DATA[region.new_key];
-                if (!fname || !FACTIONS[fname]) return;
-                const col = FACTIONS[fname].color;
+                if (!fname) return;
+                let col;
+                if (viewMode === 'cultures') {
+                    const cname = CULTURE_MAP[fname];
+                    if (!cname || !CULTURES[cname]) return;
+                    col = CULTURES[cname].color;
+                } else {
+                    if (!FACTIONS[fname]) return;
+                    col = FACTIONS[fname].color;
+                }
                 const r = parseInt(col.slice(1, 3), 16), g = parseInt(col.slice(3, 5), 16), b = parseInt(col.slice(5, 7), 16);
                 ctx.fillStyle = `rgba(${r},${g},${b},0.65)`;
                 const runs = REGION_RUNS[hexIdx];
@@ -1780,15 +1885,30 @@ body {
             if (!region) return;
             const fname = FACTION_DATA[region.new_key] || null;
             const faction = fname ? FACTIONS[fname] : null;
-            const factionHtml = faction
-                ? `<div class="faction-banner">
-                    <div class="faction-swatch" style="background:${faction.color}"></div>
-                    <div class="faction-name">${escapeHtml(fname)}</div>
-                  </div>`
-                : `<div class="faction-banner"><div class="faction-unassigned">— Unassigned —</div></div>`;
+            const cname = fname ? CULTURE_MAP[fname] : null;
+            const culture = cname ? CULTURES[cname] : null;
+            let bannerHtml;
+            if (viewMode === 'cultures') {
+                bannerHtml = culture
+                    ? `<div class="faction-banner">
+                        <div class="faction-swatch" style="background:${culture.color}"></div>
+                        <div class="faction-name">${escapeHtml(cname)}</div>
+                       </div>
+                       <div class="faction-banner" style="padding:8px 20px;font-size:.82rem;color:#6a5a3f;">
+                         <span style="font-weight:600;color:#5a4a2f;margin-right:6px;">Faction:</span>${escapeHtml(fname || '—')}
+                       </div>`
+                    : `<div class="faction-banner"><div class="faction-unassigned">— Unassigned —</div></div>`;
+            } else {
+                bannerHtml = faction
+                    ? `<div class="faction-banner">
+                        <div class="faction-swatch" style="background:${faction.color}"></div>
+                        <div class="faction-name">${escapeHtml(fname)}</div>
+                       </div>`
+                    : `<div class="faction-banner"><div class="faction-unassigned">— Unassigned —</div></div>`;
+            }
             panelBody.innerHTML = `
                 <h2>${escapeHtml(region.name)}</h2>
-                ${factionHtml}
+                ${bannerHtml}
                 <div class="info-content">
                   <div class="region-details">
                     <div class="detail-row">
@@ -1800,17 +1920,34 @@ body {
         }
 
         function showLegend() {
-            const counts = {};
-            Object.values(FACTION_DATA).forEach(f => counts[f] = (counts[f] || 0) + 1);
-            const items = Object.keys(FACTIONS).sort().map(name => {
-                const f = FACTIONS[name];
-                return `<div class="fl-item">
-                    <div class="legend-swatch" style="background:${f.color}"></div>
-                    <span class="fl-name">${escapeHtml(name)}</span>
-                    <span class="fl-count">${counts[name] || 0}</span>
-                </div>`;
-            }).join("");
-            panelBody.innerHTML = `<div class="faction-legend"><h3>Factions</h3>${items}</div>`;
+            if (viewMode === 'cultures') {
+                const counts = {};
+                Object.values(FACTION_DATA).forEach(f => {
+                    const c = CULTURE_MAP[f];
+                    if (c) counts[c] = (counts[c] || 0) + 1;
+                });
+                const items = Object.keys(CULTURES).map(name => {
+                    const c = CULTURES[name];
+                    return `<div class="fl-item">
+                        <div class="legend-swatch" style="background:${c.color}"></div>
+                        <span class="fl-name">${escapeHtml(name)}</span>
+                        <span class="fl-count">${counts[name] || 0}</span>
+                    </div>`;
+                }).join("");
+                panelBody.innerHTML = `<div class="faction-legend"><h3>Cultures</h3>${items}</div>`;
+            } else {
+                const counts = {};
+                Object.values(FACTION_DATA).forEach(f => counts[f] = (counts[f] || 0) + 1);
+                const items = Object.keys(FACTIONS).sort().map(name => {
+                    const f = FACTIONS[name];
+                    return `<div class="fl-item">
+                        <div class="legend-swatch" style="background:${f.color}"></div>
+                        <span class="fl-name">${escapeHtml(name)}</span>
+                        <span class="fl-count">${counts[name] || 0}</span>
+                    </div>`;
+                }).join("");
+                panelBody.innerHTML = `<div class="faction-legend"><h3>Factions</h3>${items}</div>`;
+            }
         }
 
         // ── Zoom & Pan ────────────────────────────────────────────────────
