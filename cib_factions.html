@@ -1,148 +1,367 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CIB Map – Factions</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Merriweather:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <style>
-        body { margin:0; padding:0; overflow:hidden; background:#1a1410; }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #1a1410;
+        }
 
-        .map-container { display:flex; width:100vw; height:100vh; }
+        .map-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
 
-        .map-area { flex:1; position:relative; overflow:hidden; background:#1a1410; }
+        .map-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #1a1410;
+        }
 
-        #mapZoomContainer { position:absolute; top:0; left:0; transform-origin:0 0; cursor:grab; }
-        #mapZoomContainer.panning { cursor:grabbing; }
+        #mapZoomContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            cursor: grab;
+        }
 
-        .map-wrapper { position:relative; display:inline-block; }
+        #mapZoomContainer.panning {
+            cursor: grabbing;
+        }
+
+        .map-wrapper {
+            position: relative;
+            display: inline-block;
+        }
 
         .map-image {
-            display:block;
-            box-shadow:0 10px 40px rgba(0,0,0,.5);
-            border:3px solid #d4af37;
-            border-radius:8px;
-            -webkit-user-select:none; user-select:none;
+            display: block;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+            border: 3px solid #d4af37;
+            border-radius: 8px;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        #factionCanvas, #bordersCanvas, #overlayCanvas, #interactiveCanvas {
-            position:absolute; top:3px; left:3px; border-radius:5px;
+        #factionCanvas,
+        #bordersCanvas,
+        #overlayCanvas,
+        #interactiveCanvas {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            border-radius: 5px;
         }
-        #factionCanvas, #bordersCanvas, #overlayCanvas { pointer-events:none; }
-        #interactiveCanvas { cursor:crosshair; }
+
+        #factionCanvas,
+        #bordersCanvas,
+        #overlayCanvas {
+            pointer-events: none;
+        }
+
+        #interactiveCanvas {
+            cursor: crosshair;
+        }
 
         .info-panel {
-            width:320px; min-width:320px;
-            background:linear-gradient(135deg,rgba(245,241,232,.98),rgba(232,220,196,.98));
-            backdrop-filter:blur(10px);
-            box-shadow:-5px 0 20px rgba(0,0,0,.3);
-            display:flex; flex-direction:column;
-            border-left:3px solid #d4af37;
+            width: 320px;
+            min-width: 320px;
+            background: linear-gradient(135deg, rgba(245, 241, 232, .98), rgba(232, 220, 196, .98));
+            backdrop-filter: blur(10px);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, .3);
+            display: flex;
+            flex-direction: column;
+            border-left: 3px solid #d4af37;
         }
 
         .search-box {
-            padding:16px 20px 12px;
-            border-bottom:2px solid rgba(212,175,55,.4);
-            background:rgba(255,252,245,.7);
-            position:relative;
+            padding: 16px 20px 12px;
+            border-bottom: 2px solid rgba(212, 175, 55, .4);
+            background: rgba(255, 252, 245, .7);
+            position: relative;
         }
+
         .search-box label {
-            display:block; font-family:'Cinzel',serif; font-size:.8rem;
-            color:#5a4a2f; font-weight:700; margin-bottom:8px; letter-spacing:.05em;
+            display: block;
+            font-family: 'Cinzel', serif;
+            font-size: .8rem;
+            color: #5a4a2f;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: .05em;
         }
+
         #searchInput {
-            width:100%; box-sizing:border-box; padding:9px 12px;
-            border:1.5px solid #c8a84b; border-radius:6px;
-            font-family:monospace; font-size:.88rem;
-            background:rgba(255,255,255,.95); color:#3a2a10; outline:none;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px 12px;
+            border: 1.5px solid #c8a84b;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: .88rem;
+            background: rgba(255, 255, 255, .95);
+            color: #3a2a10;
+            outline: none;
         }
-        #searchInput:focus { border-color:#8b6914; box-shadow:0 0 0 2px rgba(212,175,55,.25); }
+
+        #searchInput:focus {
+            border-color: #8b6914;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, .25);
+        }
 
         #searchDropdown {
-            display:none; position:absolute; left:20px; right:20px;
-            background:#fffdf5; border:1.5px solid #c8a84b; border-top:none;
-            border-radius:0 0 8px 8px; max-height:260px; overflow-y:auto;
-            z-index:2000; box-shadow:0 6px 20px rgba(0,0,0,.18);
+            display: none;
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            background: #fffdf5;
+            border: 1.5px solid #c8a84b;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 260px;
+            overflow-y: auto;
+            z-index: 2000;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
         }
-        #searchDropdown.open { display:block; }
-        .drop-item { padding:9px 14px; cursor:pointer; border-bottom:1px solid rgba(212,175,55,.15); transition:background .1s; }
-        .drop-item:last-child { border-bottom:none; }
-        .drop-item:hover, .drop-item.active { background:rgba(212,175,55,.18); }
-        .drop-item-name { font-size:.9rem; color:#3a2a10; font-weight:600; }
-        .drop-item-key { font-family:monospace; font-size:.75rem; color:#7a6a4f; margin-top:1px; }
-        .drop-item-oldkey { font-family:monospace; font-size:.72rem; color:#9a8a6a; margin-top:1px; font-style:italic; }
-        .drop-match { background:rgba(212,175,55,.45); border-radius:2px; }
 
-        .panel-body { flex:1; overflow-y:auto; }
-        .panel-body.empty { display:flex; align-items:center; justify-content:center; color:#8a7a5f; font-style:italic; }
+        #searchDropdown.open {
+            display: block;
+        }
+
+        .drop-item {
+            padding: 9px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(212, 175, 55, .15);
+            transition: background .1s;
+        }
+
+        .drop-item:last-child {
+            border-bottom: none;
+        }
+
+        .drop-item:hover,
+        .drop-item.active {
+            background: rgba(212, 175, 55, .18);
+        }
+
+        .drop-item-name {
+            font-size: .9rem;
+            color: #3a2a10;
+            font-weight: 600;
+        }
+
+        .drop-item-key {
+            font-family: monospace;
+            font-size: .75rem;
+            color: #7a6a4f;
+            margin-top: 1px;
+        }
+
+        .drop-item-oldkey {
+            font-family: monospace;
+            font-size: .72rem;
+            color: #9a8a6a;
+            margin-top: 1px;
+            font-style: italic;
+        }
+
+        .drop-match {
+            background: rgba(212, 175, 55, .45);
+            border-radius: 2px;
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .panel-body.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a7a5f;
+            font-style: italic;
+        }
 
         .info-panel h2 {
-            font-family:'Cinzel',serif; font-size:1.6rem; color:#5a4a2f;
-            margin:0 0 14px; padding:20px 20px 14px;
-            border-bottom:2px solid #d4af37; word-break:break-word;
+            font-family: 'Cinzel', serif;
+            font-size: 1.6rem;
+            color: #5a4a2f;
+            margin: 0 0 14px;
+            padding: 20px 20px 14px;
+            border-bottom: 2px solid #d4af37;
+            word-break: break-word;
         }
-        .info-content { padding:0 20px 20px; font-size:.95rem; color:#4a3a25; line-height:1.8; }
+
+        .info-content {
+            padding: 0 20px 20px;
+            font-size: .95rem;
+            color: #4a3a25;
+            line-height: 1.8;
+        }
 
         .faction-banner {
-            display:flex; align-items:center; gap:12px;
-            padding:14px 20px; border-bottom:1px solid rgba(212,175,55,.25);
-            background:rgba(255,252,245,.6);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(212, 175, 55, .25);
+            background: rgba(255, 252, 245, .6);
         }
-        .faction-swatch { width:36px; height:36px; border-radius:5px; flex-shrink:0; border:2px solid rgba(0,0,0,.15); }
-        .faction-name { font-family:'Cinzel',serif; font-size:1rem; font-weight:700; color:#3a2a10; }
-        .faction-unassigned { color:#9a8a6a; font-style:italic; font-size:.9rem; }
 
-        .region-details { margin-top:4px; }
+        .faction-swatch {
+            width: 36px;
+            height: 36px;
+            border-radius: 5px;
+            flex-shrink: 0;
+            border: 2px solid rgba(0, 0, 0, .15);
+        }
+
+        .faction-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #3a2a10;
+        }
+
+        .faction-unassigned {
+            color: #9a8a6a;
+            font-style: italic;
+            font-size: .9rem;
+        }
+
+        .region-details {
+            margin-top: 4px;
+        }
+
         .detail-row {
-            display:flex; justify-content:space-between; align-items:flex-start;
-            padding:9px 0; border-bottom:1px solid rgba(212,175,55,.2); gap:10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, .2);
+            gap: 10px;
         }
-        .detail-row:last-child { border-bottom:none; }
-        .detail-label { font-weight:600; color:#5a4a2f; font-size:.88rem; white-space:nowrap; }
-        .detail-value { color:#6a5a3f; font-size:.88rem; font-style:italic; text-align:right; word-break:break-all; }
 
-        .faction-legend { padding:16px 20px; overflow-y:auto; flex:1; }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #5a4a2f;
+            font-size: .88rem;
+            white-space: nowrap;
+        }
+
+        .detail-value {
+            color: #6a5a3f;
+            font-size: .88rem;
+            font-style: italic;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .faction-legend {
+            padding: 16px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
         .faction-legend h3 {
-            font-family:'Cinzel',serif; font-size:.82rem; font-weight:700;
-            color:#5a4a2f; margin-bottom:12px; letter-spacing:.1em; text-transform:uppercase;
+            font-family: 'Cinzel', serif;
+            font-size: .82rem;
+            font-weight: 700;
+            color: #5a4a2f;
+            margin-bottom: 12px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
         }
+
         .fl-item {
-            display:flex; align-items:center; gap:8px;
-            padding:7px 0; border-bottom:1px solid rgba(212,175,55,.15);
-            font-size:.88rem; color:#4a3a25;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, .15);
+            font-size: .88rem;
+            color: #4a3a25;
         }
-        .legend-swatch { width:16px; height:16px; border-radius:3px; flex-shrink:0; border:1px solid rgba(0,0,0,.18); }
-        .fl-name { flex:1; font-weight:600; }
+
+        .legend-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0, 0, 0, .18);
+        }
+
+        .fl-name {
+            flex: 1;
+            font-weight: 600;
+        }
+
         .fl-count {
-            font-size:.72rem; color:#9a8a6a;
-            background:rgba(212,175,55,.15); border-radius:10px;
-            padding:1px 7px; min-width:22px; text-align:center;
+            font-size: .72rem;
+            color: #9a8a6a;
+            background: rgba(212, 175, 55, .15);
+            border-radius: 10px;
+            padding: 1px 7px;
+            min-width: 22px;
+            text-align: center;
         }
 
         .back-button {
-            position:absolute; top:20px; left:20px;
-            background:linear-gradient(135deg,#d4af37,#b8962e);
-            color:white; padding:10px 20px; border:none; border-radius:8px;
-            font-family:'Cinzel',serif; font-size:.9rem; cursor:pointer;
-            box-shadow:0 4px 15px rgba(0,0,0,.3); transition:all .3s;
-            z-index:1000; text-decoration:none; display:inline-block;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #d4af37, #b8962e);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cinzel', serif;
+            font-size: .9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .3);
+            transition: all .3s;
+            z-index: 1000;
+            text-decoration: none;
+            display: inline-block;
         }
-        .back-button:hover { background:linear-gradient(135deg,#b8962e,#d4af37); transform:translateY(-2px); }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #b8962e, #d4af37);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
+
 <body>
     <a href="index.html" class="back-button">&#8592; Back to Home</a>
     <div class="map-container">
         <div class="map-area" id="mapArea">
             <div id="mapZoomContainer">
-            <div class="map-wrapper" id="mapWrapper">
-                <img src="background_cib.jpg" alt="CIB Campaign Map" class="map-image" id="mapImage">
-                <canvas id="factionCanvas"></canvas>
-                <canvas id="bordersCanvas"></canvas>
-                <canvas id="overlayCanvas"></canvas>
-                <canvas id="interactiveCanvas"></canvas>
-            </div>
+                <div class="map-wrapper" id="mapWrapper">
+                    <img src="background_cib.jpg" alt="CIB Campaign Map" class="map-image" id="mapImage">
+                    <canvas id="factionCanvas"></canvas>
+                    <canvas id="bordersCanvas"></canvas>
+                    <canvas id="overlayCanvas"></canvas>
+                    <canvas id="interactiveCanvas"></canvas>
+                </div>
             </div>
         </div>
         <div class="info-panel" id="infoPanel">
@@ -162,65 +381,65 @@
     <script>
         // ── Faction data ──────────────────────────────────────────────────
         const FACTIONS = {
-            "Ambiani":     { color: "#6E3765" },
-            "Atrebates":   { color: "#396E4E" },
-            "Auteni":      { color: "#17616E" },
-            "Bellovaci":   { color: "#7F4F2D" },
-            "Brigantes":   { color: "#0D5C6E" },
-            "Caereni":     { color: "#00006E" },
-            "Caledoni":    { color: "#4A6FBF" },
-            "Caletes":     { color: "#9F2248" },
-            "Cantiaci":    { color: "#326E1B" },
-            "Carnonacae":  { color: "#2E6E45" },
-            "Carvetii":    { color: "#6E472E" },
-            "Catuvellauni":{ color: "#6E110A" },
-            "Cauci":       { color: "#5A0A0A" },
-            "Coriondi":    { color: "#359F64" },
-            "Cornavii":    { color: "#225D6E" },
-            "Cornovii":    { color: "#38476E" },
-            "Coritani":    { color: "#6E2E2E" },
-            "Creones":     { color: "#496E2E" },
-            "Damnonii":    { color: "#3C6F3B" },
-            "Darini":      { color: "#F2CC00" },
-            "Decantae":    { color: "#3B5E6F" },
-            "Deceangli":   { color: "#6F683B" },
-            "Demetae":     { color: "#6F3B3D" },
-            "Dobunni":     { color: "#6E5B4F" },
-            "Dumnonii":    { color: "#6E6C4A" },
-            "Durotriges":  { color: "#6E510F" },
-            "Ebdani":      { color: "#7BB757" },
-            "Epidii":      { color: "#6E0D0D" },
-            "Erdin":       { color: "#4466AC" },
-            "Gangani":     { color: "#4E536E" },
-            "Iceni":       { color: "#3C436E" },
-            "Iverni":      { color: "#0A1A40" },
-            "Lexovii":     { color: "#3E406E" },
-            "Luceni":      { color: "#0A2351" },
-            "Lugi":        { color: "#6E3A16" },
-            "Menapi":      { color: "#4A6E3E" },
-            "Morini":      { color: "#F2F279" },
-            "Nagnate":     { color: "#44906A" },
-            "Novantae":    { color: "#6E4F4F" },
-            "Ordovices":   { color: "#694B6E" },
-            "Parisi":      { color: "#5E6E05" },
-            "Regni":       { color: "#6E126A" },
-            "Remi":        { color: "#6E6E37" },
-            "Robogdii":    { color: "#217227" },
-            "Rome":        { color: "#964035" },
-            "Selgovae":    { color: "#211E6E" },
-            "Setanti":     { color: "#2C6E1E" },
-            "Silures":     { color: "#6E231E" },
-            "Smertae":     { color: "#1E2F6E" },
-            "Taexali":     { color: "#006C6E" },
-            "Trinovantes": { color: "#6E3119" },
-            "Vacomagi":    { color: "#6E2344" },
-            "Velabri":     { color: "#6E4F4F" },
-            "Veliocasses": { color: "#004D70" },
-            "Venellii":    { color: "#B76938" },
-            "Venicones":   { color: "#49376E" },
-            "Vodiae":      { color: "#6C6E35" },
-            "Volunti":     { color: "#57935F" },
-            "Votadini":    { color: "#4C6E5A" }
+            "Rome": { color: "#8B1A1A" },
+            "Cornavii": { color: "#050D2E" },
+            "Caledoni": { color: "#3355CC" },
+            "Damnonii": { color: "#0A1A55" },
+            "Novantae": { color: "#5566DD" },
+            "Taexali": { color: "#0D1F44" },
+            "Vacomagi": { color: "#1A2E88" },
+            "Venicones": { color: "#6677EE" },
+            "Epidii": { color: "#0A1650" },
+            "Creones": { color: "#2233AA" },
+            "Carnonacae": { color: "#7788FF" },
+            "Caereni": { color: "#111E66" },
+            "Smertae": { color: "#4455BB" },
+            "Lugi": { color: "#080F3A" },
+            "Decantae": { color: "#8899EE" },
+            "Gangani": { color: "#021A05" },
+            "Robogdii": { color: "#2EA83A" },
+            "Darini": { color: "#042E0A" },
+            "Volunti": { color: "#50C85A" },
+            "Ebdani": { color: "#081A0C" },
+            "Cauci": { color: "#1A7822" },
+            "Menapi": { color: "#0A3D12" },
+            "Vodiae": { color: "#66DD72" },
+            "Iverni": { color: "#021008" },
+            "Velabri": { color: "#3ABB46" },
+            "Luceni": { color: "#0D5518" },
+            "Auteni": { color: "#80EE88" },
+            "Nagnate": { color: "#062210" },
+            "Erdin": { color: "#22993A" },
+            "Coriondi": { color: "#44CC55" },
+            "Morini": { color: "#1A0800" },
+            "Remi": { color: "#C87820" },
+            "Veliocasses": { color: "#3D1A00" },
+            "Lexovii": { color: "#EEAA44" },
+            "Venellii": { color: "#6E3008" },
+            "Catuvellauni": { color: "#021822" },
+            "Iceni": { color: "#2299BB" },
+            "Brigantes": { color: "#042A38" },
+            "Trinovantes": { color: "#44BBDD" },
+            "Silures": { color: "#071E2E" },
+            "Cornovii": { color: "#55CCEE" },
+            "Ordovices": { color: "#031520" },
+            "Votadini": { color: "#1188AA" },
+            "Dumnonii": { color: "#77DDFF" },
+            "Durotriges": { color: "#082233" },
+            "Dobunni": { color: "#0A6688" },
+            "Regni": { color: "#88EEFF" },
+            "Cantiaci": { color: "#0D3344" },
+            "Demetae": { color: "#33AACC" },
+            "Coritani": { color: "#AAFFFF" },
+            "Deceangli": { color: "#051C2C" },
+            "Setanti": { color: "#1A7799" },
+            "Parisi": { color: "#66DDEE" },
+            "Carvetii": { color: "#093040" },
+            "Selgovae": { color: "#0E99BB" },
+            "Atrebates": { color: "#0A0F02" },
+            "Ambiani": { color: "#6E8822" },
+            "Bellovaci": { color: "#1C2808" },
+            "Caletes": { color: "#AACC44" },
         };
 
         const FACTION_DATA = {
@@ -300,7 +519,7 @@
             "cib_reg_cair_daun": "Brigantes",
             "cib_reg_dun_dwfr": "Atrebates",
             "cib_reg_sefeldion": "Coritani",
-            "cib_reg_coed_agos_traeth": "Coritani",
+            "cib_reg_coed_agos_traeth": "Trinovantes",
             "cib_reg_druim_collachair": "Luceni",
             "cib_reg_druim_da_ethiar": "Nagnate",
             "cib_reg_dun_cawn": "Deceangli",
@@ -328,7 +547,7 @@
             "cib_reg_ferna": "Menapi",
             "cib_reg_tig_ar_y_aber": "Coritani",
             "cib_reg_fofaras": "Vacomagi",
-            "cib_reg_elge": "Trinovantes",
+            "cib_reg_elge": "Iceni",
             "cib_reg_gleann_da_loch": "Cauci",
             "cib_reg_cilta": "Dobunni",
             "cib_reg_dina_briwa": "Catuvellauni",
@@ -382,7 +601,7 @@
             "cib_reg_dun_ailinne": "Cauci",
             "cib_reg_nedd": "Silures",
             "cib_reg_neen_din": "Catuvellauni",
-            "cib_reg_gipesbae": "Iceni",
+            "cib_reg_gipesbae": "Trinovantes",
             "cib_reg_caer_ogyrfan": "Deceangli",
             "cib_reg_lifer_pol": "Setanti",
             "cib_reg_caer_cunobelinos": "Catuvellauni",
@@ -391,7 +610,7 @@
             "cib_reg_dun_na_ramhainn_aon": "Ambiani",
             "cib_reg_rath_cruachan": "Nagnate",
             "cib_reg_rath_luraig": "Robogdii",
-            "cib_reg_mwd_din": "Trinovantes",
+            "cib_reg_mwd_din": "Coritani",
             "cib_reg_bealach_dair": "Vacomagi",
             "cib_reg_drochebrig": "Coritani",
             "cib_reg_dourbruf": "Cantiaci",
@@ -402,7 +621,7 @@
             "cib_reg_rudglann": "Deceangli",
             "cib_reg_saigher": "Cauci",
             "cib_reg_verlamion": "Catuvellauni",
-            "cib_reg_tas_din": "Trinovantes",
+            "cib_reg_tas_din": "Iceni",
             "cib_reg_bodweryn": "Cornovii",
             "cib_reg_dun_menez": "Durotriges",
             "cib_reg_hamdon": "Durotriges",
@@ -417,7 +636,7 @@
             "cib_reg_ictinovium": "Ambiani",
             "cib_reg_cair_tamas": "Coritani",
             "cib_reg_tanet": "Cantiaci",
-            "cib_reg_tre_ar_sturr": "Iceni",
+            "cib_reg_tre_ar_sturr": "Trinovantes",
             "cib_reg_inbhir_theorsa": "Cornavii",
             "cib_reg_dun_tagel": "Dumnonii",
             "cib_reg_abernanton": "Creones",
@@ -448,12 +667,13 @@
             "cib_reg_portus_itius": "Morini",
             "cib_reg_ratumacos": "Veliocasses",
             "cib_reg_samarobriva": "Ambiani",
-            "cib_reg_corda": "Selgovae"
+            "cib_reg_corda": "Selgovae",
+            "cib_reg_læwe": "Regni",
+            "cib_reg_hæferfordd": "Demetae"
         };
 
         // ── Map data ──────────────────────────────────────────────────────
-        const HEX_LIST = ["000080","0000FF","002157","003471","003663","004A80","0054A6","005952","005B7F","006400","0072BC","00746B","0076A3","008B00","008B45","008B8B","009ACD","00A99D","00AEEF","00B2EE","00BFF3","00CD66","00CED1","00E5EE","00EE00","00EE76","00EEEE","00FF00","050505","080808","0D004C","104E8B","121212","1ABBB4","1B1464","1F1F1F","242424","262626","27408B","2E3192","2E8B57","303030","333333","3CB371","3D3D3D","40E0D0","4169E1","424242","436EEE","448CCB","458B00","48D1CC","4D4D4D","4EEE94","4F94CD","53868B","54FF9F","575757","595959","5A50BE","5B4DC2","5C5C5C","5CACEE","5E5E5E","5F9EA0","636363","6495ED","668B8B","66CDAA","6852CD","6959CD","696969","696B69","698B22","698B69","707070","76EEC6","787878","7A67EE","7A8B8B","7AC5CD","7B68EE","7CFC00","7D7D7D","813626","82616E","826EFA","828282","836FFF","838B83","878787","88CEFF","8968CD","8A8A8A","8B0000","8B008B","8B1A1A","8B2500","8B3A62","8B4726","8B475D","8B668B","8B6914","8B6969","8B7500","8B7B8B","8B7D6B","8B8378","8B8682","8B8878","8B8970","8B8B00","8EE5EE","8F8F8F","8FBC8F","912CEE","919191","9370DB","969696","9A32CD","9AC0CD","9AFF9A","9B30FF","9C9C9C","9DB6CD","A020F0","A0522D","A2CD5A","A3A3A3","A6A6A6","ADADAD","AFEEEE","B03060","B0B0B0","B0D8E6","B0E0E6","B0E2FF","B22222","B23AEE","B3EE3A","B4CDCD","B4EEB4","B5B5B5","B8B8B8","B9D3EE","BA55D3","BBFFFF","BC8F8F","BCD2EE","BCEE68","BF3EFF","C0FF3E","C70738","C71585","C7C7C7","CAE1FF","CAFF70","CCCCCC","CD0000","CD1076","CD2990","CD3278","CD3333","CD3700","CD5A96","CD5B45","CD69C9","CD7054","CD8500","CD9B9B","CDAF95","CDB38B","CDBA96","CDBE70","CDC1C5","CDC5BF","CDCDB4","CFCFCF","D1D1D1","D1EEEE","D2B48C","D4D4D4","D6D6D6","D9D9D9","DA70D6","DAA520","DB7093","DDA0DD","DEB887","E0669B","E0EEE0","E0EEEE","E0FFFF","E3E3E3","E664B9","E68AE6","EE3A8C","EE3B3B","EE5C42","EE64AD","EE7621","EE7942","EE799F","EE9A49","EEA964","EEAD0E","EEB422","EEC900","EECFA1","EED2EE","EED5B7","EED5D2","EEDD82","EEDFCC","EEE0E5","EEE5DE","F08080","F0E68C","F4F4F4","F5DEB3","F5F5DC","F5F5F5","F8F8FF","FA8072","FAF0E6","FAFAFA","FF0000","FF1493","FF3030","FF3E96","FF4040","FF4500","FF5CCB","FF6347","FF7256","FF7F00","FF8C00","FFC11B","FFD39B","FFDEAD","FFE4B5","FFE7BA","FFEBCD","FFEC8B","FFEFD5","FFF8DC","FFFACD"];
-
+        const HEX_LIST = ["000080", "0000FF", "002157", "003471", "003663", "004A80", "0054A6", "005952", "005B7F", "006400", "0072BC", "00746B", "0076A3", "008B00", "008B45", "008B8B", "009ACD", "00A99D", "00AEEF", "00B2EE", "00BFF3", "00CD66", "00CED1", "00E5EE", "00EE00", "00EE76", "00EEEE", "00FF00", "050505", "080808", "0D004C", "104E8B", "121212", "1ABBB4", "1B1464", "1F1F1F", "242424", "262626", "27408B", "2E3192", "2E8B57", "303030", "333333", "3CB371", "3D3D3D", "40E0D0", "4169E1", "424242", "436EEE", "448CCB", "458B00", "48D1CC", "4D4D4D", "4EEE94", "4F94CD", "53868B", "54FF9F", "575757", "595959", "5A50BE", "5B4DC2", "5C5C5C", "5CACEE", "5E5E5E", "5F9EA0", "636363", "6495ED", "668B8B", "66CDAA", "6852CD", "6959CD", "696969", "696B69", "698B22", "698B69", "707070", "76EEC6", "787878", "7A67EE", "7A8B8B", "7AC5CD", "7B68EE", "7CFC00", "7D7D7D", "813626", "82616E", "826EFA", "828282", "836FFF", "838B83", "878787", "88CEFF", "8968CD", "8A8A8A", "8B0000", "8B008B", "8B1A1A", "8B2500", "8B3A62", "8B4726", "8B475D", "8B668B", "8B6914", "8B6969", "8B7500", "8B7B8B", "8B7D6B", "8B8378", "8B8682", "8B8878", "8B8970", "8B8B00", "8EE5EE", "8F8F8F", "8FBC8F", "912CEE", "919191", "9370DB", "969696", "9A32CD", "9AC0CD", "9AFF9A", "9B30FF", "9C9C9C", "9DB6CD", "A020F0", "A0522D", "A2CD5A", "A3A3A3", "A6A6A6", "ADADAD", "AFEEEE", "B03060", "B0B0B0", "B0D8E6", "B0E0E6", "B0E2FF", "B22222", "B23AEE", "B3EE3A", "B4CDCD", "B4EEB4", "B5B5B5", "B8B8B8", "B9D3EE", "BA55D3", "BBFFFF", "BC8F8F", "BCD2EE", "BCEE68", "BF3EFF", "C0FF3E", "C70738", "C71585", "C7C7C7", "CAE1FF", "CAFF70", "CCCCCC", "CD0000", "CD1076", "CD2990", "CD3278", "CD3333", "CD3700", "CD5A96", "CD5B45", "CD69C9", "CD7054", "CD8500", "CD9B9B", "CDAF95", "CDB38B", "CDBA96", "CDBE70", "CDC1C5", "CDC5BF", "CDCDB4", "CFCFCF", "D1D1D1", "D1EEEE", "D2B48C", "D4D4D4", "D6D6D6", "D9D9D9", "DA70D6", "DAA520", "DB7093", "DDA0DD", "DEB887", "E0669B", "E0EEE0", "E0EEEE", "E0FFFF", "E3E3E3", "E664B9", "E68AE6", "EE3A8C", "EE3B3B", "EE5C42", "EE64AD", "EE7621", "EE7942", "EE799F", "EE9A49", "EEA964", "EEAD0E", "EEB422", "EEC900", "EECFA1", "EED2EE", "EED5B7", "EED5D2", "EEDD82", "EEDFCC", "EEE0E5", "EEE5DE", "F08080", "F0E68C", "F4F4F4", "F5DEB3", "F5F5DC", "F5F5F5", "F8F8FF", "FA8072", "FAF0E6", "FAFAFA", "FF0000", "FF1493", "FF3030", "FF3E96", "FF4040", "FF4500", "FF5CCB", "FF6347", "FF7256", "FF7F00", "FF8C00", "FFC11B", "FFD39B", "FFDEAD", "FFE4B5", "FFE7BA", "FFEBCD", "FFEC8B", "FFEFD5", "FFF8DC", "FFFACD"];
         const MAP_W = 954, MAP_H = 1063;
 
         function decodeRowData(b64) {
@@ -468,9 +688,9 @@
                 const n = view.getUint8(pos); pos++;
                 const row = new Uint16Array(n * 3);
                 for (let i = 0; i < n; i++) {
-                    row[i*3]   = view.getUint16(pos, true); pos += 2;
-                    row[i*3+1] = view.getUint16(pos, true); pos += 2;
-                    row[i*3+2] = view.getUint8(pos); pos++;
+                    row[i * 3] = view.getUint16(pos, true); pos += 2;
+                    row[i * 3 + 1] = view.getUint16(pos, true); pos += 2;
+                    row[i * 3 + 2] = view.getUint8(pos); pos++;
                 }
                 rows[y] = row;
             }
@@ -482,7 +702,7 @@
             for (let y = 0; y < rows.length; y++) {
                 const row = rows[y];
                 for (let i = 0; i < row.length; i += 3)
-                    regionRuns[row[i+2]].push(y, row[i], row[i+1]);
+                    regionRuns[row[i + 2]].push(y, row[i], row[i + 1]);
             }
             return regionRuns;
         }
@@ -492,19 +712,19 @@
         try {
             ROWS = decodeRowData(ROW_DATA_B64);
             REGION_RUNS = buildRegionIndex(ROWS);
-        } catch(e) { console.error("Decode failed:", e); }
+        } catch (e) { console.error("Decode failed:", e); }
 
         // ── Canvas refs ───────────────────────────────────────────────────
-        const mapImage         = document.getElementById("mapImage");
-        const mapArea          = document.getElementById("mapArea");
+        const mapImage = document.getElementById("mapImage");
+        const mapArea = document.getElementById("mapArea");
         const mapZoomContainer = document.getElementById("mapZoomContainer");
-        const factionCanvas    = document.getElementById("factionCanvas");
-        const bordersCanvas    = document.getElementById("bordersCanvas");
-        const overlayCanvas    = document.getElementById("overlayCanvas");
-        const interactiveCanvas= document.getElementById("interactiveCanvas");
-        const panelBody        = document.getElementById("panelBody");
-        const searchInput      = document.getElementById("searchInput");
-        const searchDropdown   = document.getElementById("searchDropdown");
+        const factionCanvas = document.getElementById("factionCanvas");
+        const bordersCanvas = document.getElementById("bordersCanvas");
+        const overlayCanvas = document.getElementById("overlayCanvas");
+        const interactiveCanvas = document.getElementById("interactiveCanvas");
+        const panelBody = document.getElementById("panelBody");
+        const searchInput = document.getElementById("searchInput");
+        const searchDropdown = document.getElementById("searchDropdown");
 
         let currentHoverIdx = -1, currentSelectedIdx = -1;
 
@@ -516,62 +736,62 @@
                 const row = ROWS[y];
                 const base = y * MAP_W;
                 for (let i = 0; i < row.length; i += 3)
-                    idxMap.fill(row[i+2]+1, base+row[i], base+row[i+1]+1);
+                    idxMap.fill(row[i + 2] + 1, base + row[i], base + row[i + 1] + 1);
             }
-            const sx = W/MAP_W, sy = H/MAP_H;
+            const sx = W / MAP_W, sy = H / MAP_H;
             const bd = new Uint8ClampedArray(W * H * 4);
-            for (let y = 1; y < MAP_H-1; y++) {
-                for (let x = 1; x < MAP_W-1; x++) {
-                    const off = y*MAP_W+x, v = idxMap[off];
+            for (let y = 1; y < MAP_H - 1; y++) {
+                for (let x = 1; x < MAP_W - 1; x++) {
+                    const off = y * MAP_W + x, v = idxMap[off];
                     if (!v) continue;
-                    if (idxMap[off-1]!==v||idxMap[off+1]!==v||idxMap[off-MAP_W]!==v||idxMap[off+MAP_W]!==v) {
-                        const px=Math.round(x*sx), py=Math.round(y*sy), px1=Math.round((x+1)*sx), py1=Math.round((y+1)*sy);
-                        for (let iy=py;iy<py1;iy++) for (let ix=px;ix<px1;ix++) {
-                            const p=(iy*W+ix)*4; bd[p]=210; bd[p+1]=210; bd[p+2]=215; bd[p+3]=180;
+                    if (idxMap[off - 1] !== v || idxMap[off + 1] !== v || idxMap[off - MAP_W] !== v || idxMap[off + MAP_W] !== v) {
+                        const px = Math.round(x * sx), py = Math.round(y * sy), px1 = Math.round((x + 1) * sx), py1 = Math.round((y + 1) * sy);
+                        for (let iy = py; iy < py1; iy++) for (let ix = px; ix < px1; ix++) {
+                            const p = (iy * W + ix) * 4; bd[p] = 210; bd[p + 1] = 210; bd[p + 2] = 215; bd[p + 3] = 180;
                         }
                     }
                 }
             }
-            const sharp = document.createElement('canvas'); sharp.width=W; sharp.height=H;
-            sharp.getContext('2d').putImageData(new ImageData(bd,W,H),0,0);
-            borderOffscreen = document.createElement('canvas'); borderOffscreen.width=W; borderOffscreen.height=H;
+            const sharp = document.createElement('canvas'); sharp.width = W; sharp.height = H;
+            sharp.getContext('2d').putImageData(new ImageData(bd, W, H), 0, 0);
+            borderOffscreen = document.createElement('canvas'); borderOffscreen.width = W; borderOffscreen.height = H;
             const bctx = borderOffscreen.getContext('2d');
-            bctx.filter='blur(1.2px)'; bctx.drawImage(sharp,0,0); bctx.filter='none';
+            bctx.filter = 'blur(1.2px)'; bctx.drawImage(sharp, 0, 0); bctx.filter = 'none';
         }
 
         function drawBorders() {
             const ctx = bordersCanvas.getContext('2d');
-            ctx.clearRect(0,0,bordersCanvas.width,bordersCanvas.height);
-            if (!borderOffscreen||bordersCanvas.width===0) return;
-            ctx.drawImage(borderOffscreen,0,0,bordersCanvas.width,bordersCanvas.height);
+            ctx.clearRect(0, 0, bordersCanvas.width, bordersCanvas.height);
+            if (!borderOffscreen || bordersCanvas.width === 0) return;
+            ctx.drawImage(borderOffscreen, 0, 0, bordersCanvas.width, bordersCanvas.height);
         }
 
         // ── Faction drawing ───────────────────────────────────────────────
         function drawFactions() {
             const ctx = factionCanvas.getContext("2d");
-            ctx.clearRect(0,0,factionCanvas.width,factionCanvas.height);
+            ctx.clearRect(0, 0, factionCanvas.width, factionCanvas.height);
             if (!REGION_RUNS) return;
-            const scaleX = factionCanvas.width/MAP_W, scaleY = factionCanvas.height/MAP_H;
+            const scaleX = factionCanvas.width / MAP_W, scaleY = factionCanvas.height / MAP_H;
             HEX_LIST.forEach((hex, hexIdx) => {
                 const region = COLOR_MAP[hex];
-                if (!region||region.sea) return;
+                if (!region || region.sea) return;
                 const fname = FACTION_DATA[region.new_key];
-                if (!fname||!FACTIONS[fname]) return;
+                if (!fname || !FACTIONS[fname]) return;
                 const col = FACTIONS[fname].color;
-                const r=parseInt(col.slice(1,3),16), g=parseInt(col.slice(3,5),16), b=parseInt(col.slice(5,7),16);
+                const r = parseInt(col.slice(1, 3), 16), g = parseInt(col.slice(3, 5), 16), b = parseInt(col.slice(5, 7), 16);
                 ctx.fillStyle = `rgba(${r},${g},${b},0.65)`;
                 const runs = REGION_RUNS[hexIdx];
-                for (let i=0;i<runs.length;i+=3)
-                    ctx.fillRect(runs[i+1]*scaleX, runs[i]*scaleY, (runs[i+2]-runs[i+1]+1)*scaleX, scaleY+0.5);
+                for (let i = 0; i < runs.length; i += 3)
+                    ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, scaleY + 0.5);
             });
         }
 
         // ── Highlight drawing ─────────────────────────────────────────────
         function drawHighlight(hexIdx, isSelected) {
             const ctx = overlayCanvas.getContext("2d");
-            ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
-            if (hexIdx<0||!REGION_RUNS) return;
-            const scaleX=overlayCanvas.width/MAP_W, scaleY=overlayCanvas.height/MAP_H;
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            if (hexIdx < 0 || !REGION_RUNS) return;
+            const scaleX = overlayCanvas.width / MAP_W, scaleY = overlayCanvas.height / MAP_H;
 
             if (isSelected) {
                 // Co-faction regions: subtle tint
@@ -583,37 +803,37 @@
                         const r = COLOR_MAP[hex];
                         if (!r || r.sea || FACTION_DATA[r.new_key] !== selFaction) return;
                         const runs = REGION_RUNS[i];
-                        for (let j=0;j<runs.length;j+=3)
-                            ctx.fillRect(runs[j+1]*scaleX, runs[j]*scaleY, (runs[j+2]-runs[j+1]+1)*scaleX, scaleY+0.5);
+                        for (let j = 0; j < runs.length; j += 3)
+                            ctx.fillRect(runs[j + 1] * scaleX, runs[j] * scaleY, (runs[j + 2] - runs[j + 1] + 1) * scaleX, scaleY + 0.5);
                     });
                 }
                 // Selected region: gold
                 const runs = REGION_RUNS[hexIdx];
-                ctx.fillStyle="rgba(212,175,55,0.22)";
-                for (let i=0;i<runs.length;i+=3)
-                    ctx.fillRect(runs[i+1]*scaleX-1, runs[i]*scaleY-1, (runs[i+2]-runs[i+1]+1)*scaleX+2, scaleY+2);
-                ctx.fillStyle="rgba(212,175,55,0.5)";
-                for (let i=0;i<runs.length;i+=3)
-                    ctx.fillRect(runs[i+1]*scaleX, runs[i]*scaleY, (runs[i+2]-runs[i+1]+1)*scaleX, scaleY+0.5);
+                ctx.fillStyle = "rgba(212,175,55,0.22)";
+                for (let i = 0; i < runs.length; i += 3)
+                    ctx.fillRect(runs[i + 1] * scaleX - 1, runs[i] * scaleY - 1, (runs[i + 2] - runs[i + 1] + 1) * scaleX + 2, scaleY + 2);
+                ctx.fillStyle = "rgba(212,175,55,0.5)";
+                for (let i = 0; i < runs.length; i += 3)
+                    ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, scaleY + 0.5);
             } else {
-                ctx.fillStyle="rgba(255,255,255,0.35)";
+                ctx.fillStyle = "rgba(255,255,255,0.35)";
                 const runs = REGION_RUNS[hexIdx];
-                for (let i=0;i<runs.length;i+=3)
-                    ctx.fillRect(runs[i+1]*scaleX, runs[i]*scaleY, (runs[i+2]-runs[i+1]+1)*scaleX, scaleY+0.5);
+                for (let i = 0; i < runs.length; i += 3)
+                    ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, scaleY + 0.5);
             }
         }
 
         // ── Canvas resize ─────────────────────────────────────────────────
         function resizeCanvases() {
-            const w=mapImage.clientWidth, h=mapImage.clientHeight;
-            if (w===0||h===0) { requestAnimationFrame(resizeCanvases); return; }
-            if (interactiveCanvas.width===w&&interactiveCanvas.height===h) return;
-            [factionCanvas,bordersCanvas,overlayCanvas,interactiveCanvas].forEach(c => {
-                c.width=w; c.height=h; c.style.width=w+"px"; c.style.height=h+"px";
+            const w = mapImage.clientWidth, h = mapImage.clientHeight;
+            if (w === 0 || h === 0) { requestAnimationFrame(resizeCanvases); return; }
+            if (interactiveCanvas.width === w && interactiveCanvas.height === h) return;
+            [factionCanvas, bordersCanvas, overlayCanvas, interactiveCanvas].forEach(c => {
+                c.width = w; c.height = h; c.style.width = w + "px"; c.style.height = h + "px";
             });
             drawFactions();
-            buildBorders(w,h); drawBorders();
-            if (currentSelectedIdx>=0) drawHighlight(currentSelectedIdx,true);
+            buildBorders(w, h); drawBorders();
+            if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
         }
 
         // ── Autocomplete search ───────────────────────────────────────────
@@ -622,52 +842,52 @@
             const r = COLOR_MAP[hex];
             if (!r) return;
             SEARCH_ENTRIES.push({
-                idx, name: r.name||"", new_key: r.new_key||"", old_key: r.old_key||"",
-                searchText: ((r.name||"")+" "+(r.new_key||"")+" "+(r.old_key||"")).toLowerCase()
+                idx, name: r.name || "", new_key: r.new_key || "", old_key: r.old_key || "",
+                searchText: ((r.name || "") + " " + (r.new_key || "") + " " + (r.old_key || "")).toLowerCase()
             });
         });
 
         let dropActiveIdx = -1;
-        function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-        function highlight(text,query){
-            if(!query) return escapeHtml(text);
-            const qi=text.toLowerCase().indexOf(query); if(qi<0) return escapeHtml(text);
-            return escapeHtml(text.slice(0,qi))+'<span class="drop-match">'+escapeHtml(text.slice(qi,qi+query.length))+'</span>'+escapeHtml(text.slice(qi+query.length));
+        function escapeHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+        function highlight(text, query) {
+            if (!query) return escapeHtml(text);
+            const qi = text.toLowerCase().indexOf(query); if (qi < 0) return escapeHtml(text);
+            return escapeHtml(text.slice(0, qi)) + '<span class="drop-match">' + escapeHtml(text.slice(qi, qi + query.length)) + '</span>' + escapeHtml(text.slice(qi + query.length));
         }
 
-        function closeDropdown(){ searchDropdown.classList.remove("open"); searchDropdown.innerHTML=""; dropActiveIdx=-1; }
-        function selectDropItem(entry){ searchInput.value=entry.name; closeDropdown(); currentSelectedIdx=entry.idx; drawHighlight(entry.idx,true); showRegionInfo(entry.idx); }
+        function closeDropdown() { searchDropdown.classList.remove("open"); searchDropdown.innerHTML = ""; dropActiveIdx = -1; }
+        function selectDropItem(entry) { searchInput.value = entry.name; closeDropdown(); currentSelectedIdx = entry.idx; drawHighlight(entry.idx, true); showRegionInfo(entry.idx); }
 
-        function updateDropdown(){
-            const query=searchInput.value.trim().toLowerCase();
-            if(!query){closeDropdown();return;}
-            const matches=SEARCH_ENTRIES.filter(e=>e.searchText.includes(query));
-            if(!matches.length){searchDropdown.innerHTML='<div class="drop-item" style="color:#888;cursor:default;">No results</div>';searchDropdown.classList.add("open");return;}
-            const MAX=15, shown=matches.slice(0,MAX);
-            searchDropdown.innerHTML=shown.map((e,i)=>{
-                const hasOld=e.old_key&&e.old_key!=="nuova regione";
-                return `<div class="drop-item" data-i="${i}"><div class="drop-item-name">${highlight(e.name,query)}</div><div class="drop-item-key">${highlight(e.new_key,query)}</div>${hasOld?`<div class="drop-item-oldkey">${highlight(e.old_key,query)}</div>`:""}</div>`;
+        function updateDropdown() {
+            const query = searchInput.value.trim().toLowerCase();
+            if (!query) { closeDropdown(); return; }
+            const matches = SEARCH_ENTRIES.filter(e => e.searchText.includes(query));
+            if (!matches.length) { searchDropdown.innerHTML = '<div class="drop-item" style="color:#888;cursor:default;">No results</div>'; searchDropdown.classList.add("open"); return; }
+            const MAX = 15, shown = matches.slice(0, MAX);
+            searchDropdown.innerHTML = shown.map((e, i) => {
+                const hasOld = e.old_key && e.old_key !== "nuova regione";
+                return `<div class="drop-item" data-i="${i}"><div class="drop-item-name">${highlight(e.name, query)}</div><div class="drop-item-key">${highlight(e.new_key, query)}</div>${hasOld ? `<div class="drop-item-oldkey">${highlight(e.old_key, query)}</div>` : ""}</div>`;
             }).join("");
-            if(matches.length>MAX) searchDropdown.innerHTML+=`<div class="drop-item" style="color:#888;cursor:default;font-size:.8rem;">...and ${matches.length-MAX} more</div>`;
-            searchDropdown.classList.add("open"); dropActiveIdx=-1;
-            searchDropdown.querySelectorAll(".drop-item[data-i]").forEach(el=>{
-                el.addEventListener("mousedown",function(e){e.preventDefault();selectDropItem(shown[parseInt(this.dataset.i)]);});
+            if (matches.length > MAX) searchDropdown.innerHTML += `<div class="drop-item" style="color:#888;cursor:default;font-size:.8rem;">...and ${matches.length - MAX} more</div>`;
+            searchDropdown.classList.add("open"); dropActiveIdx = -1;
+            searchDropdown.querySelectorAll(".drop-item[data-i]").forEach(el => {
+                el.addEventListener("mousedown", function (e) { e.preventDefault(); selectDropItem(shown[parseInt(this.dataset.i)]); });
             });
         }
 
         searchInput.addEventListener("input", updateDropdown);
-        searchInput.addEventListener("keydown", function(e){
-            const items=searchDropdown.querySelectorAll(".drop-item[data-i]");
-            if(!items.length) return;
-            if(e.key==="ArrowDown"){e.preventDefault();dropActiveIdx=Math.min(dropActiveIdx+1,items.length-1);}
-            else if(e.key==="ArrowUp"){e.preventDefault();dropActiveIdx=Math.max(dropActiveIdx-1,0);}
-            else if(e.key==="Enter"){e.preventDefault();if(dropActiveIdx>=0)items[dropActiveIdx].dispatchEvent(new MouseEvent("mousedown"));return;}
-            else if(e.key==="Escape"){closeDropdown();return;}
+        searchInput.addEventListener("keydown", function (e) {
+            const items = searchDropdown.querySelectorAll(".drop-item[data-i]");
+            if (!items.length) return;
+            if (e.key === "ArrowDown") { e.preventDefault(); dropActiveIdx = Math.min(dropActiveIdx + 1, items.length - 1); }
+            else if (e.key === "ArrowUp") { e.preventDefault(); dropActiveIdx = Math.max(dropActiveIdx - 1, 0); }
+            else if (e.key === "Enter") { e.preventDefault(); if (dropActiveIdx >= 0) items[dropActiveIdx].dispatchEvent(new MouseEvent("mousedown")); return; }
+            else if (e.key === "Escape") { closeDropdown(); return; }
             else return;
-            items.forEach((el,i)=>el.classList.toggle("active",i===dropActiveIdx));
-            if(dropActiveIdx>=0) items[dropActiveIdx].scrollIntoView({block:"nearest"});
+            items.forEach((el, i) => el.classList.toggle("active", i === dropActiveIdx));
+            if (dropActiveIdx >= 0) items[dropActiveIdx].scrollIntoView({ block: "nearest" });
         });
-        searchInput.addEventListener("blur",()=>setTimeout(closeDropdown,150));
+        searchInput.addEventListener("blur", () => setTimeout(closeDropdown, 150));
 
         // ── Info panel ────────────────────────────────────────────────────
         function showRegionInfo(hexIdx) {
@@ -689,7 +909,7 @@
                   <div class="region-details">
                     <div class="detail-row">
                       <span class="detail-label">Key:</span>
-                      <span class="detail-value" style="font-family:monospace;font-size:.8rem">${escapeHtml(region.new_key||"")}</span>
+                      <span class="detail-value" style="font-family:monospace;font-size:.8rem">${escapeHtml(region.new_key || "")}</span>
                     </div>
                   </div>
                 </div>`;
@@ -697,114 +917,115 @@
 
         function showLegend() {
             const counts = {};
-            Object.values(FACTION_DATA).forEach(f => counts[f]=(counts[f]||0)+1);
+            Object.values(FACTION_DATA).forEach(f => counts[f] = (counts[f] || 0) + 1);
             const items = Object.keys(FACTIONS).sort().map(name => {
                 const f = FACTIONS[name];
                 return `<div class="fl-item">
                     <div class="legend-swatch" style="background:${f.color}"></div>
                     <span class="fl-name">${escapeHtml(name)}</span>
-                    <span class="fl-count">${counts[name]||0}</span>
+                    <span class="fl-count">${counts[name] || 0}</span>
                 </div>`;
             }).join("");
             panelBody.innerHTML = `<div class="faction-legend"><h3>Factions</h3>${items}</div>`;
         }
 
         // ── Zoom & Pan ────────────────────────────────────────────────────
-        let zoom=1, panX=0, panY=0;
-        const MIN_ZOOM=0.4, MAX_ZOOM=10;
-        let isPanning=false, panX0=0, panY0=0, panMx0=0, panMy0=0, panMoved=false, wasDragging=false;
+        let zoom = 1, panX = 0, panY = 0;
+        const MIN_ZOOM = 0.4, MAX_ZOOM = 10;
+        let isPanning = false, panX0 = 0, panY0 = 0, panMx0 = 0, panMy0 = 0, panMoved = false, wasDragging = false;
 
-        function applyTransform(){ mapZoomContainer.style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`; }
+        function applyTransform() { mapZoomContainer.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`; }
 
-        function initPan(){
-            const aW=mapArea.clientWidth, aH=mapArea.clientHeight;
-            const mW=mapImage.naturalWidth||mapImage.clientWidth, mH=mapImage.naturalHeight||mapImage.clientHeight;
-            if(!mW||!mH) return;
-            zoom=Math.min((aW-40)/mW,(aH-40)/mH,1);
-            panX=(aW-mW*zoom)/2; panY=(aH-mH*zoom)/2;
+        function initPan() {
+            const aW = mapArea.clientWidth, aH = mapArea.clientHeight;
+            const mW = mapImage.naturalWidth || mapImage.clientWidth, mH = mapImage.naturalHeight || mapImage.clientHeight;
+            if (!mW || !mH) return;
+            zoom = Math.min((aW - 40) / mW, (aH - 40) / mH, 1);
+            panX = (aW - mW * zoom) / 2; panY = (aH - mH * zoom) / 2;
             applyTransform();
         }
 
-        mapArea.addEventListener('wheel',function(e){
+        mapArea.addEventListener('wheel', function (e) {
             e.preventDefault();
-            const rect=mapArea.getBoundingClientRect(), mx=e.clientX-rect.left, my=e.clientY-rect.top;
-            const factor=e.deltaY<0?1.12:1/1.12;
-            const newZ=Math.max(MIN_ZOOM,Math.min(MAX_ZOOM,zoom*factor));
-            panX=mx-(mx-panX)*(newZ/zoom); panY=my-(my-panY)*(newZ/zoom); zoom=newZ;
+            const rect = mapArea.getBoundingClientRect(), mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+            const newZ = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * factor));
+            panX = mx - (mx - panX) * (newZ / zoom); panY = my - (my - panY) * (newZ / zoom); zoom = newZ;
             applyTransform();
-        },{passive:false});
+        }, { passive: false });
 
-        function toLookupCoords(cx,cy){
-            const r=interactiveCanvas.getBoundingClientRect();
-            return {x:Math.round(cx*MAP_W/r.width), y:Math.round(cy*MAP_H/r.height)};
+        function toLookupCoords(cx, cy) {
+            const r = interactiveCanvas.getBoundingClientRect();
+            return { x: Math.round(cx * MAP_W / r.width), y: Math.round(cy * MAP_H / r.height) };
         }
-        function getRegionIdxAt(x,y){
-            if(!ROWS||y<0||y>=ROWS.length) return -1;
-            const row=ROWS[y];
-            for(let i=0;i<row.length;i+=3) if(x>=row[i]&&x<=row[i+1]) return row[i+2];
+        function getRegionIdxAt(x, y) {
+            if (!ROWS || y < 0 || y >= ROWS.length) return -1;
+            const row = ROWS[y];
+            for (let i = 0; i < row.length; i += 3) if (x >= row[i] && x <= row[i + 1]) return row[i + 2];
             return -1;
         }
 
-        interactiveCanvas.addEventListener("mousedown",function(e){
-            isPanning=true; panMoved=false; panX0=panX; panY0=panY; panMx0=e.clientX; panMy0=e.clientY;
+        interactiveCanvas.addEventListener("mousedown", function (e) {
+            isPanning = true; panMoved = false; panX0 = panX; panY0 = panY; panMx0 = e.clientX; panMy0 = e.clientY;
         });
-        interactiveCanvas.addEventListener("mouseup",function(){
-            if(isPanning&&panMoved) wasDragging=true;
-            isPanning=false; mapZoomContainer.classList.remove('panning');
+        interactiveCanvas.addEventListener("mouseup", function () {
+            if (isPanning && panMoved) wasDragging = true;
+            isPanning = false; mapZoomContainer.classList.remove('panning');
         });
-        interactiveCanvas.addEventListener("mousemove",function(e){
-            if(isPanning){
-                const dx=e.clientX-panMx0, dy=e.clientY-panMy0;
-                if(!panMoved&&(Math.abs(dx)>4||Math.abs(dy)>4)){panMoved=true;mapZoomContainer.classList.add('panning');}
-                if(panMoved){panX=panX0+dx;panY=panY0+dy;applyTransform();return;}
+        interactiveCanvas.addEventListener("mousemove", function (e) {
+            if (isPanning) {
+                const dx = e.clientX - panMx0, dy = e.clientY - panMy0;
+                if (!panMoved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) { panMoved = true; mapZoomContainer.classList.add('panning'); }
+                if (panMoved) { panX = panX0 + dx; panY = panY0 + dy; applyTransform(); return; }
             }
-            if(!ROWS) return;
-            const rect=interactiveCanvas.getBoundingClientRect();
-            const {x,y}=toLookupCoords(e.clientX-rect.left,e.clientY-rect.top);
-            const idx=getRegionIdxAt(x,y);
-            if(idx<0){
-                interactiveCanvas.style.cursor="default";
-                if(currentHoverIdx!==-1){currentHoverIdx=-1;if(currentSelectedIdx>=0)drawHighlight(currentSelectedIdx,true);else overlayCanvas.getContext("2d").clearRect(0,0,overlayCanvas.width,overlayCanvas.height);}
+            if (!ROWS) return;
+            const rect = interactiveCanvas.getBoundingClientRect();
+            const { x, y } = toLookupCoords(e.clientX - rect.left, e.clientY - rect.top);
+            const idx = getRegionIdxAt(x, y);
+            if (idx < 0) {
+                interactiveCanvas.style.cursor = "default";
+                if (currentHoverIdx !== -1) { currentHoverIdx = -1; if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true); else overlayCanvas.getContext("2d").clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); }
                 return;
             }
-            interactiveCanvas.style.cursor="pointer";
-            if(currentHoverIdx!==idx){
-                currentHoverIdx=idx;
-                if(currentSelectedIdx>=0&&currentSelectedIdx!==idx){
-                    drawHighlight(currentSelectedIdx,true);
-                    const ctx=overlayCanvas.getContext("2d");
-                    const scaleX=overlayCanvas.width/MAP_W, scaleY=overlayCanvas.height/MAP_H;
-                    const runs=REGION_RUNS[idx];
-                    ctx.fillStyle="rgba(255,255,255,0.22)";
-                    for(let i=0;i<runs.length;i+=3) ctx.fillRect(runs[i+1]*scaleX,runs[i]*scaleY,(runs[i+2]-runs[i+1]+1)*scaleX,scaleY+0.5);
-                } else if(currentSelectedIdx!==idx){
-                    drawHighlight(idx,false);
+            interactiveCanvas.style.cursor = "pointer";
+            if (currentHoverIdx !== idx) {
+                currentHoverIdx = idx;
+                if (currentSelectedIdx >= 0 && currentSelectedIdx !== idx) {
+                    drawHighlight(currentSelectedIdx, true);
+                    const ctx = overlayCanvas.getContext("2d");
+                    const scaleX = overlayCanvas.width / MAP_W, scaleY = overlayCanvas.height / MAP_H;
+                    const runs = REGION_RUNS[idx];
+                    ctx.fillStyle = "rgba(255,255,255,0.22)";
+                    for (let i = 0; i < runs.length; i += 3) ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, scaleY + 0.5);
+                } else if (currentSelectedIdx !== idx) {
+                    drawHighlight(idx, false);
                 }
             }
         });
-        interactiveCanvas.addEventListener("mouseleave",function(){
-            isPanning=false; mapZoomContainer.classList.remove('panning'); currentHoverIdx=-1;
-            if(currentSelectedIdx>=0) drawHighlight(currentSelectedIdx,true);
-            else overlayCanvas.getContext("2d").clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
+        interactiveCanvas.addEventListener("mouseleave", function () {
+            isPanning = false; mapZoomContainer.classList.remove('panning'); currentHoverIdx = -1;
+            if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
+            else overlayCanvas.getContext("2d").clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         });
-        interactiveCanvas.addEventListener("click",function(e){
-            if(!ROWS) return;
-            if(wasDragging){wasDragging=false;return;}
-            const rect=interactiveCanvas.getBoundingClientRect();
-            const {x,y}=toLookupCoords(e.clientX-rect.left,e.clientY-rect.top);
-            const idx=getRegionIdxAt(x,y);
-            if(idx<0){currentSelectedIdx=-1;drawHighlight(-1,false);showLegend();return;}
-            if(currentSelectedIdx===idx){currentSelectedIdx=-1;drawHighlight(-1,false);showLegend();}
-            else{currentSelectedIdx=idx;drawHighlight(idx,true);showRegionInfo(idx);}
+        interactiveCanvas.addEventListener("click", function (e) {
+            if (!ROWS) return;
+            if (wasDragging) { wasDragging = false; return; }
+            const rect = interactiveCanvas.getBoundingClientRect();
+            const { x, y } = toLookupCoords(e.clientX - rect.left, e.clientY - rect.top);
+            const idx = getRegionIdxAt(x, y);
+            if (idx < 0) { currentSelectedIdx = -1; drawHighlight(-1, false); showLegend(); return; }
+            if (currentSelectedIdx === idx) { currentSelectedIdx = -1; drawHighlight(-1, false); showLegend(); }
+            else { currentSelectedIdx = idx; drawHighlight(idx, true); showRegionInfo(idx); }
         });
 
         // ── Init ──────────────────────────────────────────────────────────
-        window.addEventListener("resize",resizeCanvases);
-        if(typeof ResizeObserver!=="undefined") new ResizeObserver(()=>resizeCanvases()).observe(mapImage);
-        mapImage.addEventListener("load",()=>requestAnimationFrame(()=>{resizeCanvases();initPan();}));
-        if(mapImage.complete&&mapImage.naturalWidth>0) requestAnimationFrame(()=>{resizeCanvases();initPan();});
+        window.addEventListener("resize", resizeCanvases);
+        if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => resizeCanvases()).observe(mapImage);
+        mapImage.addEventListener("load", () => requestAnimationFrame(() => { resizeCanvases(); initPan(); }));
+        if (mapImage.complete && mapImage.naturalWidth > 0) requestAnimationFrame(() => { resizeCanvases(); initPan(); });
 
         showLegend();
     </script>
 </body>
+
 </html>
