@@ -1784,34 +1784,33 @@ body {
             ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             if (hexIdx < 0 || !REGION_RUNS) return;
             const scaleX = overlayCanvas.width / MAP_W, scaleY = overlayCanvas.height / MAP_H;
+            const h = Math.ceil(scaleY) + 1; // overlap rows to avoid stripe gaps
+
+            function fillRegion(idx, style) {
+                ctx.fillStyle = style;
+                const runs = REGION_RUNS[idx];
+                for (let i = 0; i < runs.length; i += 3)
+                    ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, h);
+            }
 
             if (isSelected) {
-                // Co-faction regions: subtle tint
                 const selFaction = FACTION_DATA[COLOR_MAP[HEX_LIST[hexIdx]]?.new_key];
                 if (selFaction) {
-                    ctx.fillStyle = "rgba(255,220,80,0.22)";
                     HEX_LIST.forEach((hex, i) => {
                         if (i === hexIdx) return;
                         const r = COLOR_MAP[hex];
-                        if (!r || r.sea || FACTION_DATA[r.new_key] !== selFaction) return;
-                        const runs = REGION_RUNS[i];
-                        for (let j = 0; j < runs.length; j += 3)
-                            ctx.fillRect(runs[j + 1] * scaleX, runs[j] * scaleY, (runs[j + 2] - runs[j + 1] + 1) * scaleX, scaleY + 0.5);
+                        if (!r || r.sea) return;
+                        if (viewMode === 'cultures') {
+                            if (CULTURE_MAP[FACTION_DATA[r.new_key]] !== CULTURE_MAP[selFaction]) return;
+                        } else {
+                            if (FACTION_DATA[r.new_key] !== selFaction) return;
+                        }
+                        fillRegion(i, "rgba(255,220,80,0.20)");
                     });
                 }
-                // Selected region: gold
-                const runs = REGION_RUNS[hexIdx];
-                ctx.fillStyle = "rgba(212,175,55,0.22)";
-                for (let i = 0; i < runs.length; i += 3)
-                    ctx.fillRect(runs[i + 1] * scaleX - 1, runs[i] * scaleY - 1, (runs[i + 2] - runs[i + 1] + 1) * scaleX + 2, scaleY + 2);
-                ctx.fillStyle = "rgba(212,175,55,0.5)";
-                for (let i = 0; i < runs.length; i += 3)
-                    ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, scaleY + 0.5);
+                fillRegion(hexIdx, "rgba(212,175,55,0.50)");
             } else {
-                ctx.fillStyle = "rgba(255,255,255,0.35)";
-                const runs = REGION_RUNS[hexIdx];
-                for (let i = 0; i < runs.length; i += 3)
-                    ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, scaleY + 0.5);
+                fillRegion(hexIdx, "rgba(255,255,255,0.28)");
             }
         }
 
