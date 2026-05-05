@@ -610,10 +610,13 @@
                 <button class="vt-btn active" id="btnRegions" onclick="setView('regions')">Regions</button>
                 <button class="vt-btn" id="btnFactions" onclick="setView('factions')">Factions</button>
             </div>
-            <div class="view-slider" id="cultureSlider">
+            <div class="view-slider" id="regionsSlider" style="display:flex">
+                <button class="vs-btn active" id="vsBtnMap"     onclick="setViewMode('regions')">Map</button>
+                <button class="vs-btn"        id="vsBtnWealth"  onclick="setViewMode('wealth')">Wealth</button>
+            </div>
+            <div class="view-slider" id="factionsSlider" style="display:none">
                 <button class="vs-btn active" id="vsBtnFactions" onclick="setViewMode('factions')">Factions</button>
-                <button class="vs-btn" id="vsBtnCultures" onclick="setViewMode('cultures')">Cultures</button>
-                <button class="vs-btn" id="vsBtnWealth"   onclick="setViewMode('wealth')">Wealth</button>
+                <button class="vs-btn"        id="vsBtnCultures" onclick="setViewMode('cultures')">Cultures</button>
             </div>
             <div class="faction-toolbar">
                 <button class="ft-btn" onclick="exportJSON()">&#11015; Export</button>
@@ -1232,42 +1235,58 @@
         }
 
         // --- View mode ---
+        // 'regions' | 'wealth'  → Regions tab sub-modes
+        // 'factions' | 'cultures' → Factions tab sub-modes
         let viewMode = "regions";
-        let lastSubMode = "factions"; // remembers sub-mode across Regions/Factions tab switches
+        let lastRegionsSubMode  = "regions";
+        let lastFactionsSubMode = "factions";
 
         function _syncSubBtns() {
-            ['factions','cultures','wealth'].forEach(m => {
-                const el = document.getElementById('vsBtn' + m[0].toUpperCase() + m.slice(1));
+            const map = {
+                regions: 'vsBtnMap', wealth: 'vsBtnWealth',
+                factions: 'vsBtnFactions', cultures: 'vsBtnCultures'
+            };
+            Object.entries(map).forEach(([m, id]) => {
+                const el = document.getElementById(id);
                 if (el) el.classList.toggle('active', viewMode === m);
             });
         }
 
-        function setView(mode) {
-            const isFactions = (mode === "factions");
-            if (isFactions && viewMode === 'regions') viewMode = lastSubMode;
-            else if (!isFactions) viewMode = 'regions';
+        function setView(mainTab) {
+            const isFactions = (mainTab === "factions");
+            viewMode = isFactions ? lastFactionsSubMode : lastRegionsSubMode;
             document.getElementById("btnRegions").classList.toggle("active", !isFactions);
             document.getElementById("btnFactions").classList.toggle("active", isFactions);
-            document.getElementById("cultureSlider").style.display = isFactions ? "flex" : "none";
-            if (isFactions) {
-                _syncSubBtns();
+            document.getElementById("regionsSlider").style.display  = !isFactions ? "flex" : "none";
+            document.getElementById("factionsSlider").style.display =  isFactions ? "flex" : "none";
+            _syncSubBtns();
+            if (viewMode === 'factions' || viewMode === 'cultures' || viewMode === 'wealth') {
                 drawFactions();
-                if (currentSelectedIdx < 0) showFactionLegend();
-                else showRegionInfo(currentSelectedIdx);
+                if (currentSelectedIdx < 0) {
+                    if (viewMode === 'wealth') showWealthLegend(); else showFactionLegend();
+                } else showRegionInfo(currentSelectedIdx);
             } else {
                 factionCanvas.getContext("2d").clearRect(0, 0, factionCanvas.width, factionCanvas.height);
-                if (currentSelectedIdx < 0) clearInfoPanel();
-                else showRegionInfo(currentSelectedIdx);
+                if (currentSelectedIdx < 0) clearInfoPanel(); else showRegionInfo(currentSelectedIdx);
             }
         }
 
         function setViewMode(subMode) {
             viewMode = subMode;
-            lastSubMode = subMode;
+            if (subMode === 'regions' || subMode === 'wealth') lastRegionsSubMode  = subMode;
+            else                                               lastFactionsSubMode = subMode;
             _syncSubBtns();
-            drawFactions();
+            if (subMode === 'factions' || subMode === 'cultures' || subMode === 'wealth') {
+                drawFactions();
+            } else {
+                factionCanvas.getContext("2d").clearRect(0, 0, factionCanvas.width, factionCanvas.height);
+            }
             if (currentSelectedIdx >= 0) { drawHighlight(currentSelectedIdx, true); showRegionInfo(currentSelectedIdx); }
-            else showFactionLegend();
+            else {
+                if (subMode === 'factions' || subMode === 'cultures') showFactionLegend();
+                else if (subMode === 'wealth') showWealthLegend();
+                else clearInfoPanel();
+            }
         }
 
         // --- DOM refs ---
@@ -1341,22 +1360,6 @@
 
         function showFactionLegend() {
             infoPanel.classList.remove("empty");
-            if (viewMode === 'wealth') {
-                infoPanel.innerHTML = `
-        <div class="faction-legend">
-            <h3>Wealth</h3>
-            <div style="padding:10px 0 6px">
-                <div style="background:linear-gradient(to right,#8B1A1A,#D4AA00,#2A7A2A);height:22px;border-radius:5px;border:1px solid rgba(0,0,0,.15)"></div>
-                <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#5a4a2f;margin-top:5px;font-family:'Cinzel',serif;font-weight:700;">
-                    <span>100</span><span>150</span><span>200</span>
-                </div>
-            </div>
-            <p style="font-size:.82rem;color:#7a6a4f;margin-top:12px;line-height:1.5">
-                Click a region to view and edit its wealth (100 = default, 200 = max).
-            </p>
-        </div>`;
-                return;
-            }
             if (viewMode === 'cultures') {
                 const counts = {};
                 Object.values(FACTION_DATA).forEach(f => {
@@ -1494,15 +1497,9 @@
             const culture = cname ? CULTURES[cname] : null;
 
             const curWealth = getWealth(region.new_key);
-            const wCol = wealthColor(curWealth);
 
             let bannerHtml = '';
-            if (viewMode === 'wealth') {
-                bannerHtml = `<div class="faction-banner">
-                    <div class="faction-swatch" style="background:${wCol}"></div>
-                    <div class="faction-banner-name">Wealth: ${curWealth}</div>
-                </div>`;
-            } else if (viewMode === 'cultures') {
+            if (viewMode === 'cultures') {
                 bannerHtml = culture
                     ? `<div class="faction-banner">
                            <div class="faction-swatch" style="background:${culture.color}"></div>
@@ -1552,11 +1549,8 @@
                 </div>
                 <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:16px;">
                     <span class="detail-label">Wealth: <span id="wealthVal" style="font-style:italic;color:#6a5a3f">${curWealth}</span></span>
-                    <div style="display:flex;align-items:center;gap:8px;width:100%">
-                        <input type="range" id="wealthRange" min="100" max="200" value="${curWealth}"
-                               style="flex:1;cursor:pointer;accent-color:${wCol}">
-                        <div id="wealthSwatch" style="width:18px;height:18px;border-radius:3px;background:${wCol};border:1px solid rgba(0,0,0,.2);flex-shrink:0"></div>
-                    </div>
+                    <input type="range" id="wealthRange" min="100" max="200" value="${curWealth}"
+                           style="width:100%;cursor:pointer;accent-color:#5a4a2f">
                 </div>
                 <div class="detail-row" style="padding-top:8px;">
                     <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#5a4a2f;font-size:1rem;">
@@ -1595,24 +1589,32 @@
             document.getElementById("wealthRange").addEventListener("input", function () {
                 const v = parseInt(this.value);
                 wealthData[region.new_key] = v;
-                const col = wealthColor(v);
                 document.getElementById("wealthVal").textContent = v;
-                document.getElementById("wealthSwatch").style.background = col;
-                this.style.accentColor = col;
                 saveWealth();
-                if (viewMode === 'wealth') {
-                    drawFactions();
-                    // update banner in-place
-                    const sw = document.querySelector('.faction-swatch');
-                    const nm = document.querySelector('.faction-banner-name');
-                    if (sw) sw.style.background = col;
-                    if (nm) nm.textContent = 'Wealth: ' + v;
-                }
+                if (viewMode === 'wealth') drawFactions();
             });
         }
 
+        function showWealthLegend() {
+            infoPanel.classList.remove("empty");
+            infoPanel.innerHTML = `
+        <div class="faction-legend">
+            <h3>Wealth</h3>
+            <div style="padding:10px 0 6px">
+                <div style="background:linear-gradient(to right,#8B1A1A,#D4AA00,#2A7A2A);height:22px;border-radius:5px;border:1px solid rgba(0,0,0,.15)"></div>
+                <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#5a4a2f;margin-top:5px;font-family:'Cinzel',serif;font-weight:700;">
+                    <span>100</span><span>150</span><span>200</span>
+                </div>
+            </div>
+            <p style="font-size:.82rem;color:#7a6a4f;margin-top:12px;line-height:1.5">
+                Click a region to view and edit its wealth (100 = default, 200 = max).
+            </p>
+        </div>`;
+        }
+
         function clearInfoPanel() {
-            if (viewMode === 'factions' || viewMode === 'cultures' || viewMode === 'wealth') { showFactionLegend(); return; }
+            if (viewMode === 'factions' || viewMode === 'cultures') { showFactionLegend(); return; }
+            if (viewMode === 'wealth') { showWealthLegend(); return; }
             infoPanel.classList.add("empty");
             infoPanel.innerHTML = "<p>Click on a region to view information</p>";
         }
