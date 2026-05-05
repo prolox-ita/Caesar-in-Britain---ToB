@@ -773,7 +773,7 @@
                 g = Math.round(170 + (122 - 170) * s);
                 b = Math.round(0   + (42  - 0)   * s);
             }
-            return `rgb(${r},${g},${b})`;
+            return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
         }
 
         function calcCentroid(hexIdx) {
