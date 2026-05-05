@@ -534,6 +534,77 @@
             background: linear-gradient(135deg, #b8962e, #d4af37);
             transform: translateY(-2px);
         }
+
+        .faction-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(212,175,55,.25);
+            background: rgba(255,252,245,.6);
+        }
+        .faction-swatch {
+            width: 36px;
+            height: 36px;
+            border-radius: 5px;
+            flex-shrink: 0;
+            border: 2px solid rgba(0,0,0,.15);
+        }
+        .faction-banner-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #3a2a10;
+        }
+        .faction-unassigned-label {
+            color: #9a8a6a;
+            font-style: italic;
+            font-size: .9rem;
+        }
+        .view-slider {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 8px 20px;
+            border-bottom: 1px solid rgba(212,175,55,.3);
+            background: rgba(255,252,245,.6);
+            font-family: 'Cinzel', serif;
+            font-size: .72rem;
+            font-weight: 700;
+            color: #5a4a2f;
+            letter-spacing: .06em;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            background: #c8a84b;
+            border-radius: 22px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .toggle-track::before {
+            content: '';
+            position: absolute;
+            width: 16px; height: 16px;
+            left: 3px; top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform .2s;
+        }
+        .toggle-switch input:checked + .toggle-track { background: #5a4a2f; }
+        .toggle-switch input:checked + .toggle-track::before { transform: translateX(22px); }
+        .vs-label { transition: color .2s; }
+        .vs-label.active { color: #3a2a10; }
+        .vs-label.inactive { color: #a08860; }
     </style>
 </head>
 
@@ -557,6 +628,14 @@
             <div class="view-toggle">
                 <button class="vt-btn active" id="btnRegions" onclick="setView('regions')">Regions</button>
                 <button class="vt-btn" id="btnFactions" onclick="setView('factions')">Factions</button>
+            </div>
+            <div class="view-slider" id="cultureSlider">
+                <span class="vs-label active" id="vsLabelFactions">Factions</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cultureToggle" onchange="setViewMode(this.checked)">
+                    <span class="toggle-track"></span>
+                </label>
+                <span class="vs-label inactive" id="vsLabelCultures">Cultures</span>
             </div>
             <div class="faction-toolbar">
                 <button class="ft-btn" onclick="exportJSON()">&#11015; Export</button>
@@ -910,26 +989,170 @@
         const FACTION_STATE_KEY = "cib_faction_state_v1";
 
         const DEFAULT_FACTIONS = {
-            "Rome": { color: "#C0392B", label: "Rome" },
-            "Catuvellauni": { color: "#27AE60", label: "Catuvellauni" },
-            "Trinovantes": { color: "#2980B9", label: "Trinovantes" },
-            "Cantii": { color: "#8E44AD", label: "Cantii" },
-            "Iceni": { color: "#E67E22", label: "Iceni" },
-            "Atrebates": { color: "#16A085", label: "Atrebates" },
-            "Durotriges": { color: "#D4AC0D", label: "Durotriges" },
-            "Brigantes": { color: "#7F8C8D", label: "Brigantes" },
-            "Gaul": { color: "#1A5276", label: "Gaul" },
+            "Rome":        { color: "#8B1A1A", label: "Rome" },
+            "Cornavii":    { color: "#050D2E", label: "Cornavii" },
+            "Caledoni":    { color: "#3355CC", label: "Caledoni" },
+            "Damnonii":    { color: "#0A1A55", label: "Damnonii" },
+            "Novantae":    { color: "#5566DD", label: "Novantae" },
+            "Taexali":     { color: "#0D1F44", label: "Taexali" },
+            "Vacomagi":    { color: "#1A2E88", label: "Vacomagi" },
+            "Venicones":   { color: "#6677EE", label: "Venicones" },
+            "Epidii":      { color: "#0A1650", label: "Epidii" },
+            "Creones":     { color: "#2233AA", label: "Creones" },
+            "Carnonacae":  { color: "#7788FF", label: "Carnonacae" },
+            "Caereni":     { color: "#111E66", label: "Caereni" },
+            "Smertae":     { color: "#4455BB", label: "Smertae" },
+            "Lugi":        { color: "#080F3A", label: "Lugi" },
+            "Decantae":    { color: "#8899EE", label: "Decantae" },
+            "Gangani":     { color: "#021A05", label: "Gangani" },
+            "Robogdii":    { color: "#2EA83A", label: "Robogdii" },
+            "Darini":      { color: "#042E0A", label: "Darini" },
+            "Volunti":     { color: "#50C85A", label: "Volunti" },
+            "Ebdani":      { color: "#081A0C", label: "Ebdani" },
+            "Cauci":       { color: "#1A7822", label: "Cauci" },
+            "Menapi":      { color: "#0A3D12", label: "Menapi" },
+            "Vodiae":      { color: "#66DD72", label: "Vodiae" },
+            "Iverni":      { color: "#021008", label: "Iverni" },
+            "Velabri":     { color: "#3ABB46", label: "Velabri" },
+            "Luceni":      { color: "#0D5518", label: "Luceni" },
+            "Auteni":      { color: "#80EE88", label: "Auteni" },
+            "Nagnate":     { color: "#062210", label: "Nagnate" },
+            "Erdin":       { color: "#22993A", label: "Erdin" },
+            "Coriondi":    { color: "#44CC55", label: "Coriondi" },
+            "Morini":      { color: "#1A0800", label: "Morini" },
+            "Remi":        { color: "#C87820", label: "Remi" },
+            "Veliocasses": { color: "#3D1A00", label: "Veliocasses" },
+            "Lexovii":     { color: "#EEAA44", label: "Lexovii" },
+            "Venellii":    { color: "#6E3008", label: "Venellii" },
+            "Catuvellauni":{ color: "#021822", label: "Catuvellauni" },
+            "Iceni":       { color: "#2299BB", label: "Iceni" },
+            "Brigantes":   { color: "#042A38", label: "Brigantes" },
+            "Trinovantes": { color: "#44BBDD", label: "Trinovantes" },
+            "Silures":     { color: "#071E2E", label: "Silures" },
+            "Cornovii":    { color: "#55CCEE", label: "Cornovii" },
+            "Ordovices":   { color: "#031520", label: "Ordovices" },
+            "Votadini":    { color: "#1188AA", label: "Votadini" },
+            "Dumnonii":    { color: "#77DDFF", label: "Dumnonii" },
+            "Durotriges":  { color: "#082233", label: "Durotriges" },
+            "Dobunni":     { color: "#0A6688", label: "Dobunni" },
+            "Regni":       { color: "#88EEFF", label: "Regni" },
+            "Cantiaci":    { color: "#0D3344", label: "Cantiaci" },
+            "Demetae":     { color: "#33AACC", label: "Demetae" },
+            "Coritani":    { color: "#AAFFFF", label: "Coritani" },
+            "Deceangli":   { color: "#051C2C", label: "Deceangli" },
+            "Setanti":     { color: "#1A7799", label: "Setanti" },
+            "Parisi":      { color: "#66DDEE", label: "Parisi" },
+            "Carvetii":    { color: "#093040", label: "Carvetii" },
+            "Selgovae":    { color: "#0E99BB", label: "Selgovae" },
+            "Atrebates":   { color: "#0A0F02", label: "Atrebates" },
+            "Ambiani":     { color: "#6E8822", label: "Ambiani" },
+            "Bellovaci":   { color: "#1C2808", label: "Bellovaci" },
+            "Caletes":     { color: "#AACC44", label: "Caletes" },
         };
         const DEFAULT_ASSIGNMENTS = {
-            "cib_reg_caracotinum": "Rome", "cib_reg_portus_itius": "Rome", "cib_reg_lemanae": "Rome", "cib_reg_dwfr_ker": "Rome",
-            "cib_reg_verlamion": "Catuvellauni", "cib_reg_caer_cunobelinos": "Catuvellauni", "cib_reg_durocobrivis": "Catuvellauni", "cib_reg_cair_tamas": "Catuvellauni",
-            "cib_reg_camulodunon": "Trinovantes", "cib_reg_gipesbae": "Trinovantes", "cib_reg_brannodunion": "Trinovantes", "cib_reg_coed_agos_traeth": "Trinovantes",
-            "cib_reg_durouernon": "Cantii", "cib_reg_læwe": "Cantii",
-            "cib_reg_din_usa": "Iceni", "cib_reg_tas_din": "Iceni", "cib_reg_brocolition": "Iceni",
-            "cib_reg_venta": "Atrebates", "cib_reg_ictinovium": "Atrebates", "cib_reg_hamdon": "Atrebates",
-            "cib_reg_karn_briga": "Durotriges", "cib_reg_dun_tagel": "Durotriges", "cib_reg_bodun": "Durotriges", "cib_reg_mai_dun": "Durotriges",
-            "cib_reg_cataractonion": "Brigantes", "cib_reg_isurium": "Brigantes", "cib_reg_inhrypum": "Brigantes", "cib_reg_dervention": "Brigantes",
-            "cib_reg_samarobriva": "Gaul", "cib_reg_bibrax": "Gaul", "cib_reg_nemetocenna": "Gaul", "cib_reg_noviodunum": "Gaul", "cib_reg_crociatonum": "Gaul", "cib_reg_ratumacos": "Gaul",
+            "cib_reg_aber_don":"Taexali","cib_reg_din_lligwy":"Deceangli","cib_reg_aberteifi":"Demetae",
+            "cib_reg_achadh_bo":"Menapi","cib_reg_carmore":"Damnonii","cib_reg_brannodunion":"Iceni",
+            "cib_reg_dun_co_abon_granta":"Durotriges","cib_reg_lochduin":"Caledoni","cib_reg_skipton":"Votadini",
+            "cib_reg_alt_clut":"Damnonii","cib_reg_an_tinbhear_mor":"Menapi","cib_reg_aporcrosan":"Carnonacae",
+            "cib_reg_ard_fert":"Luceni","cib_reg_emain_macha":"Darini","cib_reg_ard_mor":"Brigantes",
+            "cib_reg_ard_sratha":"Venicones","cib_reg_ardach":"Nagnate","cib_reg_axanbryc":"Durotriges",
+            "cib_reg_ceathair_maol":"Nagnate","cib_reg_rgos_dun":"Atrebates","cib_reg_caere_badon":"Dobunni",
+            "cib_reg_din_gefron":"Votadini","cib_reg_an_toot":"Catuvellauni","cib_reg_tig_ar_hul":"Parisi",
+            "cib_reg_gurnbrough":"Cornavii","cib_reg_karn_briga":"Cornovii","cib_reg_dun_mhulan":"Carnonacae",
+            "cib_reg_rerigon":"Novantae","cib_reg_mai_dun":"Durotriges","cib_reg_caer_caradog":"Cornovii",
+            "cib_reg_durocobrivis":"Catuvellauni","cib_reg_caer_venta":"Silures","cib_reg_caer_myrddin":"Demetae",
+            "cib_reg_trer_cewri":"Gangani","cib_reg_cairlinn":"Darini","cib_reg_caisil":"Coriondi",
+            "cib_reg_durouernon":"Cantiaci","cib_reg_luguwalion":"Carvetii","cib_reg_dun_alt":"Novantae",
+            "cib_reg_cathair_commain":"Gangani","cib_reg_cathair_domnaill":"Velabri","cib_reg_gunia":"Cornovii",
+            "cib_reg_cell_alaid":"Nagnate","cib_reg_drom_an_iarainn":"Menapi","cib_reg_dun_knausborg":"Epidii",
+            "cib_reg_cell_maic_aeda":"Coriondi","cib_reg_cell_mor":"Volunti","cib_reg_tre_uwch_baddow":"Trinovantes",
+            "cib_reg_teamhair":"Volunti","cib_reg_cataractonion":"Brigantes","cib_reg_keerford":"Brigantes",
+            "cib_reg_duno_uper_abona":"Atrebates","cib_reg_burg_lgas":"Dobunni","cib_reg_triker":"Atrebates",
+            "cib_reg_clocher":"Robogdii","cib_reg_rath_an_draoi":"Volunti","cib_reg_cluain":"Ebdani",
+            "cib_reg_cluain_iraird":"Ebdani","cib_reg_cluain_mac_nois":"Menapi","cib_reg_cluain_mor":"Vodiae",
+            "cib_reg_sligeach":"Erdin","cib_reg_coinnire":"Robogdii","cib_reg_din_pelydr":"Votadini",
+            "cib_reg_camulodunon":"Trinovantes","cib_reg_corcach":"Vodiae","cib_reg_bodfford":"Dumnonii",
+            "cib_reg_allt_dun":"Carvetii","cib_reg_touesis":"Vacomagi","cib_reg_dervention":"Coritani",
+            "cib_reg_dun_prys":"Novantae","cib_reg_caer_taff":"Silures","cib_reg_y_gaer_fawr":"Demetae",
+            "cib_reg_dwfr_ker":"Cantiaci","cib_reg_cair_daun":"Brigantes","cib_reg_dun_dwfr":"Atrebates",
+            "cib_reg_sefeldion":"Coritani","cib_reg_coed_agos_traeth":"Trinovantes","cib_reg_druim_collachair":"Luceni",
+            "cib_reg_druim_da_ethiar":"Nagnate","cib_reg_dun_cawn":"Deceangli","cib_reg_rauatonion":"Epidii",
+            "cib_reg_dun_ad":"Epidii","cib_reg_dun_bheccain":"Carnonacae","cib_reg_tulach":"Venicones",
+            "cib_reg_drochaidh":"Damnonii","cib_reg_caleto_dubro":"Venicones","cib_reg_dun_de":"Venicones",
+            "cib_reg_men_aber":"Taexali","cib_reg_dun_na_ngall":"Erdin","cib_reg_derdriun":"Caledoni",
+            "cib_reg_oban":"Epidii","cib_reg_dun_droma":"Darini","cib_reg_dun_sebuirgi":"Robogdii",
+            "cib_reg_dunholm":"Brigantes","cib_reg_eblana":"Ebdani","cib_reg_din_bar":"Votadini",
+            "cib_reg_caer_eidyn":"Votadini","cib_reg_din_usa":"Iceni","cib_reg_eburakon":"Parisi",
+            "cib_reg_durtun":"Atrebates","cib_reg_bodun":"Dumnonii","cib_reg_ferna":"Menapi",
+            "cib_reg_tig_ar_y_aber":"Coritani","cib_reg_fofaras":"Vacomagi","cib_reg_elge":"Iceni",
+            "cib_reg_gleann_da_loch":"Cauci","cib_reg_cilta":"Dobunni","cib_reg_dina_briwa":"Catuvellauni",
+            "cib_reg_grianan_aileach":"Venicones","cib_reg_dun_firth":"Atrebates","cib_reg_cathures":"Damnonii",
+            "cib_reg_caer_wear":"Brigantes","cib_reg_loch_in_aice_ba":"Regni","cib_reg_brocolition":"Selgovae",
+            "cib_reg_haeferfordd":"Demetae","cib_reg_dunmore_ring":"Ordovices","cib_reg_lle_ffynnon":"Catuvellauni",
+            "cib_reg_cilurnum":"Votadini","cib_reg_inis_sibhtonn":"Gangani","cib_reg_inhrypum":"Brigantes",
+            "cib_reg_rhwospen":"Novantae","cib_reg_imblech_ibair":"Gangani","cib_reg_aberness":"Caledoni",
+            "cib_reg_inis_cathaigh":"Gangani","cib_reg_dun_loch":"Luceni","cib_reg_colen_bryn":"Novantae",
+            "cib_reg_dun_nan_gall":"Creones","cib_reg_laewe":"Regni","cib_reg_cwm_bran":"Demetae",
+            "cib_reg_lann_cors":"Demetae","cib_reg_lann_dewi":"Demetae","cib_reg_llwyn_y_brain":"Ordovices",
+            "cib_reg_lann_ildut":"Silures","cib_reg_dinas_maelor":"Demetae","cib_reg_latharna":"Robogdii",
+            "cib_reg_carn_smeart":"Smertae","cib_reg_letocaiton":"Coritani","cib_reg_ratae":"Coritani",
+            "cib_reg_lindon":"Coritani","cib_reg_linns":"Volunti","cib_reg_lis_mor":"Brigantes",
+            "cib_reg_dun_tamor":"Dumnonii","cib_reg_loch_gabhair":"Ebdani","cib_reg_loch_raich":"Gangani",
+            "cib_reg_latenses":"Brigantes","cib_reg_dun_moricambe":"Setanti","cib_reg_isurium":"Brigantes",
+            "cib_reg_londonjon":"Atrebates","cib_reg_eil_dun":"Selgovae","cib_reg_mamnos":"Setanti",
+            "cib_reg_caersws":"Ordovices","cib_reg_mynyw":"Demetae","cib_reg_mowdacch":"Gangani",
+            "cib_reg_moige_bile":"Darini","cib_reg_droim_menaich":"Ebdani","cib_reg_dun_ailinne":"Cauci",
+            "cib_reg_nedd":"Silures","cib_reg_neen_din":"Catuvellauni","cib_reg_gipesbae":"Trinovantes",
+            "cib_reg_caer_ogyrfan":"Deceangli","cib_reg_lifer_pol":"Setanti","cib_reg_caer_cunobelinos":"Catuvellauni",
+            "cib_reg_pefenesea":"Deceangli","cib_reg_tig_yn_cors":"Parisi","cib_reg_dun_na_ramhainn_aon":"Ambiani",
+            "cib_reg_rath_cruachan":"Nagnate","cib_reg_rath_luraig":"Robogdii","cib_reg_mwd_din":"Coritani",
+            "cib_reg_bealach_dair":"Vacomagi","cib_reg_drochebrig":"Coritani","cib_reg_dourbruf":"Cantiaci",
+            "cib_reg_cuan_modha":"Iverni","cib_reg_caerbron":"Caereni","cib_reg_ros_mhaircnidh":"Decantae",
+            "cib_reg_ivernia":"Auteni","cib_reg_rudglann":"Deceangli","cib_reg_saigher":"Cauci",
+            "cib_reg_verlamion":"Catuvellauni","cib_reg_tas_din":"Iceni","cib_reg_bodweryn":"Cornovii",
+            "cib_reg_dun_menez":"Durotriges","cib_reg_hamdon":"Durotriges","cib_reg_gortomagos":"Venicones",
+            "cib_reg_uriconion":"Cornovii","cib_reg_cuala":"Regni","cib_reg_tig_guocobauc":"Coritani",
+            "cib_reg_striveling":"Damnonii","cib_reg_pont_war_weolud":"Iceni","cib_reg_ebudes":"Carnonacae",
+            "cib_reg_lemanae":"Cantiaci","cib_reg_ictinovium":"Ambiani","cib_reg_cair_tamas":"Coritani",
+            "cib_reg_tanet":"Cantiaci","cib_reg_tre_ar_sturr":"Trinovantes","cib_reg_inbhir_theorsa":"Cornavii",
+            "cib_reg_dun_tagel":"Dumnonii","cib_reg_abernanton":"Creones","cib_reg_bun_ilidh":"Lugi",
+            "cib_reg_caer_penhallgot":"Durotriges","cib_reg_tuaim_da_ghualann":"Auteni","cib_reg_tuam_greine":"Gangani",
+            "cib_reg_sceap_dun":"Brigantes","cib_reg_vedrafjordr":"Coriondi","cib_reg_veisafjordr":"Coriondi",
+            "cib_reg_wogoced":"Durotriges","cib_reg_tre_weir":"Dobunni","cib_reg_dun_kerch":"Durotriges",
+            "cib_reg_cors_crin":"Trinovantes","cib_reg_moel_byrn":"Cornovii","cib_reg_wextsetla":"Ambiani",
+            "cib_reg_broch_lech":"Atrebates","cib_reg_venta":"Atrebates","cib_reg_ffyn_y_nant":"Coritani",
+            "cib_reg_alauna":"Venellii","cib_reg_bibrax":"Remi","cib_reg_bratus":"Bellovaci",
+            "cib_reg_caracotinum":"Caletes","cib_reg_crociatonum":"Venellii","cib_reg_nemetocenna":"Atrebates",
+            "cib_reg_noviodunum":"Rome","cib_reg_noviomagos":"Lexovii","cib_reg_portus_itius":"Morini",
+            "cib_reg_ratumacos":"Veliocasses","cib_reg_samarobriva":"Ambiani","cib_reg_corda":"Selgovae",
+            "cib_reg_læwe":"Regni","cib_reg_hæferfordd":"Demetae",
+        };
+
+        const CULTURES = {
+            "Picti":    { color: "#3B4A6B", label: "Picti" },
+            "Hiberni":  { color: "#2E7D32", label: "Hiberni" },
+            "Britanni": { color: "#4A7C8E", label: "Britanni" },
+            "Belgae":   { color: "#4A5E3A", label: "Belgae" },
+            "Galli":    { color: "#C8860A", label: "Galli" },
+            "Roma":     { color: "#8B1A1A", label: "Roma" },
+        };
+        const CULTURE_MAP = {
+            "Caledoni":"Picti","Taexali":"Picti","Vacomagi":"Picti","Venicones":"Picti",
+            "Epidii":"Picti","Carnonacae":"Picti","Creones":"Picti","Smertae":"Picti",
+            "Decantae":"Picti","Lugi":"Picti","Caereni":"Picti","Cornavii":"Picti",
+            "Damnonii":"Picti","Novantae":"Picti",
+            "Volunti":"Hiberni","Darini":"Hiberni","Robogdii":"Hiberni","Coriondi":"Hiberni",
+            "Ebdani":"Hiberni","Menapi":"Hiberni","Gangani":"Hiberni","Vodiae":"Hiberni",
+            "Cauci":"Hiberni","Iverni":"Hiberni","Auteni":"Hiberni","Erdin":"Hiberni",
+            "Velabri":"Hiberni","Nagnate":"Hiberni","Luceni":"Hiberni",
+            "Votadini":"Britanni","Selgovae":"Britanni","Brigantes":"Britanni","Parisi":"Britanni",
+            "Setanti":"Britanni","Coritani":"Britanni","Iceni":"Britanni","Trinovantes":"Britanni",
+            "Catuvellauni":"Britanni","Regni":"Britanni","Cantiaci":"Britanni","Silures":"Britanni",
+            "Ordovices":"Britanni","Demetae":"Britanni","Deceangli":"Britanni","Dumnonii":"Britanni",
+            "Cornovii":"Britanni","Dobunni":"Britanni","Carvetii":"Britanni","Durotriges":"Britanni",
+            "Atrebates":"Belgae","Ambiani":"Belgae","Bellovaci":"Belgae","Caletes":"Belgae",
+            "Remi":"Galli","Veliocasses":"Galli","Lexovii":"Galli","Venellii":"Galli","Morini":"Galli",
+            "Rome":"Roma",
         };
 
         let FACTIONS = JSON.parse(JSON.stringify(DEFAULT_FACTIONS));
@@ -960,7 +1183,7 @@
                     const d = JSON.parse(e.target.result);
                     if (!d.factions || !d.assignments) throw new Error("Invalid format — expected {factions, assignments}");
                     FACTIONS = d.factions; FACTION_DATA = d.assignments; saveState();
-                    if (viewMode === "factions") { drawFactions(); if (currentSelectedIdx < 0) showFactionLegend(); else showRegionInfo(currentSelectedIdx); }
+                    if (viewMode === "factions" || viewMode === "cultures") { drawFactions(); if (currentSelectedIdx < 0) showFactionLegend(); else showRegionInfo(currentSelectedIdx); }
                     else if (currentSelectedIdx >= 0) showRegionInfo(currentSelectedIdx);
                 } catch (err) { alert("Import failed: " + err.message); }
                 input.value = "";
@@ -971,7 +1194,7 @@
         function assignRegion(newKey, factionName) {
             if (factionName) FACTION_DATA[newKey] = factionName; else delete FACTION_DATA[newKey];
             saveState();
-            if (viewMode === "factions") drawFactions();
+            if (viewMode === "factions" || viewMode === "cultures") drawFactions();
         }
 
         function deleteFaction(name) {
@@ -980,7 +1203,7 @@
             delete FACTIONS[name];
             for (const k in FACTION_DATA) { if (FACTION_DATA[k] === name) delete FACTION_DATA[k]; }
             saveState();
-            if (viewMode === "factions") { drawFactions(); if (currentSelectedIdx >= 0) showRegionInfo(currentSelectedIdx); }
+            if (viewMode === "factions" || viewMode === "cultures") { drawFactions(); if (currentSelectedIdx >= 0) showRegionInfo(currentSelectedIdx); }
             showFactionLegend();
         }
 
@@ -999,7 +1222,7 @@
             if (!name) { document.getElementById("flName").focus(); return; }
             if (FACTIONS[name]) { alert(`"${name}" already exists.`); return; }
             FACTIONS[name] = { color, label: name }; saveState();
-            if (viewMode === "factions") drawFactions();
+            if (viewMode === "factions" || viewMode === "cultures") drawFactions();
             showFactionLegend();
         }
 
@@ -1007,11 +1230,30 @@
         let viewMode = "regions";
 
         function setView(mode) {
-            viewMode = mode;
-            document.getElementById("btnRegions").classList.toggle("active", mode === "regions");
-            document.getElementById("btnFactions").classList.toggle("active", mode === "factions");
-            if (mode === "factions") { drawFactions(); if (currentSelectedIdx < 0) showFactionLegend(); }
-            else { factionCanvas.getContext("2d").clearRect(0, 0, factionCanvas.width, factionCanvas.height); if (currentSelectedIdx < 0) clearInfoPanel(); }
+            const isFactions = (mode === "factions");
+            const toggle = document.getElementById("cultureToggle");
+            viewMode = isFactions ? (toggle && toggle.checked ? "cultures" : "factions") : "regions";
+            document.getElementById("btnRegions").classList.toggle("active", !isFactions);
+            document.getElementById("btnFactions").classList.toggle("active", isFactions);
+            document.getElementById("cultureSlider").style.display = isFactions ? "flex" : "none";
+            if (isFactions) {
+                drawFactions();
+                if (currentSelectedIdx < 0) showFactionLegend();
+                else showRegionInfo(currentSelectedIdx);
+            } else {
+                factionCanvas.getContext("2d").clearRect(0, 0, factionCanvas.width, factionCanvas.height);
+                if (currentSelectedIdx < 0) clearInfoPanel();
+                else showRegionInfo(currentSelectedIdx);
+            }
+        }
+
+        function setViewMode(isCulture) {
+            viewMode = isCulture ? "cultures" : "factions";
+            document.getElementById("vsLabelFactions").className = "vs-label " + (isCulture ? "inactive" : "active");
+            document.getElementById("vsLabelCultures").className = "vs-label " + (isCulture ? "active" : "inactive");
+            drawFactions();
+            if (currentSelectedIdx >= 0) { drawHighlight(currentSelectedIdx, true); showRegionInfo(currentSelectedIdx); }
+            else showFactionLegend();
         }
 
         // --- DOM refs ---
@@ -1041,7 +1283,7 @@
                 c.width = w; c.height = h;
                 c.style.width = w + "px"; c.style.height = h + "px";
             });
-            if (viewMode === 'factions') drawFactions();
+            if (viewMode === 'factions' || viewMode === 'cultures') drawFactions();
             buildBorders(w, h);
             drawBorders();
             drawLavorata();
@@ -1058,30 +1300,53 @@
             HEX_LIST.forEach((hex, hexIdx) => {
                 const region = COLOR_MAP[hex];
                 if (!region || region.sea) return;
-                const factionName = FACTION_DATA[region.new_key];
-                if (!factionName || !FACTIONS[factionName]) return;
-                const col = FACTIONS[factionName].color;
-                // Parse hex color and draw with opacity
+                const fname = FACTION_DATA[region.new_key];
+                if (!fname) return;
+                let col;
+                if (viewMode === "cultures") {
+                    const cname = CULTURE_MAP[fname];
+                    if (!cname || !CULTURES[cname]) return;
+                    col = CULTURES[cname].color;
+                } else {
+                    if (!FACTIONS[fname]) return;
+                    col = FACTIONS[fname].color;
+                }
                 const r = parseInt(col.slice(1, 3), 16);
                 const g = parseInt(col.slice(3, 5), 16);
                 const b = parseInt(col.slice(5, 7), 16);
-                ctx.fillStyle = `rgba(${r},${g},${b},0.62)`;
+                ctx.fillStyle = `rgba(${r},${g},${b},0.65)`;
                 const runs = REGION_RUNS[hexIdx];
                 for (let i = 0; i < runs.length; i += 3) {
-                    const y = runs[i], xs = runs[i + 1], xe = runs[i + 2];
-                    ctx.fillRect(xs * scaleX, y * scaleY, (xe - xs + 1) * scaleX, scaleY + 0.5);
+                    ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, scaleY + 0.5);
                 }
             });
         }
 
         function showFactionLegend() {
             infoPanel.classList.remove("empty");
+            if (viewMode === 'cultures') {
+                const counts = {};
+                Object.values(FACTION_DATA).forEach(f => {
+                    const c = CULTURE_MAP[f];
+                    if (c) counts[c] = (counts[c] || 0) + 1;
+                });
+                const items = Object.keys(CULTURES).map(name => {
+                    const c = CULTURES[name];
+                    return `<div class="fl-item">
+                        <span class="legend-swatch" style="background:${c.color}"></span>
+                        <span class="fl-name">${escapeHtml(name)}</span>
+                        <span class="fl-count">${counts[name] || 0}</span>
+                    </div>`;
+                }).join('');
+                infoPanel.innerHTML = `<div class="faction-legend"><h3>Cultures</h3>${items}</div>`;
+                return;
+            }
             const items = Object.entries(FACTIONS).map(([key, f]) => {
                 const count = Object.values(FACTION_DATA).filter(v => v === key).length;
                 const safeKey = key.replace(/'/g, "\\'");
                 return `<div class="fl-item">
             <span class="legend-swatch" style="background:${f.color}"></span>
-            <span class="fl-name">${escapeHtml(f.label)}</span>
+            <span class="fl-name">${escapeHtml(f.label || key)}</span>
             <span class="fl-count">${count}</span>
             <button class="fl-del" onclick="deleteFaction('${safeKey}')" title="Delete">✕</button>
         </div>`;
@@ -1152,20 +1417,35 @@
             if (hexIdx < 0 || !REGION_RUNS) return;
             const scaleX = overlayCanvas.width / MAP_W;
             const scaleY = overlayCanvas.height / MAP_H;
-            const runs = REGION_RUNS[hexIdx];
-            if (isSelected) {
-                ctx.fillStyle = "rgba(212,175,55,0.22)";
-                for (let i = 0; i < runs.length; i += 3) {
-                    const y = runs[i], xs = runs[i + 1], xe = runs[i + 2];
-                    ctx.fillRect(xs * scaleX - 1, y * scaleY - 1, (xe - xs + 1) * scaleX + 2, scaleY + 2);
-                }
-                ctx.fillStyle = "rgba(212,175,55,0.5)";
-            } else {
-                ctx.fillStyle = "rgba(255,255,255,0.35)";
+            const h = Math.ceil(scaleY) + 1;
+
+            function fillRegion(idx, style) {
+                ctx.fillStyle = style;
+                const runs = REGION_RUNS[idx];
+                for (let i = 0; i < runs.length; i += 3)
+                    ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, h);
             }
-            for (let i = 0; i < runs.length; i += 3) {
-                const y = runs[i], xs = runs[i + 1], xe = runs[i + 2];
-                ctx.fillRect(xs * scaleX, y * scaleY, (xe - xs + 1) * scaleX, scaleY + 0.5);
+
+            if (isSelected) {
+                if (viewMode === "factions" || viewMode === "cultures") {
+                    const selFaction = FACTION_DATA[COLOR_MAP[HEX_LIST[hexIdx]]?.new_key];
+                    if (selFaction) {
+                        HEX_LIST.forEach((hex, i) => {
+                            if (i === hexIdx) return;
+                            const r = COLOR_MAP[hex];
+                            if (!r || r.sea) return;
+                            if (viewMode === "cultures") {
+                                if (CULTURE_MAP[FACTION_DATA[r.new_key]] !== CULTURE_MAP[selFaction]) return;
+                            } else {
+                                if (FACTION_DATA[r.new_key] !== selFaction) return;
+                            }
+                            fillRegion(i, "rgba(255,220,80,0.20)");
+                        });
+                    }
+                }
+                fillRegion(hexIdx, "rgba(212,175,55,0.50)");
+            } else {
+                fillRegion(hexIdx, "rgba(255,255,255,0.28)");
             }
         }
 
@@ -1175,9 +1455,35 @@
             const region = COLOR_MAP[hex];
             if (!region) return;
             const isLavorata = lavorataSet.has(hexIdx);
+            const fname = FACTION_DATA[region.new_key] || null;
+            const faction = fname ? FACTIONS[fname] : null;
+            const cname = fname ? CULTURE_MAP[fname] : null;
+            const culture = cname ? CULTURES[cname] : null;
+
+            let bannerHtml = '';
+            if (viewMode === 'cultures') {
+                bannerHtml = culture
+                    ? `<div class="faction-banner">
+                           <div class="faction-swatch" style="background:${culture.color}"></div>
+                           <div class="faction-banner-name">${escapeHtml(cname)}</div>
+                       </div>
+                       <div class="faction-banner" style="padding:8px 20px;font-size:.82rem;color:#6a5a3f;">
+                           <span style="font-weight:600;color:#5a4a2f;margin-right:6px;">Faction:</span>${escapeHtml(fname || '—')}
+                       </div>`
+                    : `<div class="faction-banner"><div class="faction-unassigned-label">— Unassigned —</div></div>`;
+            } else if (viewMode === 'factions') {
+                bannerHtml = faction
+                    ? `<div class="faction-banner">
+                           <div class="faction-swatch" style="background:${faction.color}"></div>
+                           <div class="faction-banner-name">${escapeHtml(fname)}</div>
+                       </div>`
+                    : `<div class="faction-banner"><div class="faction-unassigned-label">— Unassigned —</div></div>`;
+            }
+
             infoPanel.classList.remove("empty");
             infoPanel.innerHTML = `
         <h2>${region.name}</h2>
+        ${bannerHtml}
         <div class="info-content">
             <div style="margin-bottom:20px;display:flex;align-items:center;gap:10px;">
                 <span style="display:inline-block;width:40px;height:40px;background:#${hex};border:2px solid #8b7355;border-radius:4px;flex-shrink:0;"></span>
@@ -1200,7 +1506,7 @@
                     <span class="detail-label">Faction:</span>
                     <select class="assign-select" onchange="assignRegion('${region.new_key}',this.value)">
                         <option value="">— Unassigned —</option>
-                        ${Object.entries(FACTIONS).map(([k, f]) => `<option value="${escapeHtml(k)}" ${FACTION_DATA[region.new_key] === k ? 'selected' : ''}>${escapeHtml(f.label)}</option>`).join('')}
+                        ${Object.entries(FACTIONS).map(([k, f]) => `<option value="${escapeHtml(k)}" ${FACTION_DATA[region.new_key] === k ? 'selected' : ''}>${escapeHtml(f.label || k)}</option>`).join('')}
                     </select>
                 </div>
                 <div class="detail-row" style="padding-top:16px;">
@@ -1240,7 +1546,7 @@
         }
 
         function clearInfoPanel() {
-            if (viewMode === 'factions') { showFactionLegend(); return; }
+            if (viewMode === 'factions' || viewMode === 'cultures') { showFactionLegend(); return; }
             infoPanel.classList.add("empty");
             infoPanel.innerHTML = "<p>Click on a region to view information</p>";
         }
@@ -1446,10 +1752,11 @@
                     const ctx = overlayCanvas.getContext("2d");
                     const scaleX = overlayCanvas.width / MAP_W;
                     const scaleY = overlayCanvas.height / MAP_H;
+                    const hh = Math.ceil(scaleY) + 1;
                     const runs = REGION_RUNS[idx];
                     ctx.fillStyle = "rgba(255,255,255,0.22)";
                     for (let i = 0; i < runs.length; i += 3) {
-                        ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, scaleY + 0.5);
+                        ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, hh);
                     }
                 } else if (currentSelectedIdx !== idx) {
                     drawHighlight(idx, false);
