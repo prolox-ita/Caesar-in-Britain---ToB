@@ -1191,8 +1191,8 @@
                     const d = JSON.parse(e.target.result);
                     if (!d.factions || !d.assignments) throw new Error("Invalid format — expected {factions, assignments}");
                     FACTIONS = d.factions; FACTION_DATA = d.assignments; saveState();
-                    if (viewMode === "factions" || viewMode === "cultures") { drawFactions(); if (currentSelectedIdx < 0) showFactionLegend(); else showRegionInfo(currentSelectedIdx); }
-                    else if (currentSelectedIdx >= 0) showRegionInfo(currentSelectedIdx);
+                    if (viewMode === "factions" || viewMode === "cultures") { drawFactions(); if (selectedSet.size === 0) showFactionLegend(); else if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx); else showMultiSelectInfo(); }
+                    else if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx); else if (selectedSet.size > 1) showMultiSelectInfo();
                 } catch (err) { alert("Import failed: " + err.message); }
                 input.value = "";
             };
@@ -1211,7 +1211,7 @@
             delete FACTIONS[name];
             for (const k in FACTION_DATA) { if (FACTION_DATA[k] === name) delete FACTION_DATA[k]; }
             saveState();
-            if (viewMode === "factions" || viewMode === "cultures") { drawFactions(); if (currentSelectedIdx >= 0) showRegionInfo(currentSelectedIdx); }
+            if (viewMode === "factions" || viewMode === "cultures") { drawFactions(); if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx); else if (selectedSet.size > 1) showMultiSelectInfo(); }
             showFactionLegend();
         }
 
@@ -1262,12 +1262,14 @@
             _syncSubBtns();
             if (viewMode === 'factions' || viewMode === 'cultures' || viewMode === 'wealth') {
                 drawFactions();
-                if (currentSelectedIdx < 0) {
-                    if (viewMode === 'wealth') showWealthLegend(); else showFactionLegend();
-                } else showRegionInfo(currentSelectedIdx);
+                if (selectedSet.size === 0) { if (viewMode === 'wealth') showWealthLegend(); else showFactionLegend(); }
+                else if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx);
+                else showMultiSelectInfo();
             } else {
                 factionCanvas.getContext("2d").clearRect(0, 0, factionCanvas.width, factionCanvas.height);
-                if (currentSelectedIdx < 0) clearInfoPanel(); else showRegionInfo(currentSelectedIdx);
+                if (selectedSet.size === 0) clearInfoPanel();
+                else if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx);
+                else showMultiSelectInfo();
             }
         }
 
@@ -1281,7 +1283,9 @@
             } else {
                 factionCanvas.getContext("2d").clearRect(0, 0, factionCanvas.width, factionCanvas.height);
             }
-            if (currentSelectedIdx >= 0) { drawHighlight(currentSelectedIdx, true); showRegionInfo(currentSelectedIdx); }
+            drawHighlight(currentHoverIdx);
+            if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx);
+            else if (selectedSet.size > 1) showMultiSelectInfo();
             else {
                 if (subMode === 'factions' || subMode === 'cultures') showFactionLegend();
                 else if (subMode === 'wealth') showWealthLegend();
@@ -1304,7 +1308,8 @@
         const searchDropdown = document.getElementById("searchDropdown");
 
         let currentHoverIdx = -1;
-        let currentSelectedIdx = -1;
+        let currentSelectedIdx = -1; // primary (last clicked) — used for co-faction glow
+        let selectedSet = new Set();  // all selected region indices
 
         // --- Canvas sizing ---
         function resizeCanvases() {
@@ -1320,7 +1325,7 @@
             buildBorders(w, h);
             drawBorders();
             drawLavorata();
-            if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
+            drawHighlight(currentHoverIdx);
             drawMarkers();
         }
 
@@ -1447,10 +1452,11 @@
         }
 
         // --- Draw hover/selection highlight ---
-        function drawHighlight(hexIdx, isSelected) {
+        // hoveredIdx: region under the mouse cursor (-1 if none)
+        function drawHighlight(hoveredIdx) {
             const ctx = overlayCanvas.getContext("2d");
             ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            if (hexIdx < 0 || !REGION_RUNS) return;
+            if (!REGION_RUNS) return;
             const scaleX = overlayCanvas.width / MAP_W;
             const scaleY = overlayCanvas.height / MAP_H;
             const h = Math.ceil(scaleY) + 1;
@@ -1462,27 +1468,31 @@
                     ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, h);
             }
 
-            if (isSelected) {
-                if (viewMode === "factions" || viewMode === "cultures") {
-                    const selFaction = FACTION_DATA[COLOR_MAP[HEX_LIST[hexIdx]]?.new_key];
-                    if (selFaction) {
-                        HEX_LIST.forEach((hex, i) => {
-                            if (i === hexIdx) return;
-                            const r = COLOR_MAP[hex];
-                            if (!r || r.sea) return;
-                            if (viewMode === "cultures") {
-                                if (CULTURE_MAP[FACTION_DATA[r.new_key]] !== CULTURE_MAP[selFaction]) return;
-                            } else {
-                                if (FACTION_DATA[r.new_key] !== selFaction) return;
-                            }
-                            fillRegion(i, "rgba(255,220,80,0.20)");
-                        });
-                    }
+            // co-faction/co-culture glow from the primary selected region
+            if (selectedSet.size > 0 && currentSelectedIdx >= 0 &&
+                (viewMode === "factions" || viewMode === "cultures")) {
+                const selFaction = FACTION_DATA[COLOR_MAP[HEX_LIST[currentSelectedIdx]]?.new_key];
+                if (selFaction) {
+                    HEX_LIST.forEach((hex, i) => {
+                        if (selectedSet.has(i)) return;
+                        const r = COLOR_MAP[hex];
+                        if (!r || r.sea) return;
+                        if (viewMode === "cultures") {
+                            if (CULTURE_MAP[FACTION_DATA[r.new_key]] !== CULTURE_MAP[selFaction]) return;
+                        } else {
+                            if (FACTION_DATA[r.new_key] !== selFaction) return;
+                        }
+                        fillRegion(i, "rgba(255,220,80,0.20)");
+                    });
                 }
-                fillRegion(hexIdx, "rgba(212,175,55,0.50)");
-            } else {
-                fillRegion(hexIdx, "rgba(255,255,255,0.28)");
             }
+
+            // all selected regions
+            for (const idx of selectedSet) fillRegion(idx, "rgba(212,175,55,0.50)");
+
+            // hovered region (only if not already selected)
+            if (hoveredIdx >= 0 && !selectedSet.has(hoveredIdx))
+                fillRegion(hoveredIdx, "rgba(255,255,255,0.28)");
         }
 
         // --- Info panel ---
@@ -1549,8 +1559,12 @@
                 </div>
                 <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:16px;">
                     <span class="detail-label">Wealth: <span id="wealthVal" style="font-style:italic;color:#6a5a3f">${curWealth}</span></span>
-                    <input type="range" id="wealthRange" min="100" max="200" value="${curWealth}"
-                           style="width:100%;cursor:pointer;accent-color:#5a4a2f">
+                    <div style="display:flex;align-items:center;gap:8px;width:100%">
+                        <input type="range" id="wealthRange" min="100" max="200" value="${curWealth}"
+                               style="flex:1;cursor:pointer;accent-color:#5a4a2f">
+                        <input type="number" id="wealthNum" min="100" max="200" value="${curWealth}"
+                               style="width:54px;padding:3px 5px;border:1.5px solid #c8a84b;border-radius:4px;font-size:.85rem;text-align:center;color:#3a2a10;background:rgba(255,255,255,.9);outline:none">
+                    </div>
                 </div>
                 <div class="detail-row" style="padding-top:8px;">
                     <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#5a4a2f;font-size:1rem;">
@@ -1586,12 +1600,65 @@
                     drawMarkers();
                 });
             }
-            document.getElementById("wealthRange").addEventListener("input", function () {
-                const v = parseInt(this.value);
+            function applyWealth(v) {
                 wealthData[region.new_key] = v;
                 document.getElementById("wealthVal").textContent = v;
+                document.getElementById("wealthRange").value = v;
+                document.getElementById("wealthNum").value = v;
                 saveWealth();
                 if (viewMode === 'wealth') drawFactions();
+            }
+            document.getElementById("wealthRange").addEventListener("input", function () {
+                applyWealth(parseInt(this.value));
+            });
+            document.getElementById("wealthNum").addEventListener("change", function () {
+                applyWealth(Math.max(100, Math.min(200, parseInt(this.value) || 100)));
+            });
+        }
+
+        function showMultiSelectInfo() {
+            infoPanel.classList.remove("empty");
+            const indices = [...selectedSet];
+            const regions = indices.map(i => COLOR_MAP[HEX_LIST[i]]).filter(Boolean);
+            const wVals = regions.map(r => getWealth(r.new_key));
+            const allSame = wVals.every(v => v === wVals[0]);
+            const sharedW = allSame ? wVals[0] : Math.round(wVals.reduce((a,b)=>a+b,0)/wVals.length);
+
+            const regionList = regions.map(r =>
+                `<div style="font-size:.82rem;color:#4a3a25;padding:4px 0;border-bottom:1px solid rgba(212,175,55,.15)">${escapeHtml(r.name)}</div>`
+            ).join('');
+
+            infoPanel.innerHTML = `
+        <h2 style="font-size:1.35rem">${indices.length} regions selected</h2>
+        <div class="info-content">
+            <div class="region-details">
+                <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:8px;">
+                    <span class="detail-label">Wealth (all): <span id="wealthValM" style="font-style:italic;color:#6a5a3f">${sharedW}${allSame?'':' avg'}</span></span>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%">
+                        <input type="range" id="wealthRangeM" min="100" max="200" value="${sharedW}"
+                               style="flex:1;cursor:pointer;accent-color:#5a4a2f">
+                        <input type="number" id="wealthNumM" min="100" max="200" value="${sharedW}"
+                               style="width:54px;padding:3px 5px;border:1.5px solid #c8a84b;border-radius:4px;font-size:.85rem;text-align:center;color:#3a2a10;background:rgba(255,255,255,.9);outline:none">
+                    </div>
+                </div>
+            </div>
+            <div style="margin:12px 0 6px;font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;color:#5a4a2f;letter-spacing:.08em;text-transform:uppercase">Selected</div>
+            <div style="max-height:220px;overflow-y:auto">${regionList}</div>
+        </div>`;
+
+            function applyMultiWealth(v) {
+                regions.forEach(r => { wealthData[r.new_key] = v; });
+                document.getElementById("wealthValM").textContent = v;
+                document.getElementById("wealthRangeM").value = v;
+                document.getElementById("wealthNumM").value = v;
+                saveWealth();
+                if (viewMode === 'wealth') drawFactions();
+            }
+            document.getElementById("wealthRangeM").addEventListener("input", function () {
+                applyMultiWealth(parseInt(this.value));
+            });
+            document.getElementById("wealthNumM").addEventListener("change", function () {
+                applyMultiWealth(Math.max(100, Math.min(200, parseInt(this.value) || 100)));
             });
         }
 
@@ -1639,8 +1706,10 @@
         function selectDropItem(entry) {
             searchInput.value = entry.name;
             closeDropdown();
+            selectedSet.clear();
+            selectedSet.add(entry.idx);
             currentSelectedIdx = entry.idx;
-            drawHighlight(entry.idx, true);
+            drawHighlight(currentHoverIdx);
             showRegionInfo(entry.idx);
         }
 
@@ -1805,39 +1874,18 @@
             const idx = getRegionIdxAt(x, y);
             if (idx < 0) {
                 interactiveCanvas.style.cursor = "default";
-                if (currentHoverIdx !== -1) {
-                    currentHoverIdx = -1;
-                    if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
-                    else overlayCanvas.getContext("2d").clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-                }
+                if (currentHoverIdx !== -1) { currentHoverIdx = -1; drawHighlight(-1); }
                 return;
             }
             interactiveCanvas.style.cursor = "pointer";
-            if (currentHoverIdx !== idx) {
-                currentHoverIdx = idx;
-                if (currentSelectedIdx >= 0 && currentSelectedIdx !== idx) {
-                    drawHighlight(currentSelectedIdx, true);
-                    const ctx = overlayCanvas.getContext("2d");
-                    const scaleX = overlayCanvas.width / MAP_W;
-                    const scaleY = overlayCanvas.height / MAP_H;
-                    const hh = Math.ceil(scaleY) + 1;
-                    const runs = REGION_RUNS[idx];
-                    ctx.fillStyle = "rgba(255,255,255,0.22)";
-                    for (let i = 0; i < runs.length; i += 3) {
-                        ctx.fillRect(runs[i + 1] * scaleX, runs[i] * scaleY, (runs[i + 2] - runs[i + 1] + 1) * scaleX, hh);
-                    }
-                } else if (currentSelectedIdx !== idx) {
-                    drawHighlight(idx, false);
-                }
-            }
+            if (currentHoverIdx !== idx) { currentHoverIdx = idx; drawHighlight(idx); }
         });
 
         interactiveCanvas.addEventListener("mouseleave", function () {
             isPanning = false;
             mapZoomContainer.classList.remove('panning');
             currentHoverIdx = -1;
-            if (currentSelectedIdx >= 0) drawHighlight(currentSelectedIdx, true);
-            else overlayCanvas.getContext("2d").clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            drawHighlight(-1);
         });
 
         interactiveCanvas.addEventListener("click", function (e) {
@@ -1846,21 +1894,38 @@
             const rect = interactiveCanvas.getBoundingClientRect();
             const { x, y } = toLookupCoords(e.clientX - rect.left, e.clientY - rect.top);
             const idx = getRegionIdxAt(x, y);
+
             if (idx < 0) {
-                currentSelectedIdx = -1;
-                drawHighlight(-1, false);
-                clearInfoPanel();
+                if (!e.ctrlKey) {
+                    selectedSet.clear(); currentSelectedIdx = -1;
+                    drawHighlight(-1); clearInfoPanel();
+                }
                 return;
             }
-            if (currentSelectedIdx === idx) {
-                currentSelectedIdx = -1;
-                clearInfoPanel();
-                drawHighlight(-1, false);
+
+            if (e.ctrlKey) {
+                // toggle this region in/out of the selection
+                if (selectedSet.has(idx)) {
+                    selectedSet.delete(idx);
+                    if (currentSelectedIdx === idx)
+                        currentSelectedIdx = selectedSet.size > 0 ? [...selectedSet].at(-1) : -1;
+                } else {
+                    selectedSet.add(idx);
+                    currentSelectedIdx = idx;
+                }
             } else {
-                currentSelectedIdx = idx;
-                drawHighlight(idx, true);
-                showRegionInfo(idx);
+                // single select (deselect if same)
+                if (selectedSet.size === 1 && selectedSet.has(idx)) {
+                    selectedSet.clear(); currentSelectedIdx = -1;
+                    drawHighlight(currentHoverIdx); clearInfoPanel(); return;
+                }
+                selectedSet.clear(); selectedSet.add(idx); currentSelectedIdx = idx;
             }
+
+            drawHighlight(currentHoverIdx);
+            if (selectedSet.size === 0) clearInfoPanel();
+            else if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx);
+            else showMultiSelectInfo();
         });
 
         // --- Init ---
