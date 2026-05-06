@@ -1649,16 +1649,15 @@
                     </select>
                 </div>
                 <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:16px;">
-                    <span class="detail-label">Wealth (base): <span id="wealthVal" style="font-style:italic;color:#6a5a3f">${curWealth}</span></span>
+                    <span class="detail-label">Wealth: <strong id="wealthVal" style="color:#3a2a10">${effWealth}</strong></span>
                     <div style="display:flex;align-items:center;gap:8px;width:100%">
                         <input type="range" id="wealthRange" min="150" max="250" value="${curWealth}"
                                style="flex:1;cursor:pointer;accent-color:#5a4a2f">
                         <input type="number" id="wealthNum" min="150" max="250" value="${curWealth}"
                                style="width:54px;padding:3px 5px;border:1.5px solid #c8a84b;border-radius:4px;font-size:.85rem;text-align:center;color:#3a2a10;background:rgba(255,255,255,.9);outline:none">
                     </div>
-                    <div style="font-size:.8rem;color:#5a4a2f;margin-top:2px">
-                        Effettivo: <strong id="wealthEffective">${effWealth}</strong>
-                        <span id="wealthBonus" style="color:#8a7a5f;margin-left:4px">${bonusLabel ? '(' + bonusLabel + ')' : ''}</span>
+                    <div style="font-size:.78rem;color:#8a7a5f;margin-top:2px">
+                        Base: <span id="wealthBase">${curWealth}</span><span id="wealthBonus">${bonusLabel ? ' · ' + bonusLabel : ''}</span>
                     </div>
                 </div>
                 <div class="detail-row" style="padding-top:8px;">
@@ -1694,22 +1693,19 @@
                     savePorto();
                     drawMarkers();
                     if (viewMode === 'wealth') drawFactions();
-                    const eff = getEffectiveWealth(region.new_key);
-                    const bonus = wealthBonusLabel(region.new_key);
-                    const elEff = document.getElementById("wealthEffective");
+                    const elVal = document.getElementById("wealthVal");
                     const elBonus = document.getElementById("wealthBonus");
-                    if (elEff) elEff.textContent = eff;
-                    if (elBonus) elBonus.textContent = bonus ? '(' + bonus + ')' : '';
+                    if (elVal) elVal.textContent = getEffectiveWealth(region.new_key);
+                    const bonus = wealthBonusLabel(region.new_key);
+                    if (elBonus) elBonus.textContent = bonus ? ' · ' + bonus : '';
                 });
             }
             function applyWealth(v) {
                 wealthData[region.new_key] = v;
-                document.getElementById("wealthVal").textContent = v;
                 document.getElementById("wealthRange").value = v;
                 document.getElementById("wealthNum").value = v;
-                const eff = getEffectiveWealth(region.new_key);
-                const elEff = document.getElementById("wealthEffective");
-                if (elEff) elEff.textContent = eff;
+                document.getElementById("wealthBase").textContent = v;
+                document.getElementById("wealthVal").textContent = getEffectiveWealth(region.new_key);
                 saveWealth();
                 if (viewMode === 'wealth') drawFactions();
             }
