@@ -711,7 +711,31 @@
 
         let ROWS = null;
         let REGION_RUNS = null;
+        let ADJACENCY = null;
         let borderOffscreen = null;
+
+        function buildAdjacency() {
+            if (!ROWS) return;
+            const n = HEX_LIST.length;
+            const adjSets = Array.from({length: n}, () => new Set());
+            const link = (a, b) => { adjSets[a].add(b); adjSets[b].add(a); };
+            for (let y = 0; y < ROWS.length; y++) {
+                const row = ROWS[y];
+                for (let i = 0; i + 3 < row.length; i += 3)
+                    if (row[i+1] + 1 === row[i+3]) link(row[i+2], row[i+5]);
+                if (y + 1 < ROWS.length) {
+                    const nxt = ROWS[y+1];
+                    let a = 0, b = 0;
+                    while (a < row.length && b < nxt.length) {
+                        if (row[a] > nxt[b+1]) { b += 3; continue; }
+                        if (nxt[b] > row[a+1]) { a += 3; continue; }
+                        if (row[a+2] !== nxt[b+2]) link(row[a+2], nxt[b+2]);
+                        if (row[a+1] <= nxt[b+1]) a += 3; else b += 3;
+                    }
+                }
+            }
+            ADJACENCY = adjSets.map(s => [...s]);
+        }
 
         function buildBorders(W, H) {
             if (!ROWS) return;
@@ -765,6 +789,7 @@
         try {
             ROWS = decodeRowData(ROW_DATA_B64);
             REGION_RUNS = buildRegionIndex(ROWS);
+            buildAdjacency();
             console.log("Decoded " + ROWS.length + " rows, " + HEX_LIST.length + " regions");
         } catch (e) {
             console.error("Decode failed:", e);
@@ -787,6 +812,35 @@
         try { const ws = localStorage.getItem(WEALTH_KEY); if (ws) wealthData = JSON.parse(ws); } catch (e) { }
         function saveWealth() { try { localStorage.setItem(WEALTH_KEY, JSON.stringify(wealthData)); } catch (e) { } }
         function getWealth(key) { return wealthData[key] ?? 150; }
+
+        function getLandPortoNeighborCount(hexIdx) {
+            if (!ADJACENCY) return 0;
+            return ADJACENCY[hexIdx].reduce((cnt, nbr) => {
+                const r = COLOR_MAP[HEX_LIST[nbr]];
+                return cnt + (r && !r.sea && portoSet.has(r.new_key) ? 1 : 0);
+            }, 0);
+        }
+
+        function getEffectiveWealth(key) {
+            const idx = keyToHexIdx[key];
+            const base = getWealth(key);
+            const portBonus = portoSet.has(key) ? 30 : 0;
+            const nbrBonus = idx !== undefined ? getLandPortoNeighborCount(idx) * 10 : 0;
+            return Math.max(100, base + portBonus + nbrBonus);
+        }
+
+        function wealthBonusLabel(key) {
+            const idx = keyToHexIdx[key];
+            const portBonus = portoSet.has(key) ? 30 : 0;
+            const nbrCount = idx !== undefined ? getLandPortoNeighborCount(idx) : 0;
+            const nbrBonus = nbrCount * 10;
+            if (!portBonus && !nbrBonus) return '';
+            const parts = [];
+            if (portBonus) parts.push(`+${portBonus} porto`);
+            if (nbrBonus) parts.push(`+${nbrBonus} vicini (×${nbrCount})`);
+            return parts.join(', ');
+        }
+
         function wealthColor(val) {
             const t = Math.max(0, Math.min(1, (val - 150) / 150));
             let r, g, b;
@@ -1375,7 +1429,7 @@
                     if (!cname || !CULTURES[cname]) return;
                     col = CULTURES[cname].color;
                 } else if (viewMode === "wealth") {
-                    col = wealthColor(getWealth(region.new_key));
+                    col = wealthColor(getEffectiveWealth(region.new_key));
                 } else {
                     if (!FACTIONS[fname]) return;
                     col = FACTIONS[fname].color;
@@ -1535,6 +1589,8 @@
             const culture = cname ? CULTURES[cname] : null;
 
             const curWealth = getWealth(region.new_key);
+            const effWealth = getEffectiveWealth(region.new_key);
+            const bonusLabel = wealthBonusLabel(region.new_key);
 
             let bannerHtml = '';
             if (viewMode === 'cultures') {
@@ -1586,12 +1642,16 @@
                     </select>
                 </div>
                 <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:16px;">
-                    <span class="detail-label">Wealth: <span id="wealthVal" style="font-style:italic;color:#6a5a3f">${curWealth}</span></span>
+                    <span class="detail-label">Wealth (base): <span id="wealthVal" style="font-style:italic;color:#6a5a3f">${curWealth}</span></span>
                     <div style="display:flex;align-items:center;gap:8px;width:100%">
                         <input type="range" id="wealthRange" min="150" max="250" value="${curWealth}"
                                style="flex:1;cursor:pointer;accent-color:#5a4a2f">
                         <input type="number" id="wealthNum" min="150" max="250" value="${curWealth}"
                                style="width:54px;padding:3px 5px;border:1.5px solid #c8a84b;border-radius:4px;font-size:.85rem;text-align:center;color:#3a2a10;background:rgba(255,255,255,.9);outline:none">
+                    </div>
+                    <div style="font-size:.8rem;color:#5a4a2f;margin-top:2px">
+                        Effettivo: <strong id="wealthEffective">${effWealth}</strong>
+                        <span id="wealthBonus" style="color:#8a7a5f;margin-left:4px">${bonusLabel ? '(' + bonusLabel + ')' : ''}</span>
                     </div>
                 </div>
                 <div class="detail-row" style="padding-top:8px;">
@@ -1626,6 +1686,13 @@
                     if (regionStatus[region.new_key]) regionStatus[region.new_key].porto = this.checked;
                     savePorto();
                     drawMarkers();
+                    if (viewMode === 'wealth') drawFactions();
+                    const eff = getEffectiveWealth(region.new_key);
+                    const bonus = wealthBonusLabel(region.new_key);
+                    const elEff = document.getElementById("wealthEffective");
+                    const elBonus = document.getElementById("wealthBonus");
+                    if (elEff) elEff.textContent = eff;
+                    if (elBonus) elBonus.textContent = bonus ? '(' + bonus + ')' : '';
                 });
             }
             function applyWealth(v) {
@@ -1633,6 +1700,9 @@
                 document.getElementById("wealthVal").textContent = v;
                 document.getElementById("wealthRange").value = v;
                 document.getElementById("wealthNum").value = v;
+                const eff = getEffectiveWealth(region.new_key);
+                const elEff = document.getElementById("wealthEffective");
+                if (elEff) elEff.textContent = eff;
                 saveWealth();
                 if (viewMode === 'wealth') drawFactions();
             }
@@ -1649,8 +1719,10 @@
             const indices = [...selectedSet];
             const regions = indices.map(i => COLOR_MAP[HEX_LIST[i]]).filter(Boolean);
             const wVals = regions.map(r => getWealth(r.new_key));
+            const effVals = regions.map(r => getEffectiveWealth(r.new_key));
             const allSame = wVals.every(v => v === wVals[0]);
             const sharedW = allSame ? wVals[0] : Math.round(wVals.reduce((a, b) => a + b, 0) / wVals.length);
+            const avgEff = Math.round(effVals.reduce((a, b) => a + b, 0) / effVals.length);
 
             const regionList = regions.map(r =>
                 `<div style="font-size:.82rem;color:#4a3a25;padding:4px 0;border-bottom:1px solid rgba(212,175,55,.15)">${escapeHtml(r.name)}</div>`
@@ -1661,12 +1733,15 @@
         <div class="info-content">
             <div class="region-details">
                 <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:8px;">
-                    <span class="detail-label">Wealth (all): <span id="wealthValM" style="font-style:italic;color:#6a5a3f">${sharedW}${allSame ? '' : ' avg'}</span></span>
+                    <span class="detail-label">Wealth base: <span id="wealthValM" style="font-style:italic;color:#6a5a3f">${sharedW}${allSame ? '' : ' avg'}</span></span>
                     <div style="display:flex;align-items:center;gap:8px;width:100%">
-                        <input type="range" id="wealthRangeM" min="120" max="250" value="${sharedW}"
+                        <input type="range" id="wealthRangeM" min="150" max="250" value="${sharedW}"
                                style="flex:1;cursor:pointer;accent-color:#5a4a2f">
-                        <input type="number" id="wealthNumM" min="150" max="220" value="${sharedW}"
+                        <input type="number" id="wealthNumM" min="150" max="250" value="${sharedW}"
                                style="width:54px;padding:3px 5px;border:1.5px solid #c8a84b;border-radius:4px;font-size:.85rem;text-align:center;color:#3a2a10;background:rgba(255,255,255,.9);outline:none">
+                    </div>
+                    <div style="font-size:.8rem;color:#5a4a2f;margin-top:2px">
+                        Effettivo medio: <strong>${avgEff}</strong>
                     </div>
                 </div>
             </div>
@@ -1682,6 +1757,7 @@
                 saveWealth();
                 if (viewMode === 'wealth') drawFactions();
             }
+
             document.getElementById("wealthRangeM").addEventListener("input", function () {
                 applyMultiWealth(parseInt(this.value));
             });
