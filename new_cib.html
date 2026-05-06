@@ -717,20 +717,20 @@
         function buildAdjacency() {
             if (!ROWS) return;
             const n = HEX_LIST.length;
-            const adjSets = Array.from({length: n}, () => new Set());
+            const adjSets = Array.from({ length: n }, () => new Set());
             const link = (a, b) => { adjSets[a].add(b); adjSets[b].add(a); };
             for (let y = 0; y < ROWS.length; y++) {
                 const row = ROWS[y];
                 for (let i = 0; i + 3 < row.length; i += 3)
-                    if (row[i+1] + 1 === row[i+3]) link(row[i+2], row[i+5]);
+                    if (row[i + 1] + 1 === row[i + 3]) link(row[i + 2], row[i + 5]);
                 if (y + 1 < ROWS.length) {
-                    const nxt = ROWS[y+1];
+                    const nxt = ROWS[y + 1];
                     let a = 0, b = 0;
                     while (a < row.length && b < nxt.length) {
-                        if (row[a] > nxt[b+1]) { b += 3; continue; }
-                        if (nxt[b] > row[a+1]) { a += 3; continue; }
-                        if (row[a+2] !== nxt[b+2]) link(row[a+2], nxt[b+2]);
-                        if (row[a+1] <= nxt[b+1]) a += 3; else b += 3;
+                        if (row[a] > nxt[b + 1]) { b += 3; continue; }
+                        if (nxt[b] > row[a + 1]) { a += 3; continue; }
+                        if (row[a + 2] !== nxt[b + 2]) link(row[a + 2], nxt[b + 2]);
+                        if (row[a + 1] <= nxt[b + 1]) a += 3; else b += 3;
                     }
                 }
             }
@@ -800,7 +800,14 @@
         const PORTO_KEY = 'cib_porto_v1';
         const MARKERS_KEY = 'cib_markers_v1';
 
-        let portoSet = new Set(JSON.parse(localStorage.getItem(PORTO_KEY) || '[]'));
+        const DEFAULT_PORTO = [
+            "cib_reg_portus_itius",
+            "cib_reg_caracotinum",
+            // ... altre chiavi regione
+        ];
+
+        const _savedPorto = localStorage.getItem(PORTO_KEY);
+        let portoSet = new Set(_savedPorto ? JSON.parse(_savedPorto) : DEFAULT_PORTO);
         let markerPos = JSON.parse(localStorage.getItem(MARKERS_KEY) || '{}');
 
         function savePorto() { localStorage.setItem(PORTO_KEY, JSON.stringify([...portoSet])); }
