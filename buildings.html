@@ -10,7 +10,7 @@
 
         body {
             font-family: 'Cinzel', Georgia, serif;
-            background: #120a02 url('background_cib.jpg') center/cover fixed;
+            background: #0a0602 url('background_cib.jpg') center/cover fixed;
             color: #e8d5a0;
             min-height: 100vh;
         }
@@ -18,7 +18,7 @@
             content: '';
             position: fixed;
             inset: 0;
-            background: rgba(8, 4, 0, 0.75);
+            background: rgba(6, 3, 0, 0.82);
             pointer-events: none;
             z-index: 0;
         }
@@ -28,29 +28,22 @@
             z-index: 1;
             max-width: 1440px;
             margin: 0 auto;
-            padding: 0 24px 80px;
+            padding: 0 20px 80px;
         }
 
         /* ── Header ── */
         header {
             text-align: center;
-            padding: 44px 20px 26px;
-            border-bottom: 2px solid rgba(212,175,55,0.28);
+            padding: 36px 20px 20px;
             margin-bottom: 0;
         }
         header h1 {
             font-family: 'Cinzel Decorative', serif;
-            font-size: 2.6rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: #d4af37;
             text-shadow: 0 2px 10px rgba(0,0,0,0.9);
             letter-spacing: .14em;
-            margin-bottom: 6px;
-        }
-        header p {
-            font-size: .84rem;
-            color: #8a7a5a;
-            letter-spacing: .07em;
         }
 
         /* ── Filter bar ── */
@@ -58,236 +51,318 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(10, 5, 1, 0.94);
+            background: rgba(8, 4, 0, 0.96);
+            border-top: 1px solid rgba(212,175,55,0.18);
             border-bottom: 1px solid rgba(212,175,55,0.18);
-            padding: 10px 0;
-            margin-bottom: 28px;
+            padding: 8px 0;
+            margin: 16px 0 0;
             backdrop-filter: blur(8px);
         }
         .filter-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 7px;
+            gap: 6px;
             align-items: center;
         }
         .filter-label {
-            font-size: .68rem;
+            font-size: .65rem;
             font-weight: 700;
             color: #6a5a3a;
             text-transform: uppercase;
             letter-spacing: .1em;
-            margin-right: 2px;
             white-space: nowrap;
         }
-        .filter-sep {
-            width: 1px; height: 22px;
-            background: rgba(212,175,55,0.2);
-            margin: 0 8px;
-        }
+        .filter-sep { width: 1px; height: 20px; background: rgba(212,175,55,0.2); margin: 0 6px; }
 
         .cat-btn {
-            padding: 4px 14px;
+            padding: 3px 13px;
             border-radius: 20px;
-            border: 1.5px solid rgba(212,175,55,0.28);
-            background: rgba(50,34,8,0.45);
-            color: #b8984a;
+            border: 1.5px solid rgba(212,175,55,0.25);
+            background: rgba(50,34,8,0.4);
+            color: #b0904a;
             font-family: 'Cinzel', serif;
-            font-size: .7rem;
+            font-size: .68rem;
             font-weight: 600;
             cursor: pointer;
             transition: all .15s;
             white-space: nowrap;
         }
-        .cat-btn:hover { border-color: #d4af37; color: #f0d060; background: rgba(80,55,12,0.6); }
-        .cat-btn.active { background: rgba(130,88,16,0.55); border-color: #d4af37; color: #f5e070;
-            box-shadow: 0 0 8px rgba(212,175,55,0.25); }
+        .cat-btn:hover { border-color: #d4af37; color: #f0d060; }
+        .cat-btn.active { background: rgba(120,82,14,0.5); border-color: #d4af37; color: #f5e070; }
 
         .cult-btn {
-            padding: 4px 12px;
+            padding: 3px 11px;
             border-radius: 20px;
             border: 1.5px solid transparent;
             font-family: 'Cinzel', serif;
-            font-size: .68rem;
+            font-size: .66rem;
             font-weight: 700;
             cursor: pointer;
             transition: all .15s;
-            opacity: 0.55;
+            opacity: 0.5;
             white-space: nowrap;
         }
-        .cult-btn:hover { opacity: 0.85; }
-        .cult-btn.active { opacity: 1; box-shadow: 0 0 7px currentColor; }
+        .cult-btn:hover { opacity: 0.8; }
+        .cult-btn.active { opacity: 1; box-shadow: 0 0 6px currentColor; }
 
-        /* ── Category section ── */
-        .cat-section { margin-bottom: 44px; }
-        .cat-title {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 1.15rem;
+        /* ── Table structure ── */
+        .tbl-wrap {
+            margin-top: 0;
+            overflow-x: auto;
+        }
+
+        /* Sticky column header */
+        .tbl-head {
+            display: grid;
+            grid-template-columns: 34px 78px 1fr 52px;
+            background: rgba(8,4,0,0.95);
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            position: sticky;
+            top: 45px;
+            z-index: 90;
+        }
+        .tbl-head > div {
+            padding: 5px 4px;
+            font-size: .62rem;
             font-weight: 700;
-            color: #d4af37;
+            color: #6a5a3a;
+            text-transform: uppercase;
             letter-spacing: .1em;
-            padding: 14px 0 12px;
-            border-bottom: 1px solid rgba(212,175,55,0.22);
-            margin-bottom: 18px;
+        }
+        .tbl-head .th-chain {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            color: #6a5a3a;
+        }
+        .tbl-head .th-chain span {
+            padding: 5px 4px;
+            font-size: .62rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+        }
+        .tbl-head .th-cult { text-align: center; }
+
+        /* ── Category block ── */
+        .cat-block {
+            display: flex;
+            margin-bottom: 2px;
+        }
+        .cat-bar {
+            width: 34px;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-family: 'Cinzel', serif;
+            font-size: .58rem;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.92);
+            text-shadow: 0 1px 4px rgba(0,0,0,0.7);
         }
-        .cat-title-bar {
-            display: inline-block;
-            width: 5px; height: 22px;
-            background: #d4af37;
-            border-radius: 3px;
-        }
+        .cat-bar.food     { background: rgba(50,110,18,0.85); }
+        .cat-bar.religion { background: rgba(140,40,130,0.85); }
+        .cat-bar.society  { background: rgba(160,130,0,0.85); }
 
-        /* ── Card grid ── */
-        .cards-grid {
+        .cat-rows { flex: 1; }
+
+        /* ── Building row ── */
+        .b-row {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 14px;
+            grid-template-columns: 78px 1fr 52px;
+            border-bottom: 1px solid rgba(212,175,55,0.1);
+            min-height: 52px;
+            transition: background .15s;
         }
+        .b-row:hover { background: rgba(212,175,55,0.04); }
 
-        /* ── Building card ── */
-        .b-card {
-            background: rgba(16, 10, 2, 0.9);
-            border: 1px solid rgba(212,175,55,0.22);
-            border-radius: 8px;
-            padding: 15px 17px 14px;
-            transition: border-color .18s, box-shadow .18s;
-        }
-        .b-card:hover {
-            border-color: rgba(212,175,55,0.5);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.55);
-        }
-
-        .card-head {
+        /* Building name column */
+        .b-name {
             display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 11px;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid rgba(212,175,55,0.12);
+            padding: 6px 3px;
         }
-        .card-name {
-            font-size: .95rem;
+        .b-name span {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-family: 'Cinzel', serif;
+            font-size: .56rem;
             font-weight: 700;
-            color: #e8d070;
-            letter-spacing: .04em;
-            line-height: 1.3;
+            color: #c8a060;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            text-align: center;
         }
-        .card-note {
-            font-size: .7rem;
-            color: #8a7a5a;
-            font-style: italic;
-            font-family: Georgia, serif;
-            margin-top: 3px;
-        }
-        .chain-note {
-            font-size: .68rem;
+        .b-name .b-note {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-size: .52rem;
             color: #7a6a4a;
             font-style: italic;
             font-family: Georgia, serif;
-            margin-top: 7px;
-            line-height: 1.45;
+            letter-spacing: 0;
+            margin-top: 4px;
         }
 
-        .badges { display: flex; flex-wrap: wrap; gap: 4px; flex-shrink: 0; }
-        .badge {
-            font-size: .6rem;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 10px;
-            letter-spacing: .04em;
-            white-space: nowrap;
-        }
-
-        /* ── Chain visualization ── */
-        .chain-linear {
+        /* Chain column */
+        .b-chain {
+            padding: 7px 10px;
             display: flex;
-            flex-wrap: wrap;
             align-items: center;
         }
-        .chain-node {
-            background: rgba(70, 48, 10, 0.5);
-            border: 1px solid rgba(212,175,55,0.28);
-            border-radius: 4px;
-            padding: 4px 9px;
-            font-size: .7rem;
-            color: #d4c080;
-            font-family: Georgia, 'Times New Roman', serif;
-            font-style: italic;
-            white-space: nowrap;
-            line-height: 1.3;
+
+        /* Chain: linear */
+        .chain-linear {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            align-items: center;
+            width: 100%;
+            gap: 2px;
         }
-        .chain-arrow {
-            color: rgba(212,175,55,0.45);
-            font-size: .95rem;
-            padding: 0 4px;
+        .chain-linear.t3 { grid-template-columns: repeat(3, 1fr) 0px; }
+
+        .tier {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .tier:not(:last-child)::after {
+            content: '›';
+            color: rgba(212,175,55,0.4);
+            font-size: .9rem;
             flex-shrink: 0;
-            line-height: 1;
+        }
+        .tier.empty::after { content: ''; }
+
+        /* Chain: branch */
+        .chain-branch {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            align-items: center;
+            width: 100%;
+            gap: 0;
+        }
+        .chain-branch.pre2 { grid-template-columns: 2fr 2fr; }
+        .chain-branch.pre3 { grid-template-columns: 3fr 1fr; }
+
+        .branch-root {
+            display: flex;
+            align-items: center;
+            padding-right: 4px;
+        }
+        .branch-root::after {
+            content: '›';
+            color: rgba(212,175,55,0.35);
+            font-size: .9rem;
+            margin-left: 3px;
+            flex-shrink: 0;
         }
 
-        /* Branch chain */
-        .chain-root { display: flex; flex-wrap: wrap; align-items: center; margin-bottom: 5px; }
-        .chain-branches {
-            border-left: 2px solid rgba(212,175,55,0.25);
-            padding-left: 11px;
-            margin-left: 4px;
+        .branch-paths {
+            border-left: 2px solid rgba(212,175,55,0.22);
+            padding-left: 8px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
+            align-self: stretch;
+            justify-content: center;
         }
-        .chain-branch { display: flex; flex-wrap: wrap; align-items: center; }
-        .branch-label {
-            font-size: .62rem;
+        .branch-row {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .bl {
+            font-size: .58rem;
             font-weight: 900;
             color: #c8a84b;
-            background: rgba(80,55,10,0.55);
-            border: 1px solid rgba(212,175,55,0.28);
+            background: rgba(80,55,10,0.5);
+            border: 1px solid rgba(212,175,55,0.25);
             border-radius: 3px;
-            min-width: 20px; height: 20px;
+            width: 18px; height: 18px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            margin-right: 5px;
-            padding: 0 4px;
+            margin-right: 3px;
         }
         .branch-note {
-            font-size: .62rem;
-            color: #8a7a58;
-            font-family: Georgia, serif;
+            font-size: .58rem;
+            color: #7a6a4a;
             font-style: italic;
-            background: rgba(30,20,4,0.6);
+            font-family: Georgia, serif;
+            padding: 2px 5px;
+            background: rgba(20,12,2,0.5);
             border-radius: 3px;
-            padding: 2px 6px;
-            margin-left: 4px;
-            white-space: nowrap;
+            white-space: normal;
+            margin-left: 3px;
         }
 
-        /* Complex: sub-branches */
+        /* Complex sub-branches */
         .sub-branches {
             border-left: 1px solid rgba(212,175,55,0.15);
-            padding-left: 10px;
+            padding-left: 8px;
             margin-left: 4px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            margin-top: 2px;
+            gap: 3px;
         }
-        .sub-branch { display: flex; flex-wrap: wrap; align-items: center; }
-        .sub-label {
-            font-size: .62rem;
-            color: #8a7a5a;
+        .sub-row { display: flex; align-items: center; gap: 3px; }
+        .sub-lbl {
+            font-size: .55rem;
+            color: #7a6a4a;
             font-family: Georgia, serif;
             font-style: italic;
-            margin-right: 5px;
             white-space: nowrap;
+            margin-right: 3px;
         }
+
+        /* Building node box */
+        .cn {
+            background: rgba(60,40,8,0.55);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 3px;
+            padding: 3px 7px;
+            font-size: .66rem;
+            color: #d0b870;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-style: italic;
+            white-space: nowrap;
+            line-height: 1.25;
+        }
+
+        /* Culture squares column */
+        .b-cults {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 2px;
+            padding: 4px 5px;
+            border-left: 1px solid rgba(212,175,55,0.12);
+            align-items: center;
+            justify-items: center;
+        }
+        .csq {
+            width: 18px;
+            height: 18px;
+            border-radius: 2px;
+            border: 1px solid rgba(0,0,0,0.4);
+            opacity: 0.18;
+            transition: opacity .15s;
+        }
+        .csq.on { opacity: 1; }
 
         .empty-msg {
             color: #6a5a3a;
             font-style: italic;
             font-size: .85rem;
-            padding: 30px 0;
+            padding: 40px 0;
             text-align: center;
         }
     </style>
@@ -296,67 +371,108 @@
 <div id="app">
     <header>
         <h1>Building Chains</h1>
-        <p>Edifici reclutabili per categoria e cultura — MK1212 CIB</p>
     </header>
 
     <div class="filter-bar">
         <div class="filter-row" id="filters">
             <span class="filter-label">Categoria:</span>
             <button class="cat-btn active" data-cat="all">Tutte</button>
-            <button class="cat-btn" data-cat="religion">Religione</button>
-            <button class="cat-btn" data-cat="commerce">Commercio & Società</button>
+            <button class="cat-btn" data-cat="food">Food</button>
+            <button class="cat-btn" data-cat="religion">Religion</button>
+            <button class="cat-btn" data-cat="society">Society</button>
             <div class="filter-sep"></div>
             <span class="filter-label">Cultura:</span>
             <button class="cult-btn active" data-cult="all"
-                style="color:#d4af37;border-color:#d4af37;background:rgba(80,60,10,0.35)">Tutte</button>
+                style="color:#d4af37;border-color:#d4af37;background:rgba(80,60,10,0.3)">Tutte</button>
             <button class="cult-btn" data-cult="romani"
-                style="color:#cc4444;border-color:#cc4444;background:rgba(80,15,15,0.35)">Romani</button>
-            <button class="cult-btn" data-cult="britanni"
-                style="color:#4488cc;border-color:#4488cc;background:rgba(15,35,90,0.35)">Britanni</button>
-            <button class="cult-btn" data-cult="hiberni"
-                style="color:#44aa66;border-color:#44aa66;background:rgba(15,65,35,0.35)">Hiberni</button>
-            <button class="cult-btn" data-cult="belgae"
-                style="color:#cc8833;border-color:#cc8833;background:rgba(90,50,10,0.35)">Belgae</button>
+                style="color:#cc4444;border-color:#cc4444;background:rgba(80,15,15,0.3)">Romani</button>
             <button class="cult-btn" data-cult="gauls"
-                style="color:#aaaa33;border-color:#aaaa33;background:rgba(70,70,10,0.35)">Gauls</button>
+                style="color:#aaaa33;border-color:#aaaa33;background:rgba(70,70,10,0.3)">Gauls</button>
             <button class="cult-btn" data-cult="picti"
-                style="color:#aa44cc;border-color:#aa44cc;background:rgba(60,15,90,0.35)">Picti</button>
+                style="color:#4488cc;border-color:#4488cc;background:rgba(15,35,90,0.3)">Picti</button>
+            <button class="cult-btn" data-cult="belgae"
+                style="color:#cc8833;border-color:#cc8833;background:rgba(90,50,10,0.3)">Belgae</button>
+            <button class="cult-btn" data-cult="hiberni"
+                style="color:#44aa66;border-color:#44aa66;background:rgba(15,65,35,0.3)">Hiberni</button>
+            <button class="cult-btn" data-cult="britanni"
+                style="color:#5599dd;border-color:#5599dd;background:rgba(15,40,100,0.3)">Britanni</button>
         </div>
     </div>
 
-    <div id="content"></div>
+    <div class="tbl-wrap">
+        <div class="tbl-head">
+            <div></div>
+            <div></div>
+            <div class="th-chain">
+                <span>T0</span><span>T1</span><span>T2</span><span>T3</span>
+            </div>
+            <div class="th-cult">CULT</div>
+        </div>
+        <div id="content"></div>
+    </div>
 </div>
 
 <script>
+// Culture order for the 2×3 squares grid (matches screenshot legend)
+// [row0: Romani, Gauls] [row1: Picti, Belgae] [row2: Hiberni, Britanni]
+const CULT_GRID = [['romani','gauls'],['picti','belgae'],['hiberni','britanni']];
+
 const CULT = {
-    romani:   { label:'Romani',   color:'#cc4444', bg:'rgba(110,18,18,0.5)' },
-    britanni: { label:'Britanni', color:'#4488cc', bg:'rgba(18,45,110,0.5)' },
-    hiberni:  { label:'Hiberni',  color:'#44aa66', bg:'rgba(18,80,38,0.5)' },
-    belgae:   { label:'Belgae',   color:'#cc8833', bg:'rgba(110,60,14,0.5)' },
-    gauls:    { label:'Gauls',    color:'#aaaa33', bg:'rgba(80,80,14,0.5)' },
-    picti:    { label:'Picti',    color:'#aa44cc', bg:'rgba(70,18,110,0.5)' },
+    romani:   { color: '#cc4444' },
+    gauls:    { color: '#aaaa33' },
+    picti:    { color: '#4488cc' },
+    belgae:   { color: '#cc8833' },
+    hiberni:  { color: '#44aa66' },
+    britanni: { color: '#5599dd' },
 };
 
 const CATEGORIES = [
-    { id:'religion', label:'Religione' },
-    { id:'commerce', label:'Commercio & Società' },
+    { id: 'food',     label: 'FOOD',     cls: 'food' },
+    { id: 'religion', label: 'RELIGION', cls: 'religion' },
+    { id: 'society',  label: 'SOCIETY',  cls: 'society' },
 ];
 
-// Each building:
-//   id, category, name, cultures: [strings], note? (card note)
-//   chain: { type, ... }
-//
 // chain types:
-//   linear:  { nodes: [str] }
-//   branch:  { root: [str], branches: [{label, nodes, note?}] }
-//   complex: { root: [str], branches: [{label, subbranches?:[{label,nodes}], nodes?, note?}] }
-//   linear+note: linear with chainNote field on building
+//   linear:  { nodes: [str, str, str, str] }  (2–4 nodes)
+//   branch:  { pre: [str,...], branches: [{label,nodes,note?}] }
+//   complex: { pre: [str,...], branches: [{label, subs?:[{label,nodes}], nodes?, note?}] }
 
 const BUILDINGS = [
 
-    // ═══════════════════════════════════════════════
-    //  RELIGIONE
-    // ═══════════════════════════════════════════════
+    // ═══════════════════════════════════════
+    //  FOOD  (da completare con i nomi reali)
+    // ═══════════════════════════════════════
+
+    { id:'land_use', category:'food', name:'Land Use',
+      cultures:['britanni','hiberni','belgae','gauls','picti'],
+      chain:{ type:'branch', pre:['Land Use (Millet)'], branches:[
+          { label:'A', nodes:['Fields','Lynchets','Farms'] },
+          { label:'B', nodes:['Pastures','Enclosures','Cattle'] },
+      ]}
+    },
+    { id:'high_value_crops', category:'food', name:'High Value Crops',
+      cultures:['britanni','hiberni','belgae','gauls','picti'],
+      chain:{ type:'branch', pre:['Arkoba'], branches:[
+          { label:'A', nodes:['—','—','—'] },
+          { label:'B', nodes:['Pastures','—','—'] },
+      ]}
+    },
+    { id:'hunters_camp', category:'food', name:"Hunter's Camp",
+      cultures:['britanni','hiberni','belgae','gauls','picti'],
+      chain:{ type:'linear', nodes:['Hunting Ground',"Hunter's Lodge","Trapper's Camp"] }
+    },
+    { id:'mead_production', category:'food', name:'Mead Production',
+      cultures:['britanni','hiberni','belgae','gauls','picti'],
+      chain:{ type:'linear', nodes:['Bee-Hives','Breeding Sheds','Mead Cellar','—'] }
+    },
+    { id:'wild_gathering', category:'food', name:'Wild Gathering',
+      cultures:['britanni','hiberni','belgae','gauls','picti'],
+      chain:{ type:'linear', nodes:["Forager's Path","Wild Collector's Hut","Woodsman's Lodge"] }
+    },
+
+    // ═══════════════════════════════════════
+    //  RELIGION
+    // ═══════════════════════════════════════
 
     { id:'druid', category:'religion', name:'Druid',
       cultures:['britanni','hiberni'],
@@ -368,7 +484,7 @@ const BUILDINGS = [
     },
     { id:'fountains_gods', category:'religion', name:'Fountains of the Gods',
       cultures:['britanni'],
-      chain:{ type:'branch', root:['Sacred Fountain'], branches:[
+      chain:{ type:'branch', pre:['Sacred Fountain'], branches:[
           { label:'A', nodes:['Divinatory Soothsayer','Oracle of the Deep','Gateway to the Otherworld'] },
           { label:'B', nodes:['Sacrificial Pond','Black Pond of the Dead','Sunken Offerings'] },
       ]}
@@ -379,28 +495,29 @@ const BUILDINGS = [
     },
     { id:'matrona_cults', category:'religion', name:'Matrona Cults',
       cultures:['belgae'],
-      chain:{ type:'branch', root:['Wise Woman Lair'], branches:[
+      chain:{ type:'branch', pre:['Wise Woman Lair'], branches:[
           { label:'A', nodes:['Weirding Circles','Circle of the Three','Oracle of the Belgae'] },
           { label:'B', nodes:['Matrona Seat','Hall of Prophecy','Throne of the Matronae'] },
       ]}
     },
-    { id:'war_victory', category:'religion', name:'War & Victory',
+    { id:'spirits_of_war', category:'religion', name:'Spirits of War',
       cultures:['belgae','gauls'],
-      chain:{ type:'branch', root:['War Altar'], branches:[
+      chain:{ type:'branch', pre:['War Altar'], branches:[
           { label:'A', nodes:['Shrine of Teutates','Temple of the Tribe'] },
           { label:'B', nodes:['Shrine of Camulos','Hall of the War God'] },
       ]}
     },
-    { id:'cosmic_forces', category:'religion', name:'Cosmic Forces',
+    { id:'earth_and_sky', category:'religion', name:'Earth & Sky',
       cultures:['belgae','gauls'],
-      chain:{ type:'branch', root:['Stone Circle'], branches:[
-          { label:'A', nodes:['Altar of the Wheel','Temple of Thunder'] },
-          { label:'B', nodes:['Antlered Idol','Grove of the Horned God'] },
+      note:'Germanus Focus',
+      chain:{ type:'branch', pre:['Stone Circle'], branches:[
+          { label:'A', nodes:['Antlered Idol','Grove of the Horned God'] },
+          { label:'B', nodes:['Altar of the Wheel','Temple of Thunder'] },
       ]}
     },
-    { id:'ladies_wild', category:'religion', name:'Ladies of the Wild',
+    { id:'goddess_animals', category:'religion', name:'Goddess of the Animals',
       cultures:['belgae','gauls'],
-      chain:{ type:'branch', root:['Woodland Shrine'], branches:[
+      chain:{ type:'branch', pre:['Woodland Shrine'], branches:[
           { label:'A', nodes:['Stables of Epona','Sacred Pastures'] },
           { label:'B', nodes:['Grove of Abnoba','Huntress Sanctuary'] },
       ]}
@@ -415,7 +532,7 @@ const BUILDINGS = [
     },
     { id:'sovereignty_otherworld', category:'religion', name:'Sovereignty & the Otherworld',
       cultures:['hiberni'],
-      chain:{ type:'branch', root:['Fairy Mound'], branches:[
+      chain:{ type:'branch', pre:['Fairy Mound'], branches:[
           { label:'A', nodes:['Shrine of the Morrigan','Gate of the Otherworld','Seat of the Morrigan'] },
           { label:'B', nodes:['Hall of the Dagda','Well of Boann','Cauldron of the Dagda'] },
       ]}
@@ -426,124 +543,120 @@ const BUILDINGS = [
     },
     { id:'fir_bolg', category:'religion', name:'Fir Bolg',
       cultures:['hiberni'], note:'Solo Connacht',
-      chain:{ type:'branch', root:["Eochaid's Legacy"], branches:[
+      chain:{ type:'branch', pre:["Eochaid's Legacy"], branches:[
           { label:'A', nodes:['Sacred Wells','Feast of Tailtiu'] },
           { label:'B', nodes:['Song of the Broad Spears','Mound of Sreng'] },
       ]}
     },
     { id:'cult_mil', category:'religion', name:'Cult of Mil',
       cultures:['hiberni'],
-      chain:{ type:'branch', root:['Hill of Assembly'], branches:[
+      chain:{ type:'branch', pre:['Hill of Assembly'], branches:[
           { label:'A', nodes:['Shrine of the Three Queens','Seat of the High King'] },
           { label:'B', nodes:['Stone of Destiny','Hall of Amergin'] },
       ]}
     },
     { id:'divi_belli', category:'religion', name:'Divi Belli',
       cultures:['romani'],
-      chain:{ type:'branch', root:['Ara'], branches:[
+      chain:{ type:'branch', pre:['Ara'], branches:[
           { label:'A', nodes:['Aedes Martis','Magnum Templum Martis'] },
           { label:'B', nodes:['Ara Fortunae','Magnum Templum Fortunae'] },
       ]}
     },
     { id:'divi_iulii', category:'religion', name:'Divi Iulii',
       cultures:['romani'],
-      chain:{ type:'branch', root:['Fanum'], branches:[
+      chain:{ type:'branch', pre:['Fanum'], branches:[
           { label:'A', nodes:['Iovis Templum','Basilica Patris Iovis'] },
           { label:'B', nodes:['Venus Templum','Basilica Veneris Genetricis'] },
       ]}
     },
 
-    // ═══════════════════════════════════════════════
-    //  COMMERCIO & SOCIETÀ
-    // ═══════════════════════════════════════════════
+    // ═══════════════════════════════════════
+    //  SOCIETY
+    // ═══════════════════════════════════════
 
-    { id:'mercatus', category:'commerce', name:'Mercatus',
+    { id:'mercatus', category:'society', name:'Mercatus',
       cultures:['romani'],
       chain:{ type:'linear', nodes:['Pergula','Forum Venalium','Forum Nundinarium','Forum Magnum'] }
     },
-    { id:'comm_terrestre_romani', category:'commerce', name:'Commercio Terrestre',
+    { id:'commercium', category:'society', name:'Commercium',
       cultures:['romani'],
       chain:{ type:'linear', nodes:['Statio','Mutatio','Porticus','Emporium'] }
     },
-    { id:'artes_cultura', category:'commerce', name:'Artes et Cultura',
+    { id:'ludes_cultura', category:'society', name:'Ludes et Cultura',
       cultures:['romani'],
-      chain:{ type:'branch', root:['Ludus'], branches:[
+      chain:{ type:'branch', pre:['Ludus'], branches:[
           { label:'A', nodes:['Schola','Bibliotheca','Athenaeum'] },
           { label:'B', nodes:['Theatrum','Odeum','Amphitheatrum'] },
       ]}
     },
-    { id:'voluptates', category:'commerce', name:'Voluptates',
+    { id:'voluptates', category:'society', name:'Voluptates',
       cultures:['romani'],
       chain:{ type:'linear', nodes:['Thermopolium','Taberna Vinaria','Caupona','Lupanar'] }
     },
-    { id:'fiere_romani', category:'commerce', name:'Fiere',
+    { id:'politica_romani', category:'society', name:'Politica & Iustitia',
       cultures:['romani'],
-      chain:{ type:'linear', nodes:['Nundinae','Mercatus Publicus','Portus Mercatorum','Emporium Magnum'] }
-    },
-    { id:'politica_romani', category:'commerce', name:'Politica & Giustizia',
-      cultures:['romani'],
-      chain:{ type:'branch', root:['Curia Minor'], branches:[
+      chain:{ type:'branch', pre:['Curia Minor'], branches:[
           { label:'A', nodes:['Basilica Iuridica','Tribunal Magnum','Curia Magna'] },
           { label:'B', nodes:['Praetorium','Castra Praetoria','Palatium'] },
       ]}
     },
-    { id:'mercati_fiere_celtici', category:'commerce', name:'Mercati & Fiere',
+    { id:'mercati_fiere', category:'society', name:'Mercati & Fiere',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
-      chain:{ type:'branch', root:['Trading Post'], branches:[
+      chain:{ type:'branch', pre:['Trading Post'], branches:[
           { label:'A', nodes:['Tribal Market','Grand Market','Great Emporium'], note:'Belgae: Continental Emporium' },
           { label:'B', nodes:['Barter Ground','Cattle Fair','Great Assembly Fair'], note:'Hiberni: Aonach Mór · Picti: Highland Gathering' },
       ]}
     },
-    { id:'comm_terrestre_celtici', category:'commerce', name:'Commercio Terrestre',
+    { id:'comm_terrestre_celtici', category:'society', name:'Comm. Terrestre',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
       chain:{ type:'linear', nodes:['Trackway',"Merchant's Camp",'Waystation','Grand Emporium'] }
     },
-    { id:'cultura_intrattenimento', category:'commerce', name:'Cultura & Intrattenimento',
+    { id:'cultura_intrattenimento', category:'society', name:'Cultura & Intrat.',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
-      chain:{ type:'complex', root:['Gathering Ground'], branches:[
-          { label:'A', subbranches:[
-              { label:'Britanni / Gauls', nodes:["Bard's Hearth",'Hall of Songs','Seat of the Chief Bard'] },
-              { label:'Hiberni',          nodes:["Filid's Hearth",'Hall of the Filid','Seat of the Ollam'] },
-              { label:'Picti',            nodes:["Carver's Workshop","Symbol Master's Hall",'Great Hall of Symbols'] },
-              { label:'Belgae',           nodes:["Craftsman's Hall",'Continental Arts Hall','Grand Hall of Arts'] },
+      chain:{ type:'complex', pre:['Gathering Ground'], branches:[
+          { label:'A', subs:[
+              { label:'Brit/Gauls', nodes:["Bard's Hearth",'Hall of Songs','Seat of the Chief Bard'] },
+              { label:'Hiberni',    nodes:["Filid's Hearth",'Hall of the Filid','Seat of the Ollam'] },
+              { label:'Picti',      nodes:["Carver's Workshop","Symbol Master's Hall",'Great Hall of Symbols'] },
+              { label:'Belgae',     nodes:["Craftsman's Hall",'Continental Arts Hall','Grand Hall of Arts'] },
           ]},
           { label:'B', nodes:['Festival Ground','Hall of Games','Great Assembly'],
-            note:'Britanni/Gauls: Great Tribal Assembly · Hiberni: Fled Goibhnenn · Picti: Great Highland Assembly · Belgae: Great Belgic Assembly' },
+            note:'Brit/Gauls: Great Tribal Assembly · Hiberni: Fled Goibhnenn · Picti: Highland Assembly · Belgae: Great Belgic Assembly' },
       ]}
     },
-    { id:'taverna_celtica', category:'commerce', name:'Taverna Celtica',
+    { id:'taverna_celtica', category:'society', name:'Taverna Celtica',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
-      chainNote:'Ultimo livello — Hiberni: Hall of the High King\'s Feast · Picti: Hall of the Painted Kings · Belgae: Hall of the War Chiefs',
+      chainNote:'Ultimo livello: Hiberni: Hall of the High King\'s Feast · Picti: Hall of the Painted Kings · Belgae: Hall of the War Chiefs',
       chain:{ type:'linear', nodes:['Fireside Alehouse','Mead Hall','Feasting Hall','Hall of the Chief'] }
     },
-    { id:'politica_britanni', category:'commerce', name:'Politica & Giustizia — Britanni',
+    { id:'politica_britanni', category:'society', name:'Politica — Britanni',
       cultures:['britanni'],
-      chain:{ type:'branch', root:["Chief's Hall"], branches:[
+      chain:{ type:'branch', pre:["Chief's Hall"], branches:[
           { label:'A', nodes:['Council of Elders','Hall of the High Chief','Seat of the High King'] },
           { label:'B', nodes:['Druid Tribunal','Sacred Court of the Druids','Druid Seat of Power'] },
       ]}
     },
-    { id:'politica_hiberni', category:'commerce', name:'Politica & Giustizia — Hiberni',
+    { id:'politica_hiberni', category:'society', name:'Politica — Hiberni',
       cultures:['hiberni'],
-      chain:{ type:'branch', root:["Brehon's Fire"], branches:[
+      chain:{ type:'branch', pre:["Brehon's Fire"], branches:[
           { label:'A', nodes:['Brehon Court','School of Brehon Law','Seat of the Ollam Érenn'] },
           { label:'B', nodes:["Hall of the Rí","Court of the Rí Tuath",'Hall of the High King'] },
       ]}
     },
-    { id:'politica_picti', category:'commerce', name:'Politica & Giustizia — Picti',
+    { id:'politica_picti', category:'society', name:'Politica — Picti',
       cultures:['picti'],
       chain:{ type:'linear', nodes:["Elder's Cairn","Matriarch's Council",'Hall of the Mormaer','Seat of the Pictish King'] }
     },
-    { id:'politica_belgae', category:'commerce', name:'Politica & Giustizia — Belgae',
+    { id:'politica_belgae', category:'society', name:'Politica — Belgae',
       cultures:['belgae'],
-      chain:{ type:'branch', root:["War Chief's Hall"], branches:[
+      chain:{ type:'branch', pre:["War Chief's Hall"], branches:[
           { label:'A', nodes:['Council of War','Hall of the Vergobret','Seat of the High Chief'] },
           { label:'B', nodes:['Sacred Assembly','Nemeton of Law','Grand Sacred Assembly'] },
       ]}
     },
-    { id:'politica_gauls', category:'commerce', name:'Politica & Giustizia — Gauls',
+    { id:'politica_gauls', category:'society', name:'Politica — Gauls',
       cultures:['gauls'],
-      chain:{ type:'branch', root:['Village Council'], branches:[
+      chain:{ type:'branch', pre:['Village Council'], branches:[
           { label:'A', nodes:['Hall of the Vergobret','Senate of the Tribe','Grand Council of Gaul'] },
           { label:'B', nodes:['Druid Court','Sacred Tribunal','Seat of the Arch Druid'] },
       ]}
@@ -552,81 +665,109 @@ const BUILDINGS = [
 
 // ── Render helpers ───────────────────────────────────────────────────────────
 
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function node(name) { return `<div class="chain-node">${esc(name)}</div>`; }
-function arrow()    { return `<span class="chain-arrow">›</span>`; }
+function cn(name) {
+    if (!name || name === '—') return `<div class="cn" style="opacity:.35">—</div>`;
+    return `<div class="cn">${esc(name)}</div>`;
+}
 
 function nodeRow(nodes) {
-    return nodes.map((n,i) => node(n) + (i < nodes.length-1 ? arrow() : '')).join('');
+    return nodes.map(n => cn(n)).join('<span style="color:rgba(212,175,55,.35);padding:0 2px;font-size:.85rem">›</span>');
 }
 
 function renderChain(b) {
     const ch = b.chain;
 
     if (ch.type === 'linear') {
-        return `<div class="chain-linear">${nodeRow(ch.nodes)}</div>`;
+        const n = ch.nodes.length;
+        const cols = n === 4 ? '' : n === 3 ? 'style="grid-template-columns:repeat(3,1fr) 0px"' : 'style="grid-template-columns:repeat(2,1fr) 0px 0px"';
+        const cells = ch.nodes.map((nd, i) => {
+            const last = i === n - 1;
+            return `<div class="tier${last ? ' empty' : ''}">${cn(nd)}</div>`;
+        });
+        // pad to 4
+        while (cells.length < 4) cells.push('<div class="tier empty"></div>');
+        return `<div class="chain-linear" ${cols}>${cells.join('')}</div>`;
     }
 
     if (ch.type === 'branch') {
-        const rootHtml = ch.root.length
-            ? `<div class="chain-root">${nodeRow(ch.root)}${arrow()}</div>` : '';
-        const brHtml = ch.branches.map(br => {
-            const lbl  = br.label ? `<span class="branch-label">${esc(br.label)}</span>` : '';
-            const note = br.note  ? `<span class="branch-note">${esc(br.note)}</span>` : '';
-            return `<div class="chain-branch">${lbl}${nodeRow(br.nodes)}${note}</div>`;
+        const preCount = ch.pre.length;
+        const postCols = 4 - preCount;
+        let gridClass = '';
+        if (preCount === 2) gridClass = 'pre2';
+        else if (preCount === 3) gridClass = 'pre3';
+
+        const preHtml = ch.pre.map((nd, i) => {
+            const last = i === ch.pre.length - 1;
+            return cn(nd) + (last ? '' : '<span style="color:rgba(212,175,55,.35);padding:0 2px;font-size:.85rem">›</span>');
         }).join('');
-        return `${rootHtml}<div class="chain-branches">${brHtml}</div>`;
+
+        const brHtml = ch.branches.map(br => {
+            const lbl = br.label ? `<span class="bl">${esc(br.label)}</span>` : '';
+            const note = br.note ? `<span class="branch-note">${esc(br.note)}</span>` : '';
+            return `<div class="branch-row">${lbl}${nodeRow(br.nodes)}${note}</div>`;
+        }).join('');
+
+        return `<div class="chain-branch ${gridClass}">
+            <div class="branch-root">${preHtml}</div>
+            <div class="branch-paths">${brHtml}</div>
+        </div>`;
     }
 
     if (ch.type === 'complex') {
-        const rootHtml = ch.root.length
-            ? `<div class="chain-root">${nodeRow(ch.root)}${arrow()}</div>` : '';
+        const preHtml = ch.pre.map(nd => cn(nd)).join('<span style="color:rgba(212,175,55,.35);padding:0 2px">›</span>');
         const brHtml = ch.branches.map(br => {
-            const lbl = br.label ? `<span class="branch-label">${esc(br.label)}</span>` : '';
-            if (br.subbranches) {
-                const subHtml = br.subbranches.map(sb =>
-                    `<div class="sub-branch">
-                        <span class="sub-label">${esc(sb.label)}:</span>${nodeRow(sb.nodes)}
-                    </div>`
+            const lbl = `<span class="bl">${esc(br.label)}</span>`;
+            if (br.subs) {
+                const subsHtml = br.subs.map(s =>
+                    `<div class="sub-row"><span class="sub-lbl">${esc(s.label)}:</span>${nodeRow(s.nodes)}</div>`
                 ).join('');
-                return `<div class="chain-branch" style="flex-direction:column;align-items:flex-start;gap:3px">
-                    ${lbl}
-                    <div class="sub-branches">${subHtml}</div>
+                return `<div class="branch-row" style="flex-direction:column;align-items:flex-start;gap:3px">
+                    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">${lbl}</div>
+                    <div class="sub-branches">${subsHtml}</div>
                 </div>`;
             }
-            const note = br.note ? `<div style="margin-left:25px"><span class="branch-note" style="white-space:normal">${esc(br.note)}</span></div>` : '';
+            const note = br.note ? `<div style="margin-left:22px"><span class="branch-note" style="white-space:normal">${esc(br.note)}</span></div>` : '';
             return `<div style="display:flex;flex-direction:column;gap:2px">
-                <div class="chain-branch">${lbl}${nodeRow(br.nodes)}</div>
-                ${note}
+                <div class="branch-row">${lbl}${nodeRow(br.nodes)}</div>${note}
             </div>`;
         }).join('');
-        return `${rootHtml}<div class="chain-branches">${brHtml}</div>`;
+        return `<div class="chain-branch">
+            <div class="branch-root">${preHtml}</div>
+            <div class="branch-paths">${brHtml}</div>
+        </div>`;
     }
 
     return '';
 }
 
-function renderCard(b) {
-    const badges = b.cultures.map(c => {
-        const cu = CULT[c];
-        return `<span class="badge" style="color:${cu.color};background:${cu.bg};border:1px solid ${cu.color}55">${cu.label}</span>`;
-    }).join('');
-    const noteHtml      = b.note      ? `<div class="card-note">${esc(b.note)}</div>` : '';
-    const chainNoteHtml = b.chainNote ? `<div class="chain-note">* ${esc(b.chainNote)}</div>` : '';
+function renderCultSquares(cultures) {
+    return CULT_GRID.map(row =>
+        row.map(c => {
+            const on = cultures.includes(c);
+            const col = CULT[c].color;
+            return `<div class="csq${on ? ' on' : ''}" style="${on ? `background:${col};border-color:${col}80` : 'background:#1a1008;border-color:rgba(255,255,255,0.08)'}"></div>`;
+        }).join('')
+    ).join('');
+}
 
-    return `
-    <div class="b-card" data-cat="${b.category}" data-cultures="${b.cultures.join(',')}">
-        <div class="card-head">
-            <div>
-                <div class="card-name">${esc(b.name)}</div>
-                ${noteHtml}
-            </div>
-            <div class="badges">${badges}</div>
-        </div>
-        ${renderChain(b)}
-        ${chainNoteHtml}
+function renderRow(b) {
+    const nameHtml = `<div class="b-name">
+        <span>${esc(b.name)}</span>
+        ${b.note ? `<span class="b-note">${esc(b.note)}</span>` : ''}
     </div>`;
+    const chainNoteHtml = b.chainNote
+        ? `<div class="branch-note" style="margin-top:5px;display:block;white-space:normal">${esc(b.chainNote)}</div>`
+        : '';
+    const chainHtml = `<div class="b-chain">
+        <div style="width:100%">
+            ${renderChain(b)}
+            ${chainNoteHtml}
+        </div>
+    </div>`;
+    const cultHtml = `<div class="b-cults">${renderCultSquares(b.cultures)}</div>`;
+    return `<div class="b-row" data-cat="${b.category}" data-cultures="${b.cultures.join(',')}">${nameHtml}${chainHtml}${cultHtml}</div>`;
 }
 
 // ── Render & filter ──────────────────────────────────────────────────────────
@@ -636,20 +777,20 @@ let activeCult = 'all';
 
 function render() {
     const content = document.getElementById('content');
-    const sections = CATEGORIES
+    const html = CATEGORIES
         .filter(cat => activeCat === 'all' || cat.id === activeCat)
         .map(cat => {
-            const cards = BUILDINGS
+            const rows = BUILDINGS
                 .filter(b => b.category === cat.id)
                 .filter(b => activeCult === 'all' || b.cultures.includes(activeCult))
-                .map(renderCard).join('');
-            if (!cards) return '';
-            return `<div class="cat-section">
-                <div class="cat-title"><span class="cat-title-bar"></span>${cat.label}</div>
-                <div class="cards-grid">${cards}</div>
+                .map(renderRow).join('');
+            if (!rows) return '';
+            return `<div class="cat-block">
+                <div class="cat-bar ${cat.cls}">${esc(cat.label)}</div>
+                <div class="cat-rows">${rows}</div>
             </div>`;
         }).join('');
-    content.innerHTML = sections || `<div class="empty-msg">Nessun edificio trovato per i filtri selezionati.</div>`;
+    content.innerHTML = html || `<div class="empty-msg">Nessun edificio trovato.</div>`;
 }
 
 document.querySelectorAll('[data-cat]').forEach(btn => {
