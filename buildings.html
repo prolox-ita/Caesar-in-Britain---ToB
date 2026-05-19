@@ -3,446 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edifici — MK1212 CIB</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    <title>Buildings — MK1212 CIB [DEV]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Cinzel', Georgia, serif;
-            background: #0a0602 url('background_cib.jpg') center/cover fixed;
-            color: #e8d5a0;
-            min-height: 100vh;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: rgba(6, 3, 0, 0.82);
-            pointer-events: none;
-            z-index: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0e0e16;
+            color: #c8c8dc;
+            font-size: 13px;
         }
 
-        #app {
-            position: relative;
-            z-index: 1;
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 0 20px 80px;
-        }
+        #app { max-width: 1800px; margin: 0 auto; padding: 0 14px 60px; }
 
         /* ── Header ── */
         header {
-            text-align: center;
-            padding: 36px 20px 20px;
+            padding: 16px 0 10px;
+            border-bottom: 1px solid #22223a;
             margin-bottom: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
         }
-        header h1 {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #d4af37;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.9);
-            letter-spacing: .14em;
-        }
+        header h1 { font-family:'Cinzel',serif; font-size:1.25rem; color:#c8a030; }
+        header span { font-size:.75rem; color:#444458; }
 
         /* ── Filter bar ── */
         .filter-bar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(8, 4, 0, 0.96);
-            border-top: 1px solid rgba(212,175,55,0.18);
-            border-bottom: 1px solid rgba(212,175,55,0.18);
-            padding: 8px 0;
-            margin: 16px 0 0;
-            backdrop-filter: blur(8px);
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(14,14,22,0.97);
+            border-bottom: 1px solid #22223a;
+            padding: 7px 0;
+            backdrop-filter: blur(6px);
+            display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
         }
-        .filter-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-        }
-        .filter-label {
-            font-size: .65rem;
-            font-weight: 700;
-            color: #6a5a3a;
-            text-transform: uppercase;
-            letter-spacing: .1em;
-            white-space: nowrap;
-        }
-        .filter-sep { width: 1px; height: 20px; background: rgba(212,175,55,0.2); margin: 0 6px; }
+        .fl { font-size:.65rem; font-weight:700; color:#33334a; text-transform:uppercase; letter-spacing:.08em; }
+        .sep { width:1px; height:18px; background:#22223a; margin:0 3px; }
 
-        .cat-btn {
-            padding: 3px 13px;
-            border-radius: 20px;
-            border: 1.5px solid rgba(212,175,55,0.25);
-            background: rgba(50,34,8,0.4);
-            color: #b0904a;
-            font-family: 'Cinzel', serif;
-            font-size: .68rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .15s;
-            white-space: nowrap;
+        button {
+            padding: 3px 10px; border-radius:3px; border:1px solid #22223a;
+            background:#161624; color:#7070a0; font-size:.72rem; font-weight:600;
+            cursor:pointer; transition:all .1s;
         }
-        .cat-btn:hover { border-color: #d4af37; color: #f0d060; }
-        .cat-btn.active { background: rgba(120,82,14,0.5); border-color: #d4af37; color: #f5e070; }
+        button:hover { border-color:#3a3a60; color:#a0a0cc; }
+        button.active { background:#1e1e38; border-color:#5050a0; color:#c0c0e8; }
+        .cb { border-radius:3px; opacity:.45; }
+        .cb:hover { opacity:.75; }
+        .cb.active { opacity:1; }
 
-        .cult-btn {
-            padding: 3px 11px;
-            border-radius: 20px;
-            border: 1.5px solid transparent;
-            font-family: 'Cinzel', serif;
-            font-size: .66rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all .15s;
-            opacity: 0.5;
-            white-space: nowrap;
+        /* ── Category section ── */
+        .cat-section { margin-top: 14px; }
+        .cat-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 5px 8px; margin-bottom: 8px;
+            border-radius: 4px;
         }
-        .cult-btn:hover { opacity: 0.8; }
-        .cult-btn.active { opacity: 1; box-shadow: 0 0 6px currentColor; }
-
-        /* ── Table structure ── */
-        .tbl-wrap {
-            margin-top: 0;
-            overflow-x: auto;
+        .cat-header span {
+            font-family:'Cinzel',serif; font-size:.8rem; font-weight:700;
+            letter-spacing:.1em; text-transform:uppercase; color:#fff;
         }
+        .cat-header small { font-size:.68rem; color:rgba(255,255,255,0.4); margin-left:4px; }
 
-        /* Sticky column header */
-        .tbl-head {
+        .food-h   { background:#162208; border-left:3px solid #3a8010; }
+        .religion-h { background:#1e0828; border-left:3px solid #8025a0; }
+        .society-h  { background:#1e1600; border-left:3px solid #906000; }
+
+        /* ── Cards grid ── */
+        .cards {
             display: grid;
-            grid-template-columns: 34px 78px 1fr 52px;
-            background: rgba(8,4,0,0.95);
-            border-bottom: 1px solid rgba(212,175,55,0.3);
-            position: sticky;
-            top: 45px;
-            z-index: 90;
-        }
-        .tbl-head > div {
-            padding: 5px 4px;
-            font-size: .62rem;
-            font-weight: 700;
-            color: #6a5a3a;
-            text-transform: uppercase;
-            letter-spacing: .1em;
-        }
-        .tbl-head .th-chain {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            color: #6a5a3a;
-        }
-        .tbl-head .th-chain span {
-            padding: 5px 4px;
-            font-size: .62rem;
-            font-weight: 700;
-            letter-spacing: .1em;
-        }
-        .tbl-head .th-cult { text-align: center; }
-
-        /* ── Category block ── */
-        .cat-block {
-            display: flex;
-            margin-bottom: 2px;
-        }
-        .cat-bar {
-            width: 34px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            font-family: 'Cinzel', serif;
-            font-size: .58rem;
-            font-weight: 900;
-            letter-spacing: .14em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.92);
-            text-shadow: 0 1px 4px rgba(0,0,0,0.7);
-        }
-        .cat-bar.food     { background: rgba(50,110,18,0.85); }
-        .cat-bar.religion { background: rgba(140,40,130,0.85); }
-        .cat-bar.society  { background: rgba(160,130,0,0.85); }
-
-        .cat-rows { flex: 1; }
-
-        /* ── Building row ── */
-        .b-row {
-            display: grid;
-            grid-template-columns: 78px 1fr 52px;
-            border-bottom: 1px solid rgba(212,175,55,0.1);
-            min-height: 52px;
-            transition: background .15s;
-        }
-        .b-row:hover { background: rgba(212,175,55,0.04); }
-
-        /* Building name column */
-        .b-name {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-right: 1px solid rgba(212,175,55,0.12);
-            padding: 6px 3px;
-        }
-        .b-name span {
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            font-family: 'Cinzel', serif;
-            font-size: .56rem;
-            font-weight: 700;
-            color: #c8a060;
-            letter-spacing: .09em;
-            text-transform: uppercase;
-            white-space: nowrap;
-            text-align: center;
-        }
-        .b-name .b-note {
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            font-size: .52rem;
-            color: #7a6a4a;
-            font-style: italic;
-            font-family: Georgia, serif;
-            letter-spacing: 0;
-            margin-top: 4px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 8px;
         }
 
-        /* Chain column */
-        .b-chain {
-            padding: 7px 10px;
-            display: flex;
-            align-items: center;
+        /* ── Card ── */
+        .card {
+            background: #13131e;
+            border: 1px solid #1e1e32;
+            border-radius: 5px;
+            padding: 8px 10px;
+            transition: border-color .12s;
         }
+        .card:hover { border-color: #30305a; }
 
-        /* Chain: linear */
-        .chain-linear {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            align-items: center;
-            width: 100%;
-            gap: 2px;
+        /* Card header: name + culture squares */
+        .card-head {
+            display: flex; justify-content:space-between; align-items:flex-start;
+            gap: 6px; margin-bottom: 8px;
         }
-        .chain-linear.t3 { grid-template-columns: repeat(3, 1fr) 0px; }
+        .card-title {
+            font-size: .75rem; font-weight:700; color:#a0a8c8;
+            text-transform: uppercase; letter-spacing:.05em; line-height:1.3;
+        }
+        .card-note { font-size:.65rem; color:#44445a; font-style:italic; margin-top:2px; }
 
-        .tier {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .tier:not(:last-child)::after {
-            content: '›';
-            color: rgba(212,175,55,0.4);
-            font-size: .9rem;
-            flex-shrink: 0;
-        }
-        .tier.empty::after { content: ''; }
-
-        /* Chain: branch */
-        .chain-branch {
-            display: grid;
-            grid-template-columns: 1fr 3fr;
-            align-items: center;
-            width: 100%;
-            gap: 0;
-        }
-        .chain-branch.pre2 { grid-template-columns: 2fr 2fr; }
-        .chain-branch.pre3 { grid-template-columns: 3fr 1fr; }
-
-        .branch-root {
-            display: flex;
-            align-items: center;
-            padding-right: 4px;
-        }
-        .branch-root::after {
-            content: '›';
-            color: rgba(212,175,55,0.35);
-            font-size: .9rem;
-            margin-left: 3px;
-            flex-shrink: 0;
-        }
-
-        .branch-paths {
-            border-left: 2px solid rgba(212,175,55,0.22);
-            padding-left: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            align-self: stretch;
-            justify-content: center;
-        }
-        .branch-row {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .bl {
-            font-size: .58rem;
-            font-weight: 900;
-            color: #c8a84b;
-            background: rgba(80,55,10,0.5);
-            border: 1px solid rgba(212,175,55,0.25);
-            border-radius: 3px;
-            width: 18px; height: 18px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            margin-right: 3px;
-        }
-        .branch-note {
-            font-size: .58rem;
-            color: #7a6a4a;
-            font-style: italic;
-            font-family: Georgia, serif;
-            padding: 2px 5px;
-            background: rgba(20,12,2,0.5);
-            border-radius: 3px;
-            white-space: normal;
-            margin-left: 3px;
-        }
-
-        /* Complex sub-branches */
-        .sub-branches {
-            border-left: 1px solid rgba(212,175,55,0.15);
-            padding-left: 8px;
-            margin-left: 4px;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-        .sub-row { display: flex; align-items: center; gap: 3px; }
-        .sub-lbl {
-            font-size: .55rem;
-            color: #7a6a4a;
-            font-family: Georgia, serif;
-            font-style: italic;
-            white-space: nowrap;
-            margin-right: 3px;
-        }
-
-        /* Building node box */
-        .cn {
-            background: rgba(60,40,8,0.55);
-            border: 1px solid rgba(212,175,55,0.25);
-            border-radius: 3px;
-            padding: 3px 7px;
-            font-size: .66rem;
-            color: #d0b870;
-            font-family: Georgia, 'Times New Roman', serif;
-            font-style: italic;
-            white-space: nowrap;
-            line-height: 1.25;
-        }
-
-        /* Culture squares column */
-        .b-cults {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: repeat(3, 1fr);
-            gap: 2px;
-            padding: 4px 5px;
-            border-left: 1px solid rgba(212,175,55,0.12);
-            align-items: center;
-            justify-items: center;
+        /* Culture squares 2×3 */
+        .csq-grid {
+            display: grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3,1fr);
+            gap:2px; flex-shrink:0;
         }
         .csq {
-            width: 18px;
-            height: 18px;
-            border-radius: 2px;
-            border: 1px solid rgba(0,0,0,0.4);
-            opacity: 0.18;
-            transition: opacity .15s;
+            width:14px; height:14px; border-radius:2px;
+            border:1px solid rgba(0,0,0,0.4);
         }
-        .csq.on { opacity: 1; }
+        .csq.off { background:#181826; border-color:#22223a; }
 
-        .empty-msg {
-            color: #6a5a3a;
-            font-style: italic;
-            font-size: .85rem;
-            padding: 40px 0;
-            text-align: center;
+        /* ── Chain visualization ── */
+        .chain { display:flex; flex-direction:column; gap:0; }
+
+        /* Linear: single row of nodes */
+        .chain-linear {
+            display: flex; align-items:center; flex-wrap:wrap; gap:0;
         }
+
+        /* Node box */
+        .cn {
+            display: inline-flex; align-items:center;
+            background: #1a1a2c; border:1px solid #2e2e50;
+            border-radius:3px; padding:3px 7px;
+            font-size:.72rem; color:#b8bcd8; white-space:nowrap;
+            line-height:1.2;
+        }
+        .cn.ph { opacity:.3; font-style:italic; }
+
+        /* Arrow between nodes */
+        .ar { color:#2e2e50; font-size:.95rem; padding:0 3px; flex-shrink:0; }
+
+        /* Branch fork */
+        .fork { display:flex; align-items:center; }
+        .fork-pre { display:flex; align-items:center; gap:0; flex-shrink:0; padding-right:2px; }
+        .fork-arr { color:#2e2e50; font-size:.95rem; padding:0 3px; flex-shrink:0; }
+        .fork-body { display:flex; align-items:stretch; flex:1; min-width:0; }
+        .fork-vline { width:2px; background:#2e2e50; border-radius:1px; flex-shrink:0; margin:5px 0; }
+        .fork-arms { flex:1; display:flex; flex-direction:column; gap:4px; padding:3px 0 3px 0; }
+
+        /* Each arm */
+        .arm {
+            display: flex; align-items:center; gap:0;
+            padding-left:12px; position:relative;
+            flex-wrap:wrap;
+        }
+        /* Horizontal connector line */
+        .arm::before {
+            content:''; position:absolute; left:0; top:50%;
+            width:12px; height:2px; background:#2e2e50; transform:translateY(-50%);
+        }
+
+        /* Branch label badge */
+        .bl {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:18px; height:18px; border-radius:2px;
+            font-size:.62rem; font-weight:900; flex-shrink:0; margin-right:4px;
+        }
+        .bl.a { background:#081830; border:1px solid #1a4080; color:#6090d8; }
+        .bl.b { background:#201000; border:1px solid #704010; color:#c87820; }
+
+        /* Nodes tinted per branch */
+        .arm.arm-a .cn { background:#0c1a30; border-color:#1a3870; color:#90b0e8; }
+        .arm.arm-b .cn { background:#201200; border-color:#6a3808; color:#d0a050; }
+        .arm.arm-a .ar { color:#1a3870; }
+        .arm.arm-b .ar { color:#6a3808; }
+
+        /* Branch inline note */
+        .bnote {
+            font-size:.62rem; color:#44445a; font-style:italic;
+            background:#101018; border-radius:3px; padding:2px 5px;
+            margin-left:3px; white-space:normal; line-height:1.3;
+        }
+
+        /* Sub-branches (complex) */
+        .subs { border-left:1px solid #22223a; padding-left:8px; display:flex; flex-direction:column; gap:3px; }
+        .sub-row { display:flex; align-items:center; gap:3px; }
+        .sub-lbl { font-size:.62rem; color:#44445a; font-style:italic; white-space:nowrap; min-width:75px; }
+
+        /* Chain footer note */
+        .chain-fnote { margin-top:5px; font-size:.65rem; color:#44445a; font-style:italic; line-height:1.4; }
     </style>
 </head>
 <body>
 <div id="app">
     <header>
         <h1>Building Chains</h1>
+        <span>MK1212 CIB — dev reference</span>
     </header>
 
     <div class="filter-bar">
-        <div class="filter-row" id="filters">
-            <span class="filter-label">Categoria:</span>
-            <button class="cat-btn active" data-cat="all">Tutte</button>
-            <button class="cat-btn" data-cat="food">Food</button>
-            <button class="cat-btn" data-cat="religion">Religion</button>
-            <button class="cat-btn" data-cat="society">Society</button>
-            <div class="filter-sep"></div>
-            <span class="filter-label">Cultura:</span>
-            <button class="cult-btn active" data-cult="all"
-                style="color:#d4af37;border-color:#d4af37;background:rgba(80,60,10,0.3)">Tutte</button>
-            <button class="cult-btn" data-cult="romani"
-                style="color:#cc4444;border-color:#cc4444;background:rgba(80,15,15,0.3)">Romani</button>
-            <button class="cult-btn" data-cult="gauls"
-                style="color:#aaaa33;border-color:#aaaa33;background:rgba(70,70,10,0.3)">Gauls</button>
-            <button class="cult-btn" data-cult="picti"
-                style="color:#4488cc;border-color:#4488cc;background:rgba(15,35,90,0.3)">Picti</button>
-            <button class="cult-btn" data-cult="belgae"
-                style="color:#cc8833;border-color:#cc8833;background:rgba(90,50,10,0.3)">Belgae</button>
-            <button class="cult-btn" data-cult="hiberni"
-                style="color:#44aa66;border-color:#44aa66;background:rgba(15,65,35,0.3)">Hiberni</button>
-            <button class="cult-btn" data-cult="britanni"
-                style="color:#5599dd;border-color:#5599dd;background:rgba(15,40,100,0.3)">Britanni</button>
-        </div>
+        <span class="fl">Cat:</span>
+        <button class="active" data-cat="all">All</button>
+        <button data-cat="food">Food</button>
+        <button data-cat="religion">Religion</button>
+        <button data-cat="society">Society</button>
+        <div class="sep"></div>
+        <span class="fl">Cult:</span>
+        <button class="cb active" data-cult="all" style="color:#888;border-color:#33334a">All</button>
+        <button class="cb" data-cult="romani"   style="color:#e06060;border-color:#802020;background:#180808">Romani</button>
+        <button class="cb" data-cult="gauls"    style="color:#c0c030;border-color:#606010;background:#181808">Gauls</button>
+        <button class="cb" data-cult="picti"    style="color:#5088d8;border-color:#183878;background:#080e20">Picti</button>
+        <button class="cb" data-cult="belgae"   style="color:#d08030;border-color:#683808;background:#180e04">Belgae</button>
+        <button class="cb" data-cult="hiberni"  style="color:#40b860;border-color:#185828;background:#060e08">Hiberni</button>
+        <button class="cb" data-cult="britanni" style="color:#5090e8;border-color:#1838a0;background:#080c24">Britanni</button>
     </div>
 
-    <div class="tbl-wrap">
-        <div class="tbl-head">
-            <div></div>
-            <div></div>
-            <div class="th-chain">
-                <span>T0</span><span>T1</span><span>T2</span><span>T3</span>
-            </div>
-            <div class="th-cult">CULT</div>
-        </div>
-        <div id="content"></div>
-    </div>
+    <div id="content"></div>
 </div>
 
 <script>
-// Culture order for the 2×3 squares grid (matches screenshot legend)
-// [row0: Romani, Gauls] [row1: Picti, Belgae] [row2: Hiberni, Britanni]
 const CULT_GRID = [['romani','gauls'],['picti','belgae'],['hiberni','britanni']];
-
-const CULT = {
-    romani:   { color: '#cc4444' },
-    gauls:    { color: '#aaaa33' },
-    picti:    { color: '#4488cc' },
-    belgae:   { color: '#cc8833' },
-    hiberni:  { color: '#44aa66' },
-    britanni: { color: '#5599dd' },
-};
+const CULT_COLOR = { romani:'#cc3333', gauls:'#aaaa22', picti:'#3366cc', belgae:'#cc7722', hiberni:'#33aa55', britanni:'#3388ee' };
 
 const CATEGORIES = [
-    { id: 'food',     label: 'FOOD',     cls: 'food' },
-    { id: 'religion', label: 'RELIGION', cls: 'religion' },
-    { id: 'society',  label: 'SOCIETY',  cls: 'society' },
+    { id:'food',     label:'Food',     cls:'food-h',     count:0 },
+    { id:'religion', label:'Religion', cls:'religion-h', count:0 },
+    { id:'society',  label:'Society',  cls:'society-h',  count:0 },
 ];
 
-// chain types:
-//   linear:  { nodes: [str, str, str, str] }  (2–4 nodes)
-//   branch:  { pre: [str,...], branches: [{label,nodes,note?}] }
-//   complex: { pre: [str,...], branches: [{label, subs?:[{label,nodes}], nodes?, note?}] }
-
 const BUILDINGS = [
-
-    // ═══════════════════════════════════════
-    //  FOOD  (da completare con i nomi reali)
-    // ═══════════════════════════════════════
-
+    // ── FOOD ──────────────────────────────────────────────────────────────────
     { id:'land_use', category:'food', name:'Land Use',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
       chain:{ type:'branch', pre:['Land Use (Millet)'], branches:[
@@ -470,10 +246,7 @@ const BUILDINGS = [
       chain:{ type:'linear', nodes:["Forager's Path","Wild Collector's Hut","Woodsman's Lodge"] }
     },
 
-    // ═══════════════════════════════════════
-    //  RELIGION
-    // ═══════════════════════════════════════
-
+    // ── RELIGION ──────────────────────────────────────────────────────────────
     { id:'druid', category:'religion', name:'Druid',
       cultures:['britanni','hiberni'],
       chain:{ type:'linear', nodes:['Druid Circle','Druid Teachings','Sacred Oak Grove','Nemeton'] }
@@ -489,7 +262,7 @@ const BUILDINGS = [
           { label:'B', nodes:['Sacrificial Pond','Black Pond of the Dead','Sunken Offerings'] },
       ]}
     },
-    { id:'warrior_ancestors', category:'religion', name:'Cult of the Warrior Ancestors',
+    { id:'warrior_ancestors', category:'religion', name:'Cult of Warrior Ancestors',
       cultures:['britanni'],
       chain:{ type:'linear', nodes:['Ancestor Cairn','Hall of the Fallen','Shrine of the Hero Kings','Eternal Warband'] }
     },
@@ -500,16 +273,15 @@ const BUILDINGS = [
           { label:'B', nodes:['Matrona Seat','Hall of Prophecy','Throne of the Matronae'] },
       ]}
     },
-    { id:'spirits_of_war', category:'religion', name:'Spirits of War',
+    { id:'spirits_war', category:'religion', name:'Spirits of War',
       cultures:['belgae','gauls'],
       chain:{ type:'branch', pre:['War Altar'], branches:[
           { label:'A', nodes:['Shrine of Teutates','Temple of the Tribe'] },
           { label:'B', nodes:['Shrine of Camulos','Hall of the War God'] },
       ]}
     },
-    { id:'earth_and_sky', category:'religion', name:'Earth & Sky',
-      cultures:['belgae','gauls'],
-      note:'Germanus Focus',
+    { id:'earth_sky', category:'religion', name:'Earth & Sky',
+      note:'Germanus Focus', cultures:['belgae','gauls'],
       chain:{ type:'branch', pre:['Stone Circle'], branches:[
           { label:'A', nodes:['Antlered Idol','Grove of the Horned God'] },
           { label:'B', nodes:['Altar of the Wheel','Temple of Thunder'] },
@@ -530,7 +302,7 @@ const BUILDINGS = [
       cultures:['picti'],
       chain:{ type:'linear', nodes:['Carved Pillar','Symbol Stone','Ancestor Stone','Hall of the Painted Ones'] }
     },
-    { id:'sovereignty_otherworld', category:'religion', name:'Sovereignty & the Otherworld',
+    { id:'sovereignty', category:'religion', name:'Sovereignty & Otherworld',
       cultures:['hiberni'],
       chain:{ type:'branch', pre:['Fairy Mound'], branches:[
           { label:'A', nodes:['Shrine of the Morrigan','Gate of the Otherworld','Seat of the Morrigan'] },
@@ -542,7 +314,7 @@ const BUILDINGS = [
       chain:{ type:'linear', nodes:['Sacred Mound','The Four Treasures','Gods of the Síde','Connection to the Underworld'] }
     },
     { id:'fir_bolg', category:'religion', name:'Fir Bolg',
-      cultures:['hiberni'], note:'Solo Connacht',
+      note:'Solo Connacht', cultures:['hiberni'],
       chain:{ type:'branch', pre:["Eochaid's Legacy"], branches:[
           { label:'A', nodes:['Sacred Wells','Feast of Tailtiu'] },
           { label:'B', nodes:['Song of the Broad Spears','Mound of Sreng'] },
@@ -570,10 +342,7 @@ const BUILDINGS = [
       ]}
     },
 
-    // ═══════════════════════════════════════
-    //  SOCIETY
-    // ═══════════════════════════════════════
-
+    // ── SOCIETY ───────────────────────────────────────────────────────────────
     { id:'mercatus', category:'society', name:'Mercatus',
       cultures:['romani'],
       chain:{ type:'linear', nodes:['Pergula','Forum Venalium','Forum Nundinarium','Forum Magnum'] }
@@ -607,11 +376,11 @@ const BUILDINGS = [
           { label:'B', nodes:['Barter Ground','Cattle Fair','Great Assembly Fair'], note:'Hiberni: Aonach Mór · Picti: Highland Gathering' },
       ]}
     },
-    { id:'comm_terrestre_celtici', category:'society', name:'Comm. Terrestre',
+    { id:'comm_terrestre', category:'society', name:'Comm. Terrestre',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
       chain:{ type:'linear', nodes:['Trackway',"Merchant's Camp",'Waystation','Grand Emporium'] }
     },
-    { id:'cultura_intrattenimento', category:'society', name:'Cultura & Intrat.',
+    { id:'cultura_intrat', category:'society', name:'Cultura & Intrat.',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
       chain:{ type:'complex', pre:['Gathering Ground'], branches:[
           { label:'A', subs:[
@@ -626,7 +395,7 @@ const BUILDINGS = [
     },
     { id:'taverna_celtica', category:'society', name:'Taverna Celtica',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
-      chainNote:'Ultimo livello: Hiberni: Hall of the High King\'s Feast · Picti: Hall of the Painted Kings · Belgae: Hall of the War Chiefs',
+      chainNote:"Ultimo livello — Hiberni: Hall of the High King's Feast · Picti: Hall of the Painted Kings · Belgae: Hall of the War Chiefs",
       chain:{ type:'linear', nodes:['Fireside Alehouse','Mead Hall','Feasting Hall','Hall of the Chief'] }
     },
     { id:'politica_britanni', category:'society', name:'Politica — Britanni',
@@ -663,153 +432,124 @@ const BUILDINGS = [
     },
 ];
 
-// ── Render helpers ───────────────────────────────────────────────────────────
+// ── Renderers ────────────────────────────────────────────────────────────────
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function cn(name) {
-    if (!name || name === '—') return `<div class="cn" style="opacity:.35">—</div>`;
-    return `<div class="cn">${esc(name)}</div>`;
+function cn(name, branch) {
+    const ph = !name || name === '—';
+    return `<span class="cn${ph?' ph':''}">${esc(ph?'—':name)}</span>`;
 }
 
-function nodeRow(nodes) {
-    return nodes.map(n => cn(n)).join('<span style="color:rgba(212,175,55,.35);padding:0 2px;font-size:.85rem">›</span>');
+const AR = '<span class="ar">→</span>';
+
+function nrow(nodes, branch) {
+    return nodes.map(n => cn(n, branch)).join(AR);
 }
 
 function renderChain(b) {
     const ch = b.chain;
 
     if (ch.type === 'linear') {
-        const n = ch.nodes.length;
-        const cols = n === 4 ? '' : n === 3 ? 'style="grid-template-columns:repeat(3,1fr) 0px"' : 'style="grid-template-columns:repeat(2,1fr) 0px 0px"';
-        const cells = ch.nodes.map((nd, i) => {
-            const last = i === n - 1;
-            return `<div class="tier${last ? ' empty' : ''}">${cn(nd)}</div>`;
-        });
-        // pad to 4
-        while (cells.length < 4) cells.push('<div class="tier empty"></div>');
-        return `<div class="chain-linear" ${cols}>${cells.join('')}</div>`;
+        return `<div class="chain-linear">${nrow(ch.nodes)}</div>`;
     }
 
-    if (ch.type === 'branch') {
-        const preCount = ch.pre.length;
-        const postCols = 4 - preCount;
-        let gridClass = '';
-        if (preCount === 2) gridClass = 'pre2';
-        else if (preCount === 3) gridClass = 'pre3';
-
-        const preHtml = ch.pre.map((nd, i) => {
-            const last = i === ch.pre.length - 1;
-            return cn(nd) + (last ? '' : '<span style="color:rgba(212,175,55,.35);padding:0 2px;font-size:.85rem">›</span>');
-        }).join('');
-
-        const brHtml = ch.branches.map(br => {
-            const lbl = br.label ? `<span class="bl">${esc(br.label)}</span>` : '';
-            const note = br.note ? `<span class="branch-note">${esc(br.note)}</span>` : '';
-            return `<div class="branch-row">${lbl}${nodeRow(br.nodes)}${note}</div>`;
-        }).join('');
-
-        return `<div class="chain-branch ${gridClass}">
-            <div class="branch-root">${preHtml}</div>
-            <div class="branch-paths">${brHtml}</div>
-        </div>`;
-    }
-
-    if (ch.type === 'complex') {
-        const preHtml = ch.pre.map(nd => cn(nd)).join('<span style="color:rgba(212,175,55,.35);padding:0 2px">›</span>');
-        const brHtml = ch.branches.map(br => {
-            const lbl = `<span class="bl">${esc(br.label)}</span>`;
+    if (ch.type === 'branch' || ch.type === 'complex') {
+        const preH = ch.pre.map(n => cn(n)).join(AR);
+        const armsH = ch.branches.map((br, i) => {
+            const ab = i === 0 ? 'a' : 'b';
+            const lbl = br.label ? `<span class="bl ${ab}">${esc(br.label)}</span>` : '';
             if (br.subs) {
-                const subsHtml = br.subs.map(s =>
-                    `<div class="sub-row"><span class="sub-lbl">${esc(s.label)}:</span>${nodeRow(s.nodes)}</div>`
+                const subsH = br.subs.map(s =>
+                    `<div class="sub-row"><span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes,ab)}</div>`
                 ).join('');
-                return `<div class="branch-row" style="flex-direction:column;align-items:flex-start;gap:3px">
-                    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">${lbl}</div>
-                    <div class="sub-branches">${subsHtml}</div>
+                return `<div class="arm arm-${ab}" style="flex-direction:column;align-items:flex-start;gap:3px">
+                    ${lbl}
+                    <div class="subs">${subsH}</div>
                 </div>`;
             }
-            const note = br.note ? `<div style="margin-left:22px"><span class="branch-note" style="white-space:normal">${esc(br.note)}</span></div>` : '';
-            return `<div style="display:flex;flex-direction:column;gap:2px">
-                <div class="branch-row">${lbl}${nodeRow(br.nodes)}</div>${note}
-            </div>`;
+            const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
+            return `<div class="arm arm-${ab}">${lbl}${nrow(br.nodes,ab)}${note}</div>`;
         }).join('');
-        return `<div class="chain-branch">
-            <div class="branch-root">${preHtml}</div>
-            <div class="branch-paths">${brHtml}</div>
+
+        return `<div class="fork">
+            <div class="fork-pre">${preH}</div>
+            <span class="fork-arr">→</span>
+            <div class="fork-body">
+                <div class="fork-vline"></div>
+                <div class="fork-arms">${armsH}</div>
+            </div>
         </div>`;
     }
-
     return '';
 }
 
-function renderCultSquares(cultures) {
+function renderCults(cultures) {
     return CULT_GRID.map(row =>
         row.map(c => {
             const on = cultures.includes(c);
-            const col = CULT[c].color;
-            return `<div class="csq${on ? ' on' : ''}" style="${on ? `background:${col};border-color:${col}80` : 'background:#1a1008;border-color:rgba(255,255,255,0.08)'}"></div>`;
+            return `<div class="csq ${on?'on':'off'}" style="${on?`background:${CULT_COLOR[c]};border-color:${CULT_COLOR[c]}`:''}"></div>`;
         }).join('')
     ).join('');
 }
 
-function renderRow(b) {
-    const nameHtml = `<div class="b-name">
-        <span>${esc(b.name)}</span>
-        ${b.note ? `<span class="b-note">${esc(b.note)}</span>` : ''}
-    </div>`;
-    const chainNoteHtml = b.chainNote
-        ? `<div class="branch-note" style="margin-top:5px;display:block;white-space:normal">${esc(b.chainNote)}</div>`
-        : '';
-    const chainHtml = `<div class="b-chain">
-        <div style="width:100%">
-            ${renderChain(b)}
-            ${chainNoteHtml}
+function renderCard(b) {
+    const fnote = b.chainNote ? `<div class="chain-fnote">* ${esc(b.chainNote)}</div>` : '';
+    return `<div class="card" data-cat="${b.category}" data-cultures="${b.cultures.join(',')}">
+        <div class="card-head">
+            <div>
+                <div class="card-title">${esc(b.name)}</div>
+                ${b.note ? `<div class="card-note">${esc(b.note)}</div>` : ''}
+            </div>
+            <div class="csq-grid">${renderCults(b.cultures)}</div>
         </div>
+        <div class="chain">${renderChain(b)}${fnote}</div>
     </div>`;
-    const cultHtml = `<div class="b-cults">${renderCultSquares(b.cultures)}</div>`;
-    return `<div class="b-row" data-cat="${b.category}" data-cultures="${b.cultures.join(',')}">${nameHtml}${chainHtml}${cultHtml}</div>`;
 }
 
-// ── Render & filter ──────────────────────────────────────────────────────────
+// ── Filter & render ───────────────────────────────────────────────────────────
 
-let activeCat  = 'all';
-let activeCult = 'all';
+let activeCat = 'all', activeCult = 'all';
 
 function render() {
-    const content = document.getElementById('content');
-    const html = CATEGORIES
-        .filter(cat => activeCat === 'all' || cat.id === activeCat)
-        .map(cat => {
-            const rows = BUILDINGS
-                .filter(b => b.category === cat.id)
-                .filter(b => activeCult === 'all' || b.cultures.includes(activeCult))
-                .map(renderRow).join('');
-            if (!rows) return '';
-            return `<div class="cat-block">
-                <div class="cat-bar ${cat.cls}">${esc(cat.label)}</div>
-                <div class="cat-rows">${rows}</div>
-            </div>`;
-        }).join('');
-    content.innerHTML = html || `<div class="empty-msg">Nessun edificio trovato.</div>`;
+    const html = CATEGORIES.map(cat => {
+        if (activeCat !== 'all' && activeCat !== cat.id) return '';
+        const cards = BUILDINGS
+            .filter(b => b.category === cat.id)
+            .filter(b => activeCult === 'all' || b.cultures.includes(activeCult))
+            .map(renderCard).join('');
+        if (!cards) return '';
+        const n = BUILDINGS.filter(b => b.category === cat.id).length;
+        const shown = BUILDINGS.filter(b => b.category === cat.id && (activeCult==='all'||b.cultures.includes(activeCult))).length;
+        const countTxt = shown < n ? `${shown}/${n}` : `${n}`;
+        return `<div class="cat-section">
+            <div class="cat-header ${cat.cls}">
+                <span>${esc(cat.label)}</span>
+                <small>${countTxt} catene</small>
+            </div>
+            <div class="cards">${cards}</div>
+        </div>`;
+    }).join('');
+    document.getElementById('content').innerHTML =
+        html || `<div style="color:#44445a;padding:40px;text-align:center;font-style:italic">Nessun edificio trovato.</div>`;
 }
 
-document.querySelectorAll('[data-cat]').forEach(btn => {
+document.querySelectorAll('[data-cat]').forEach(btn =>
     btn.addEventListener('click', () => {
         document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         activeCat = btn.dataset.cat;
         render();
-    });
-});
-
-document.querySelectorAll('[data-cult]').forEach(btn => {
+    })
+);
+document.querySelectorAll('[data-cult]').forEach(btn =>
     btn.addEventListener('click', () => {
         document.querySelectorAll('[data-cult]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         activeCult = btn.dataset.cult;
         render();
-    });
-});
+    })
+);
 
 render();
 </script>
