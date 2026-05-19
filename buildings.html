@@ -3,188 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buildings — MK1212 CIB [DEV]</title>
+    <title>Buildings — MK1212 CIB</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0e0e16;
-            color: #c8c8dc;
+            background: #e8d9b0;
+            color: #1a1008;
             font-size: 13px;
         }
 
-        #app { max-width: 1800px; margin: 0 auto; padding: 0 14px 60px; }
+        #app { max-width: 1400px; margin: 0 auto; padding: 0 16px 60px; }
 
-        /* ── Header ── */
         header {
-            padding: 16px 0 10px;
-            border-bottom: 1px solid #22223a;
+            padding: 14px 0 10px;
+            border-bottom: 2px solid #b89848;
             margin-bottom: 0;
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
+            display: flex; align-items: baseline; gap: 12px;
         }
-        header h1 { font-family:'Cinzel',serif; font-size:1.25rem; color:#c8a030; }
-        header span { font-size:.75rem; color:#444458; }
+        header h1 { font-family:'Cinzel',serif; font-size:1.3rem; color:#5a3800; }
+        header span { font-size:.75rem; color:#9a7a40; }
 
         /* ── Filter bar ── */
         .filter-bar {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(14,14,22,0.97);
-            border-bottom: 1px solid #22223a;
+            background: rgba(232,217,176,0.97);
+            border-bottom: 1px solid #c8a848;
             padding: 7px 0;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(4px);
             display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
         }
-        .fl { font-size:.65rem; font-weight:700; color:#33334a; text-transform:uppercase; letter-spacing:.08em; }
-        .sep { width:1px; height:18px; background:#22223a; margin:0 3px; }
+        .fl { font-size:.65rem; font-weight:700; color:#9a7a40; text-transform:uppercase; letter-spacing:.08em; }
+        .sep { width:1px; height:18px; background:#c8a848; margin:0 4px; }
 
         button {
-            padding: 3px 10px; border-radius:3px; border:1px solid #22223a;
-            background:#161624; color:#7070a0; font-size:.72rem; font-weight:600;
-            cursor:pointer; transition:all .1s;
+            padding: 3px 11px; border-radius:3px;
+            border: 1px solid #c8a848; background: #f0e4c0;
+            color: #6a4a18; font-size:.72rem; font-weight:600;
+            cursor: pointer; transition: all .1s;
         }
-        button:hover { border-color:#3a3a60; color:#a0a0cc; }
-        button.active { background:#1e1e38; border-color:#5050a0; color:#c0c0e8; }
-        .cb { border-radius:3px; opacity:.45; }
-        .cb:hover { opacity:.75; }
+        button:hover { background:#e8d49c; border-color:#a07830; }
+        button.active { background:#c8a030; border-color:#a07820; color:#fff; }
+        .cb { opacity:.5; }
+        .cb:hover { opacity:.8; }
         .cb.active { opacity:1; }
 
         /* ── Category section ── */
         .cat-section { margin-top: 14px; }
         .cat-header {
-            display: flex; align-items: center; gap: 8px;
-            padding: 5px 8px; margin-bottom: 8px;
-            border-radius: 4px;
+            padding: 5px 10px; margin-bottom: 8px;
+            border-radius: 3px; display:flex; align-items:center; gap:8px;
         }
-        .cat-header span {
-            font-family:'Cinzel',serif; font-size:.8rem; font-weight:700;
-            letter-spacing:.1em; text-transform:uppercase; color:#fff;
-        }
-        .cat-header small { font-size:.68rem; color:rgba(255,255,255,0.4); margin-left:4px; }
+        .cat-header span { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#fff; }
+        .cat-header small { font-size:.68rem; color:rgba(255,255,255,0.55); }
 
-        .food-h   { background:#162208; border-left:3px solid #3a8010; }
-        .religion-h { background:#1e0828; border-left:3px solid #8025a0; }
-        .society-h  { background:#1e1600; border-left:3px solid #906000; }
+        .food-h     { background:#3a6010; }
+        .religion-h { background:#6a1880; }
+        .society-h  { background:#7a5000; }
 
-        /* ── Cards grid ── */
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 8px;
-        }
+        /* ── 2-column grid ── */
+        .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 
         /* ── Card ── */
         .card {
-            background: #13131e;
-            border: 1px solid #1e1e32;
-            border-radius: 5px;
+            background: #f5ead0;
+            border: 1px solid #c8a848;
+            border-radius: 4px;
             padding: 8px 10px;
-            transition: border-color .12s;
         }
-        .card:hover { border-color: #30305a; }
 
-        /* Card header: name + culture squares */
         .card-head {
             display: flex; justify-content:space-between; align-items:flex-start;
-            gap: 6px; margin-bottom: 8px;
+            gap: 6px; margin-bottom: 7px;
         }
         .card-title {
-            font-size: .75rem; font-weight:700; color:#a0a8c8;
-            text-transform: uppercase; letter-spacing:.05em; line-height:1.3;
+            font-size:.78rem; font-weight:700; color:#3a2000;
+            text-transform:uppercase; letter-spacing:.05em;
         }
-        .card-note { font-size:.65rem; color:#44445a; font-style:italic; margin-top:2px; }
+        .card-note { font-size:.65rem; color:#9a7a40; font-style:italic; margin-top:2px; }
 
         /* Culture squares 2×3 */
-        .csq-grid {
-            display: grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3,1fr);
-            gap:2px; flex-shrink:0;
-        }
-        .csq {
-            width:14px; height:14px; border-radius:2px;
-            border:1px solid rgba(0,0,0,0.4);
-        }
-        .csq.off { background:#181826; border-color:#22223a; }
+        .csq-grid { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3,1fr); gap:2px; flex-shrink:0; }
+        .csq { width:14px; height:14px; border-radius:2px; border:1px solid rgba(0,0,0,0.2); }
+        .csq.off { background:rgba(0,0,0,0.08); border-color:rgba(0,0,0,0.12); }
 
-        /* ── Chain visualization ── */
-        .chain { display:flex; flex-direction:column; gap:0; }
+        /* ── Chain ── */
+        .chain { display:flex; flex-direction:column; gap:4px; }
 
-        /* Linear: single row of nodes */
-        .chain-linear {
+        /* One row of nodes */
+        .row {
             display: flex; align-items:center; flex-wrap:wrap; gap:0;
         }
 
-        /* Node box */
+        /* Branch rows get a left-border color line */
+        .row.arm-a { border-left:3px solid #2060c0; padding-left:6px; }
+        .row.arm-b { border-left:3px solid #c06000; padding-left:6px; }
+
+        /* Node */
         .cn {
-            display: inline-flex; align-items:center;
-            background: #1a1a2c; border:1px solid #2e2e50;
-            border-radius:3px; padding:3px 7px;
-            font-size:.72rem; color:#b8bcd8; white-space:nowrap;
-            line-height:1.2;
+            display:inline-flex; align-items:center;
+            background:#e8dab8; border:1px solid #b89840;
+            border-radius:3px; padding:3px 8px;
+            font-size:.72rem; color:#2a1800; white-space:nowrap;
         }
-        .cn.ph { opacity:.3; font-style:italic; }
+        .cn.ph { opacity:.35; font-style:italic; }
 
-        /* Arrow between nodes */
-        .ar { color:#2e2e50; font-size:.95rem; padding:0 3px; flex-shrink:0; }
+        /* Tinted nodes per branch */
+        .arm-a .cn { background:#dae8f8; border-color:#5888c8; color:#0a1e40; }
+        .arm-b .cn { background:#f8ead8; border-color:#c87820; color:#3a1800; }
 
-        /* Branch fork */
-        .fork { display:flex; align-items:center; }
-        .fork-pre { display:flex; align-items:center; gap:0; flex-shrink:0; padding-right:2px; }
-        .fork-arr { color:#2e2e50; font-size:.95rem; padding:0 3px; flex-shrink:0; }
-        .fork-body { display:flex; align-items:stretch; flex:1; min-width:0; }
-        .fork-vline { width:2px; background:#2e2e50; border-radius:1px; flex-shrink:0; margin:5px 0; }
-        .fork-arms { flex:1; display:flex; flex-direction:column; gap:4px; padding:3px 0 3px 0; }
+        /* Arrow */
+        .ar { color:#a08040; font-size:.9rem; padding:0 3px; flex-shrink:0; }
+        .arm-a .ar { color:#5888c8; }
+        .arm-b .ar { color:#c87820; }
 
-        /* Each arm */
-        .arm {
-            display: flex; align-items:center; gap:0;
-            padding-left:12px; position:relative;
-            flex-wrap:wrap;
-        }
-        /* Horizontal connector line */
-        .arm::before {
-            content:''; position:absolute; left:0; top:50%;
-            width:12px; height:2px; background:#2e2e50; transform:translateY(-50%);
-        }
-
-        /* Branch label badge */
+        /* Branch label */
         .bl {
             display:inline-flex; align-items:center; justify-content:center;
             width:18px; height:18px; border-radius:2px;
-            font-size:.62rem; font-weight:900; flex-shrink:0; margin-right:4px;
+            font-size:.62rem; font-weight:900; flex-shrink:0; margin-right:5px;
         }
-        .bl.a { background:#081830; border:1px solid #1a4080; color:#6090d8; }
-        .bl.b { background:#201000; border:1px solid #704010; color:#c87820; }
+        .arm-a .bl { background:#2060c0; color:#fff; }
+        .arm-b .bl { background:#c06000; color:#fff; }
 
-        /* Nodes tinted per branch */
-        .arm.arm-a .cn { background:#0c1a30; border-color:#1a3870; color:#90b0e8; }
-        .arm.arm-b .cn { background:#201200; border-color:#6a3808; color:#d0a050; }
-        .arm.arm-a .ar { color:#1a3870; }
-        .arm.arm-b .ar { color:#6a3808; }
-
-        /* Branch inline note */
+        /* Inline note after last node */
         .bnote {
-            font-size:.62rem; color:#44445a; font-style:italic;
-            background:#101018; border-radius:3px; padding:2px 5px;
-            margin-left:3px; white-space:normal; line-height:1.3;
+            font-size:.62rem; color:#8a6a30; font-style:italic;
+            margin-left:5px; white-space:normal; line-height:1.3;
         }
 
-        /* Sub-branches (complex) */
-        .subs { border-left:1px solid #22223a; padding-left:8px; display:flex; flex-direction:column; gap:3px; }
-        .sub-row { display:flex; align-items:center; gap:3px; }
-        .sub-lbl { font-size:.62rem; color:#44445a; font-style:italic; white-space:nowrap; min-width:75px; }
+        /* Sub-labels for complex chains */
+        .sub-lbl {
+            font-size:.62rem; color:#7a5a28; font-style:italic;
+            white-space:nowrap; margin-right:4px;
+        }
 
-        /* Chain footer note */
-        .chain-fnote { margin-top:5px; font-size:.65rem; color:#44445a; font-style:italic; line-height:1.4; }
+        /* Footer note */
+        .fnote { font-size:.65rem; color:#8a6a30; font-style:italic; margin-top:4px; line-height:1.4; }
     </style>
 </head>
 <body>
 <div id="app">
     <header>
         <h1>Building Chains</h1>
-        <span>MK1212 CIB — dev reference</span>
+        <span>MK1212 CIB</span>
     </header>
 
     <div class="filter-bar">
@@ -195,26 +159,26 @@
         <button data-cat="society">Society</button>
         <div class="sep"></div>
         <span class="fl">Cult:</span>
-        <button class="cb active" data-cult="all" style="color:#888;border-color:#33334a">All</button>
-        <button class="cb" data-cult="romani"   style="color:#e06060;border-color:#802020;background:#180808">Romani</button>
-        <button class="cb" data-cult="gauls"    style="color:#c0c030;border-color:#606010;background:#181808">Gauls</button>
-        <button class="cb" data-cult="picti"    style="color:#5088d8;border-color:#183878;background:#080e20">Picti</button>
-        <button class="cb" data-cult="belgae"   style="color:#d08030;border-color:#683808;background:#180e04">Belgae</button>
-        <button class="cb" data-cult="hiberni"  style="color:#40b860;border-color:#185828;background:#060e08">Hiberni</button>
-        <button class="cb" data-cult="britanni" style="color:#5090e8;border-color:#1838a0;background:#080c24">Britanni</button>
+        <button class="cb active" data-cult="all">All</button>
+        <button class="cb" data-cult="romani"   style="color:#a00000;border-color:#a00000">Romani</button>
+        <button class="cb" data-cult="gauls"    style="color:#707000;border-color:#707000">Gauls</button>
+        <button class="cb" data-cult="picti"    style="color:#003898;border-color:#003898">Picti</button>
+        <button class="cb" data-cult="belgae"   style="color:#904800;border-color:#904800">Belgae</button>
+        <button class="cb" data-cult="hiberni"  style="color:#006820;border-color:#006820">Hiberni</button>
+        <button class="cb" data-cult="britanni" style="color:#0048c0;border-color:#0048c0">Britanni</button>
     </div>
 
     <div id="content"></div>
 </div>
 
 <script>
-const CULT_GRID = [['romani','gauls'],['picti','belgae'],['hiberni','britanni']];
-const CULT_COLOR = { romani:'#cc3333', gauls:'#aaaa22', picti:'#3366cc', belgae:'#cc7722', hiberni:'#33aa55', britanni:'#3388ee' };
+const CULT_GRID  = [['romani','gauls'],['picti','belgae'],['hiberni','britanni']];
+const CULT_COLOR = { romani:'#cc2222', gauls:'#999900', picti:'#1144cc', belgae:'#bb6600', hiberni:'#118833', britanni:'#1166ee' };
 
 const CATEGORIES = [
-    { id:'food',     label:'Food',     cls:'food-h',     count:0 },
-    { id:'religion', label:'Religion', cls:'religion-h', count:0 },
-    { id:'society',  label:'Society',  cls:'society-h',  count:0 },
+    { id:'food',     label:'Food',     cls:'food-h' },
+    { id:'religion', label:'Religion', cls:'religion-h' },
+    { id:'society',  label:'Society',  cls:'society-h' },
 ];
 
 const BUILDINGS = [
@@ -432,54 +396,47 @@ const BUILDINGS = [
     },
 ];
 
-// ── Renderers ────────────────────────────────────────────────────────────────
+// ── Render ───────────────────────────────────────────────────────────────────
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function cn(name, branch) {
-    const ph = !name || name === '—';
-    return `<span class="cn${ph?' ph':''}">${esc(ph?'—':name)}</span>`;
-}
-
+function cn(n) { const ph=!n||n==='—'; return `<span class="cn${ph?' ph':''}">${esc(ph?'—':n)}</span>`; }
 const AR = '<span class="ar">→</span>';
-
-function nrow(nodes, branch) {
-    return nodes.map(n => cn(n, branch)).join(AR);
-}
+function nrow(nodes) { return nodes.map(cn).join(AR); }
 
 function renderChain(b) {
     const ch = b.chain;
 
     if (ch.type === 'linear') {
-        return `<div class="chain-linear">${nrow(ch.nodes)}</div>`;
+        return `<div class="chain"><div class="row">${nrow(ch.nodes)}</div></div>`;
     }
 
-    if (ch.type === 'branch' || ch.type === 'complex') {
-        const preH = ch.pre.map(n => cn(n)).join(AR);
+    if (ch.type === 'branch') {
+        const preH = ch.pre.length ? `<div class="row">${nrow(ch.pre)}</div>` : '';
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
-            const lbl = br.label ? `<span class="bl ${ab}">${esc(br.label)}</span>` : '';
+            const lbl = `<span class="bl">${esc(br.label)}</span>`;
+            const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
+            return `<div class="row arm-${ab}">${lbl}${nrow(br.nodes)}${note}</div>`;
+        }).join('');
+        return `<div class="chain">${preH}${armsH}</div>`;
+    }
+
+    if (ch.type === 'complex') {
+        const preH = ch.pre.length ? `<div class="row">${nrow(ch.pre)}</div>` : '';
+        const armsH = ch.branches.map((br, i) => {
+            const ab = i === 0 ? 'a' : 'b';
+            const lbl = `<span class="bl">${esc(br.label)}</span>`;
             if (br.subs) {
-                const subsH = br.subs.map(s =>
-                    `<div class="sub-row"><span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes,ab)}</div>`
+                return br.subs.map(s =>
+                    `<div class="row arm-${ab}">
+                        ${lbl}<span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes)}
+                    </div>`
                 ).join('');
-                return `<div class="arm arm-${ab}" style="flex-direction:column;align-items:flex-start;gap:3px">
-                    ${lbl}
-                    <div class="subs">${subsH}</div>
-                </div>`;
             }
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            return `<div class="arm arm-${ab}">${lbl}${nrow(br.nodes,ab)}${note}</div>`;
+            return `<div class="row arm-${ab}">${lbl}${nrow(br.nodes)}${note}</div>`;
         }).join('');
-
-        return `<div class="fork">
-            <div class="fork-pre">${preH}</div>
-            <span class="fork-arr">→</span>
-            <div class="fork-body">
-                <div class="fork-vline"></div>
-                <div class="fork-arms">${armsH}</div>
-            </div>
-        </div>`;
+        return `<div class="chain">${preH}${armsH}</div>`;
     }
     return '';
 }
@@ -494,8 +451,8 @@ function renderCults(cultures) {
 }
 
 function renderCard(b) {
-    const fnote = b.chainNote ? `<div class="chain-fnote">* ${esc(b.chainNote)}</div>` : '';
-    return `<div class="card" data-cat="${b.category}" data-cultures="${b.cultures.join(',')}">
+    const fnote = b.chainNote ? `<div class="fnote">* ${esc(b.chainNote)}</div>` : '';
+    return `<div class="card">
         <div class="card-head">
             <div>
                 <div class="card-title">${esc(b.name)}</div>
@@ -503,51 +460,41 @@ function renderCard(b) {
             </div>
             <div class="csq-grid">${renderCults(b.cultures)}</div>
         </div>
-        <div class="chain">${renderChain(b)}${fnote}</div>
+        ${renderChain(b)}${fnote}
     </div>`;
 }
-
-// ── Filter & render ───────────────────────────────────────────────────────────
 
 let activeCat = 'all', activeCult = 'all';
 
 function render() {
     const html = CATEGORIES.map(cat => {
         if (activeCat !== 'all' && activeCat !== cat.id) return '';
-        const cards = BUILDINGS
-            .filter(b => b.category === cat.id)
-            .filter(b => activeCult === 'all' || b.cultures.includes(activeCult))
-            .map(renderCard).join('');
-        if (!cards) return '';
-        const n = BUILDINGS.filter(b => b.category === cat.id).length;
-        const shown = BUILDINGS.filter(b => b.category === cat.id && (activeCult==='all'||b.cultures.includes(activeCult))).length;
-        const countTxt = shown < n ? `${shown}/${n}` : `${n}`;
+        const shown = BUILDINGS.filter(b => b.category === cat.id && (activeCult==='all'||b.cultures.includes(activeCult)));
+        if (!shown.length) return '';
+        const total = BUILDINGS.filter(b => b.category === cat.id).length;
+        const countTxt = shown.length < total ? `${shown.length}/${total}` : `${total}`;
         return `<div class="cat-section">
             <div class="cat-header ${cat.cls}">
                 <span>${esc(cat.label)}</span>
-                <small>${countTxt} catene</small>
+                <small>${countTxt}</small>
             </div>
-            <div class="cards">${cards}</div>
+            <div class="cards">${shown.map(renderCard).join('')}</div>
         </div>`;
     }).join('');
     document.getElementById('content').innerHTML =
-        html || `<div style="color:#44445a;padding:40px;text-align:center;font-style:italic">Nessun edificio trovato.</div>`;
+        html || `<div style="color:#9a7a40;padding:40px;text-align:center;font-style:italic">Nessun edificio trovato.</div>`;
 }
 
 document.querySelectorAll('[data-cat]').forEach(btn =>
     btn.addEventListener('click', () => {
         document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeCat = btn.dataset.cat;
-        render();
+        btn.classList.add('active'); activeCat = btn.dataset.cat; render();
     })
 );
 document.querySelectorAll('[data-cult]').forEach(btn =>
     btn.addEventListener('click', () => {
         document.querySelectorAll('[data-cult]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeCult = btn.dataset.cult;
-        render();
+        btn.classList.add('active'); activeCult = btn.dataset.cult; render();
     })
 );
 
