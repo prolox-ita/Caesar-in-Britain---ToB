@@ -88,13 +88,13 @@
         .csq-grid { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3,1fr); gap:2px; flex-shrink:0; }
 
         /* ── Chain — linear ── */
-        .chain.linear { display:flex; align-items:center; flex-wrap:wrap; gap:0; }
+        .chain.linear { display:flex; align-items:center; flex-wrap:nowrap; gap:0; overflow-x:auto; }
 
         /* ── Chain — fork layout ── */
-        .chain.branch { display:flex; align-items:stretch; flex-wrap:wrap; gap:0; }
+        .chain.branch { display:flex; align-items:stretch; flex-wrap:nowrap; gap:0; overflow-x:auto; }
 
         /* Pre-nodes (root, before fork) */
-        .chain-pre { display:flex; align-items:center; align-self:center; flex-shrink:0; flex-wrap:wrap; }
+        .chain-pre { display:flex; align-items:center; align-self:center; flex-shrink:0; flex-wrap:nowrap; }
 
         /* Vertical fork bar (blue top half → orange bottom half) */
         .fork-vbar {
@@ -121,10 +121,11 @@
 
         /* Node */
         .cn {
-            display:inline-flex; align-items:center;
+            display:inline-flex; align-items:center; justify-content:center; text-align:center;
             background:#e8dab8; border:1px solid #b89840;
-            border-radius:4px; padding:6px 14px;
-            font-size:.82rem; color:#2a1800; white-space:nowrap;
+            border-radius:4px; padding:6px 10px;
+            font-size:.78rem; color:#2a1800; white-space:normal;
+            line-height:1.25; max-width:110px;
             cursor:default; user-select:none;
         }
         .cn.ph { opacity:.35; font-style:italic; }
@@ -223,6 +224,8 @@
         <button class="cb" data-cult="belgae"   style="color:#904800;border-color:#904800">Belgae</button>
         <button class="cb" data-cult="hiberni"  style="color:#006820;border-color:#006820">Hiberni</button>
         <button class="cb" data-cult="britanni" style="color:#0048c0;border-color:#0048c0">Britanni</button>
+        <div class="sep"></div>
+        <button onclick="resetData()" style="border-color:#a03020;color:#801000;background:#f8e8e0;margin-left:auto;">↺ Reset</button>
     </div>
 
     <div id="content"></div>
@@ -540,6 +543,27 @@ function renderCard(b) {
     </div>`;
 }
 
+// ── Persistence ───────────────────────────────────────────────────────────────
+
+const STORAGE_KEY = 'mk1212_bld_v2';
+
+function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(BUILDINGS));
+}
+
+function loadData() {
+    try {
+        const s = localStorage.getItem(STORAGE_KEY);
+        if (s) { const d = JSON.parse(s); BUILDINGS.length = 0; BUILDINGS.push(...d); }
+    } catch(e) { console.warn('loadData:', e); }
+}
+
+function resetData() {
+    if (!confirm('Resettare tutte le modifiche ai dati originali?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+}
+
 // ── Data mutations ────────────────────────────────────────────────────────────
 
 function getBuilding(bid) { return BUILDINGS.find(x => x.id === bid); }
@@ -552,6 +576,7 @@ function setNodeName(bid, path, name) {
     else if (type === 'pre') b.chain.pre[+r[0]] = name;
     else if (type === 'arm') b.chain.branches[+r[0]].nodes[+r[1]] = name;
     else if (type === 'sub') b.chain.branches[+r[0]].subs[+r[1]].nodes[+r[2]] = name;
+    saveData();
 }
 
 function toggleCulture(bid, cult) {
@@ -559,6 +584,7 @@ function toggleCulture(bid, cult) {
     if (!b) return;
     const i = b.cultures.indexOf(cult);
     if (i >= 0) b.cultures.splice(i, 1); else b.cultures.push(cult);
+    saveData();
     const grid = document.querySelector(`.card[data-bid="${bid}"] .csq-grid`);
     if (grid) grid.innerHTML = renderCults(b.cultures, bid);
 }
@@ -566,7 +592,7 @@ function toggleCulture(bid, cult) {
 function delBuilding(bid) {
     if (!confirm('Eliminare questa catena?')) return;
     const i = BUILDINGS.findIndex(x => x.id === bid);
-    if (i >= 0) { BUILDINGS.splice(i, 1); render(); }
+    if (i >= 0) { BUILDINGS.splice(i, 1); saveData(); render(); }
 }
 
 function dupBuilding(bid) {
@@ -577,7 +603,7 @@ function dupBuilding(bid) {
     copy.name = b.name + ' (copia)';
     const i = BUILDINGS.findIndex(x => x.id === bid);
     BUILDINGS.splice(i + 1, 0, copy);
-    render();
+    saveData(); render();
 }
 
 function forkChain(bid) {
@@ -593,7 +619,7 @@ function forkChain(bid) {
             { label:'B', nodes: ['—'] },
         ]
     };
-    render();
+    saveData(); render();
 }
 
 function addNodeAt(bid, apath) {
@@ -604,14 +630,13 @@ function addNodeAt(bid, apath) {
     else if (type === 'pre') b.chain.pre.push('—');
     else if (type === 'arm') b.chain.branches[+r[0]].nodes.push('—');
     else if (type === 'sub') b.chain.branches[+r[0]].subs[+r[1]].nodes.push('—');
-    render();
+    saveData(); render();
 }
 
 function addBuilding(cat) {
     const id = 'new_' + Date.now();
     BUILDINGS.push({ id, category: cat, name: 'Nuova Catena', cultures: [], chain: { type:'linear', nodes:['Edificio 1','Edificio 2'] } });
-    render();
-    // Scroll to new card
+    saveData(); render();
     setTimeout(() => document.querySelector(`.card[data-bid="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
 }
 
@@ -638,6 +663,7 @@ function startEditNode(node) {
         span.dataset.bid = bid; span.dataset.npath = path;
         span.textContent = newName;
         input.parentNode?.replaceChild(span, input);
+        saveData();
     };
 
     input.addEventListener('keydown', ev => {
@@ -673,6 +699,7 @@ function startEditTitle(titleEl) {
         titleEl.textContent = b.name;
         titleEl.dataset.bid = bid; titleEl.dataset.field = 'name';
         input.parentNode?.replaceChild(titleEl, input);
+        saveData();
     };
 
     input.addEventListener('keydown', ev => {
@@ -750,6 +777,7 @@ document.querySelectorAll('[data-cult]').forEach(btn =>
     })
 );
 
+loadData();
 render();
 </script>
 </body>
