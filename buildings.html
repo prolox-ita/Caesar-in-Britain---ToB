@@ -89,17 +89,37 @@
         .csq { width:14px; height:14px; border-radius:2px; border:1px solid rgba(0,0,0,0.2); }
         .csq.off { background:rgba(0,0,0,0.08); border-color:rgba(0,0,0,0.12); }
 
-        /* ── Chain ── */
-        .chain { display:flex; flex-direction:column; gap:4px; }
+        /* ── Chain — linear ── */
+        .chain.linear { display:flex; align-items:center; flex-wrap:wrap; gap:0; }
 
-        /* One row of nodes */
-        .row {
-            display: flex; align-items:center; flex-wrap:wrap; gap:0;
+        /* ── Chain — fork layout ── */
+        .chain.branch { display:flex; align-items:stretch; flex-wrap:wrap; gap:0; }
+
+        /* Pre-nodes (root, before fork) */
+        .chain-pre { display:flex; align-items:center; align-self:center; flex-shrink:0; flex-wrap:wrap; }
+
+        /* Vertical fork bar (blue top half → orange bottom half) */
+        .fork-vbar {
+            width:2px; flex-shrink:0;
+            background:linear-gradient(to bottom, #5888c8 50%, #c87820 50%);
+            margin:13px 0;
         }
 
-        /* Branch rows get a left-border color line */
-        .row.arm-a { border-left:3px solid #2060c0; padding-left:6px; }
-        .row.arm-b { border-left:3px solid #c06000; padding-left:6px; }
+        /* Stack of branch arms */
+        .chain-arms { display:flex; flex-direction:column; gap:5px; align-self:center; }
+
+        /* Single arm row */
+        .chain-arm { display:flex; align-items:center; flex-wrap:wrap; gap:0; position:relative; padding-left:14px; }
+
+        /* Horizontal tick from fork bar to arm */
+        .arm-a.chain-arm::before {
+            content:''; position:absolute; left:0; top:50%;
+            width:12px; height:2px; background:#5888c8; transform:translateY(-50%);
+        }
+        .arm-b.chain-arm::before {
+            content:''; position:absolute; left:0; top:50%;
+            width:12px; height:2px; background:#c87820; transform:translateY(-50%);
+        }
 
         /* Node */
         .cn {
@@ -118,15 +138,6 @@
         .ar { color:#a08040; font-size:.9rem; padding:0 3px; flex-shrink:0; }
         .arm-a .ar { color:#5888c8; }
         .arm-b .ar { color:#c87820; }
-
-        /* Branch label */
-        .bl {
-            display:inline-flex; align-items:center; justify-content:center;
-            width:18px; height:18px; border-radius:2px;
-            font-size:.62rem; font-weight:900; flex-shrink:0; margin-right:5px;
-        }
-        .arm-a .bl { background:#2060c0; color:#fff; }
-        .arm-b .bl { background:#c06000; color:#fff; }
 
         /* Inline note after last node */
         .bnote {
@@ -407,41 +418,32 @@ function renderChain(b) {
     const ch = b.chain;
 
     if (ch.type === 'linear') {
-        return `<div class="chain"><div class="row">${nrow(ch.nodes)}</div></div>`;
+        return `<div class="chain linear">${nrow(ch.nodes)}</div>`;
     }
 
     if (ch.type === 'branch') {
-        const preNodes = ch.pre.length ? nrow(ch.pre) + AR : '';
+        const preH = ch.pre.length ? `<div class="chain-pre">${nrow(ch.pre)}${AR}</div><div class="fork-vbar"></div>` : '';
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
-            const lbl = `<span class="bl">${esc(br.label)}</span>`;
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            const prefix = i === 0 ? preNodes : '';
-            return `<div class="row arm-${ab}">${prefix}${lbl}${nrow(br.nodes)}${note}</div>`;
+            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes)}${note}</div>`;
         }).join('');
-        return `<div class="chain">${armsH}</div>`;
+        return `<div class="chain branch">${preH}<div class="chain-arms">${armsH}</div></div>`;
     }
 
     if (ch.type === 'complex') {
-        const preNodes = ch.pre.length ? nrow(ch.pre) + AR : '';
-        let firstArm = true;
+        const preH = ch.pre.length ? `<div class="chain-pre">${nrow(ch.pre)}${AR}</div><div class="fork-vbar"></div>` : '';
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
-            const lbl = `<span class="bl">${esc(br.label)}</span>`;
             if (br.subs) {
-                return br.subs.map((s, si) => {
-                    const prefix = firstArm && si === 0 ? preNodes : '';
-                    if (firstArm && si === 0) firstArm = false;
-                    return `<div class="row arm-${ab}">
-                        ${prefix}${lbl}<span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes)}
-                    </div>`;
-                }).join('');
+                return br.subs.map(s =>
+                    `<div class="chain-arm arm-${ab}"><span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes)}</div>`
+                ).join('');
             }
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            const prefix = i === 0 ? preNodes : '';
-            return `<div class="row arm-${ab}">${prefix}${lbl}${nrow(br.nodes)}${note}</div>`;
+            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes)}${note}</div>`;
         }).join('');
-        return `<div class="chain">${armsH}</div>`;
+        return `<div class="chain branch">${preH}<div class="chain-arms">${armsH}</div></div>`;
     }
     return '';
 }
