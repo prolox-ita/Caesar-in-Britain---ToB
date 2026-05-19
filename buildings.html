@@ -242,16 +242,16 @@ const BUILDINGS = [
     // ── FOOD ──────────────────────────────────────────────────────────────────
     { id:'land_use', category:'food', name:'Land Use',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
-      chain:{ type:'branch', pre:['Land Use (Millet)'], branches:[
-          { label:'A', nodes:['Fields','Lynchets','Farms'] },
-          { label:'B', nodes:['Pastures','Enclosures','Cattle'] },
+      chain:{ type:'branch', pre:['Land Use (Villa)'], branches:[
+          { label:'A', nodes:['Fields (Agril)','Lynchets (Centuratio)','Farms (Latifundum)'] },
+          { label:'B', nodes:['Pastures (Pascua)','Enclosures (Saepes)','Cattle Farms (Stabulum)'] },
       ]}
     },
-    { id:'high_value_crops', category:'food', name:'High Value Crops',
+    { id:'high_value_crops', category:'food', name:'High-Value Crops',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
-      chain:{ type:'branch', pre:['Arkoba'], branches:[
-          { label:'A', nodes:['—','—','—'] },
-          { label:'B', nodes:['Pastures','—','—'] },
+      chain:{ type:'branch', pre:['Arbusta'], branches:[
+          { label:'A', nodes:['Pomerium','Ars Insilivi','Oporotheca'] },
+          { label:'B', nodes:['Pastures (Pascua)','Torcularium','Forum Vinarium'] },
       ]}
     },
     { id:'hunters_camp', category:'food', name:"Hunter's Camp",
@@ -260,21 +260,21 @@ const BUILDINGS = [
     },
     { id:'mead_production', category:'food', name:'Mead Production',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
-      chain:{ type:'linear', nodes:['Bee-Hives','Breeding Sheds','Mead Cellar','—'] }
+      chain:{ type:'linear', nodes:['Bee Hives','Brewing Sheds','Storage Cellar','Feast Halls'] }
     },
     { id:'wild_gathering', category:'food', name:'Wild Gathering',
       cultures:['britanni','hiberni','belgae','gauls','picti'],
-      chain:{ type:'linear', nodes:["Forager's Path","Wild Collector's Hut","Woodsman's Lodge"] }
+      chain:{ type:'linear', nodes:["Forager's Path","Herb Gatherer's Hut","Wisewoman's Larder"] }
     },
 
     // ── RELIGION ──────────────────────────────────────────────────────────────
     { id:'druid', category:'religion', name:'Druid',
       cultures:['britanni','hiberni'],
-      chain:{ type:'linear', nodes:['Druid Circle','Druid Teachings','Sacred Oak Grove','Nemeton'] }
+      chain:{ type:'linear', nodes:['Druid Circle','Druid Teachings','Sacred Oak Grove','Heart of the Forest'] }
     },
-    { id:'college_druids', category:'religion', name:'College of Druids',
+    { id:'college_druids', category:'religion', name:'College of the Druids',
       cultures:['gauls'],
-      chain:{ type:'linear', nodes:['Druid Assembly','College of Druids','Grand College','Seat of the Archdruid'] }
+      chain:{ type:'linear', nodes:['Druid Assembly','College of Druids','Grand College','Nemeton'] }
     },
     { id:'fountains_gods', category:'religion', name:'Fountains of the Gods',
       cultures:['britanni'],
@@ -317,9 +317,9 @@ const BUILDINGS = [
     },
     { id:'cailleach', category:'religion', name:'Cult of the Cailleach',
       cultures:['picti'],
-      chain:{ type:'linear', nodes:['Sacred Well','Carved Stone','Inauguration Rock','Seat of the Cailleach'] }
+      chain:{ type:'linear', nodes:['Sacred Well','Weirding Circles','Inauguration Rock','Seat of the Cailleach'] }
     },
-    { id:'symbol_stones', category:'religion', name:'Symbol Stones',
+    { id:'sacred_stones', category:'religion', name:'Sacred Stones',
       cultures:['picti'],
       chain:{ type:'linear', nodes:['Carved Pillar','Symbol Stone','Ancestor Stone','Hall of the Painted Ones'] }
     },
@@ -330,9 +330,9 @@ const BUILDINGS = [
           { label:'B', nodes:['Hall of the Dagda','Well of Boann','Cauldron of the Dagda'] },
       ]}
     },
-    { id:'tuatha_danann', category:'religion', name:'Tuatha Dé Danann',
+    { id:'tuatha_danann', category:'religion', name:'Tuatha Da Danainn',
       cultures:['hiberni'],
-      chain:{ type:'linear', nodes:['Sacred Mound','The Four Treasures','Gods of the Síde','Connection to the Underworld'] }
+      chain:{ type:'linear', nodes:['Cult of Traditions','The Four Treasures','Gods of the Síde','Connection to the Underworld'] }
     },
     { id:'fir_bolg', category:'religion', name:'Fir Bolg',
       note:'Solo Connacht', cultures:['hiberni'],
@@ -343,7 +343,7 @@ const BUILDINGS = [
     },
     { id:'cult_mil', category:'religion', name:'Cult of Mil',
       cultures:['hiberni'],
-      chain:{ type:'branch', pre:['Hill of Assembly'], branches:[
+      chain:{ type:'branch', pre:['Landing Shore'], branches:[
           { label:'A', nodes:['Shrine of the Three Queens','Seat of the High King'] },
           { label:'B', nodes:['Stone of Destiny','Hall of Amergin'] },
       ]}
@@ -385,9 +385,9 @@ const BUILDINGS = [
     },
     { id:'politica_romani', category:'society', name:'Politica & Iustitia',
       cultures:['romani'],
-      chain:{ type:'branch', pre:['Curia Minor'], branches:[
-          { label:'A', nodes:['Basilica Iuridica','Tribunal Magnum','Curia Magna'] },
-          { label:'B', nodes:['Praetorium','Castra Praetoria','Palatium'] },
+      chain:{ type:'branch', pre:['Forum'], branches:[
+          { label:'A', nodes:['Basilica','Conventus','Curia'] },
+          { label:'B', nodes:['Statio Annona','Fiscus Provincialis','Palatium'] },
       ]}
     },
     { id:'mercati_fiere', category:'society', name:'Mercati & Fiere',
