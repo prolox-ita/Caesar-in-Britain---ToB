@@ -176,10 +176,21 @@
         .card-title[data-bid]:hover { color:#7a5010; }
 
         /* Card action buttons */
-        .card-actions { display:flex; gap:5px; margin-top:8px; justify-content:flex-end; }
+        .card-actions { display:flex; gap:5px; margin-top:8px; justify-content:flex-end; flex-wrap:wrap; }
         .card-actions button { padding:2px 10px; font-size:.65rem; }
-        .dup-btn { border-color:#4060a8 !important; background:#d8e0f8 !important; color:#102060 !important; }
-        .del-btn { border-color:#c04020 !important; background:#f8d8d0 !important; color:#801000 !important; }
+        .dup-btn  { border-color:#4060a8 !important; background:#d8e0f8 !important; color:#102060 !important; }
+        .del-btn  { border-color:#c04020 !important; background:#f8d8d0 !important; color:#801000 !important; }
+        .fork-btn { border-color:#2060c0 !important; background:#e0ecff !important; color:#0a3080 !important; }
+
+        /* Add-node "+" button inline at the end of a chain row */
+        .add-node-btn {
+            display:inline-flex; align-items:center;
+            padding:2px 7px; margin-left:4px;
+            background:transparent; border:1px dashed #a08040;
+            border-radius:3px; color:#a08040; font-size:.78rem;
+            cursor:pointer; opacity:.5; flex-shrink:0; vertical-align:middle;
+        }
+        .add-node-btn:hover { opacity:1; background:#f0ffe0; border-color:#408020; color:#408020; border-style:solid; }
 
         /* Add chain button inside category header */
         .add-chain-btn {
@@ -462,35 +473,38 @@ function renderChain(b) {
     const ch = b.chain;
     const id = b.id;
 
+    const addBtn = (apath) =>
+        `<button class="add-node-btn" data-bid="${esc(id)}" data-apath="${apath}" title="Aggiungi nodo">+</button>`;
+
     if (ch.type === 'linear') {
-        return `<div class="chain linear">${nrow(ch.nodes, id, 'lin')}</div>`;
+        return `<div class="chain linear">${nrow(ch.nodes, id, 'lin')}${addBtn('lin')}</div>`;
     }
 
     if (ch.type === 'branch') {
         const preH = ch.pre.length
-            ? `<div class="chain-pre">${nrow(ch.pre, id, 'pre')}${AR}</div><div class="fork-vbar"></div>`
+            ? `<div class="chain-pre">${nrow(ch.pre, id, 'pre')}${addBtn('pre')}${AR}</div><div class="fork-vbar"></div>`
             : '';
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes, id, `arm:${i}`)}${note}</div>`;
+            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes, id, `arm:${i}`)}${addBtn(`arm:${i}`)}${note}</div>`;
         }).join('');
         return `<div class="chain branch">${preH}<div class="chain-arms">${armsH}</div></div>`;
     }
 
     if (ch.type === 'complex') {
         const preH = ch.pre.length
-            ? `<div class="chain-pre">${nrow(ch.pre, id, 'pre')}${AR}</div><div class="fork-vbar"></div>`
+            ? `<div class="chain-pre">${nrow(ch.pre, id, 'pre')}${addBtn('pre')}${AR}</div><div class="fork-vbar"></div>`
             : '';
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
             if (br.subs) {
                 return br.subs.map((s, si) =>
-                    `<div class="chain-arm arm-${ab}"><span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes, id, `sub:${i}:${si}`)}</div>`
+                    `<div class="chain-arm arm-${ab}"><span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes, id, `sub:${i}:${si}`)}${addBtn(`sub:${i}:${si}`)}</div>`
                 ).join('');
             }
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes, id, `arm:${i}`)}${note}</div>`;
+            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes, id, `arm:${i}`)}${addBtn(`arm:${i}`)}${note}</div>`;
         }).join('');
         return `<div class="chain branch">${preH}<div class="chain-arms">${armsH}</div></div>`;
     }
@@ -519,6 +533,7 @@ function renderCard(b) {
         </div>
         ${renderChain(b)}${fnote}
         <div class="card-actions">
+            ${b.chain.type === 'linear' ? `<button class="fork-btn" data-bid="${esc(b.id)}">⑂ Biforca</button>` : ''}
             <button class="dup-btn" data-bid="${esc(b.id)}">⧉ Duplica</button>
             <button class="del-btn" data-bid="${esc(b.id)}">✕ Elimina</button>
         </div>
@@ -562,6 +577,33 @@ function dupBuilding(bid) {
     copy.name = b.name + ' (copia)';
     const i = BUILDINGS.findIndex(x => x.id === bid);
     BUILDINGS.splice(i + 1, 0, copy);
+    render();
+}
+
+function forkChain(bid) {
+    const b = getBuilding(bid);
+    if (!b || b.chain.type !== 'linear') return;
+    const nodes = b.chain.nodes;
+    const splitAt = nodes.length > 1 ? 1 : 0;
+    b.chain = {
+        type: 'branch',
+        pre: nodes.slice(0, splitAt),
+        branches: [
+            { label:'A', nodes: nodes.slice(splitAt).length ? nodes.slice(splitAt) : ['—'] },
+            { label:'B', nodes: ['—'] },
+        ]
+    };
+    render();
+}
+
+function addNodeAt(bid, apath) {
+    const b = getBuilding(bid);
+    if (!b) return;
+    const [type, ...r] = apath.split(':');
+    if (type === 'lin') b.chain.nodes.push('—');
+    else if (type === 'pre') b.chain.pre.push('—');
+    else if (type === 'arm') b.chain.branches[+r[0]].nodes.push('—');
+    else if (type === 'sub') b.chain.branches[+r[0]].subs[+r[1]].nodes.push('—');
     render();
 }
 
@@ -685,6 +727,10 @@ content.addEventListener('click', e => {
     if (del) { delBuilding(del.dataset.bid); return; }
     const dup = e.target.closest('.dup-btn[data-bid]');
     if (dup) { dupBuilding(dup.dataset.bid); return; }
+    const fork = e.target.closest('.fork-btn[data-bid]');
+    if (fork) { forkChain(fork.dataset.bid); return; }
+    const addN = e.target.closest('.add-node-btn[data-bid]');
+    if (addN) { addNodeAt(addN.dataset.bid, addN.dataset.apath); return; }
     const add = e.target.closest('.add-chain-btn[data-cat]');
     if (add) { addBuilding(add.dataset.cat); }
 });
