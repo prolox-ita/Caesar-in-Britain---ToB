@@ -86,8 +86,6 @@
 
         /* Culture squares 2×3 */
         .csq-grid { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3,1fr); gap:2px; flex-shrink:0; }
-        .csq { width:14px; height:14px; border-radius:2px; border:1px solid rgba(0,0,0,0.2); }
-        .csq.off { background:rgba(0,0,0,0.08); border-color:rgba(0,0,0,0.12); }
 
         /* ── Chain — linear ── */
         .chain.linear { display:flex; align-items:center; flex-wrap:wrap; gap:0; }
@@ -125,34 +123,71 @@
         .cn {
             display:inline-flex; align-items:center;
             background:#e8dab8; border:1px solid #b89840;
-            border-radius:3px; padding:3px 8px;
-            font-size:.72rem; color:#2a1800; white-space:nowrap;
+            border-radius:4px; padding:6px 14px;
+            font-size:.82rem; color:#2a1800; white-space:nowrap;
+            cursor:default; user-select:none;
         }
         .cn.ph { opacity:.35; font-style:italic; }
+        .cn[data-bid]:hover { border-color:#a07020; }
+
+        /* Inline edit input */
+        .cn-edit {
+            display:inline-flex; align-items:center;
+            background:#fffae8; border:2px solid #c8a030;
+            border-radius:4px; padding:5px 13px;
+            font-size:.82rem; color:#2a1800;
+            font-family:inherit; outline:none;
+            min-width:60px; max-width:200px;
+            vertical-align:middle;
+        }
 
         /* Tinted nodes per branch */
         .arm-a .cn { background:#dae8f8; border-color:#5888c8; color:#0a1e40; }
         .arm-b .cn { background:#f8ead8; border-color:#c87820; color:#3a1800; }
 
         /* Arrow */
-        .ar { color:#a08040; font-size:.9rem; padding:0 3px; flex-shrink:0; }
+        .ar { color:#a08040; font-size:.9rem; padding:0 4px; flex-shrink:0; }
         .arm-a .ar { color:#5888c8; }
         .arm-b .ar { color:#c87820; }
 
         /* Inline note after last node */
         .bnote {
-            font-size:.62rem; color:#8a6a30; font-style:italic;
-            margin-left:5px; white-space:normal; line-height:1.3;
+            font-size:.65rem; color:#8a6a30; font-style:italic;
+            margin-left:6px; white-space:normal; line-height:1.3;
         }
 
         /* Sub-labels for complex chains */
         .sub-lbl {
-            font-size:.62rem; color:#7a5a28; font-style:italic;
-            white-space:nowrap; margin-right:4px;
+            font-size:.65rem; color:#7a5a28; font-style:italic;
+            white-space:nowrap; margin-right:5px;
         }
 
         /* Footer note */
         .fnote { font-size:.65rem; color:#8a6a30; font-style:italic; margin-top:4px; line-height:1.4; }
+
+        /* Culture squares — now interactive */
+        .csq { width:18px; height:18px; border-radius:2px; border:1px solid rgba(0,0,0,0.2); cursor:pointer; transition:transform .1s,opacity .1s; }
+        .csq:hover { opacity:.75; transform:scale(1.2); }
+        .csq.off { background:rgba(0,0,0,0.08); border-color:rgba(0,0,0,0.12); }
+        .csq-grid { gap:3px; }
+
+        /* Card title editable hint */
+        .card-title[data-bid] { cursor:text; }
+        .card-title[data-bid]:hover { color:#7a5010; }
+
+        /* Card action buttons */
+        .card-actions { display:flex; gap:5px; margin-top:8px; justify-content:flex-end; }
+        .card-actions button { padding:2px 10px; font-size:.65rem; }
+        .dup-btn { border-color:#4060a8 !important; background:#d8e0f8 !important; color:#102060 !important; }
+        .del-btn { border-color:#c04020 !important; background:#f8d8d0 !important; color:#801000 !important; }
+
+        /* Add chain button inside category header */
+        .add-chain-btn {
+            margin-left:auto; padding:2px 10px; border-radius:3px;
+            border:1px solid rgba(255,255,255,0.5); background:rgba(255,255,255,0.15);
+            color:#fff; font-size:.7rem; font-weight:700; cursor:pointer;
+        }
+        .add-chain-btn:hover { background:rgba(255,255,255,0.3) !important; border-color:#fff !important; color:#fff !important; }
     </style>
 </head>
 <body>
@@ -407,69 +442,208 @@ const BUILDINGS = [
     },
 ];
 
-// ── Render ───────────────────────────────────────────────────────────────────
+// ── Render helpers ───────────────────────────────────────────────────────────
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function cn(n) { const ph=!n||n==='—'; return `<span class="cn${ph?' ph':''}">${esc(ph?'—':n)}</span>`; }
+
+function cn(n, bid, path) {
+    const ph = !n || n === '—';
+    const d = bid != null ? ` data-bid="${esc(bid)}" data-npath="${esc(path)}"` : '';
+    return `<span class="cn${ph?' ph':''}"${d}>${esc(ph?'—':n)}</span>`;
+}
+
 const AR = '<span class="ar">→</span>';
-function nrow(nodes) { return nodes.map(cn).join(AR); }
+
+function nrow(nodes, bid, pfx) {
+    return nodes.map((n,i) => cn(n, bid, `${pfx}:${i}`)).join(AR);
+}
 
 function renderChain(b) {
     const ch = b.chain;
+    const id = b.id;
 
     if (ch.type === 'linear') {
-        return `<div class="chain linear">${nrow(ch.nodes)}</div>`;
+        return `<div class="chain linear">${nrow(ch.nodes, id, 'lin')}</div>`;
     }
 
     if (ch.type === 'branch') {
-        const preH = ch.pre.length ? `<div class="chain-pre">${nrow(ch.pre)}${AR}</div><div class="fork-vbar"></div>` : '';
+        const preH = ch.pre.length
+            ? `<div class="chain-pre">${nrow(ch.pre, id, 'pre')}${AR}</div><div class="fork-vbar"></div>`
+            : '';
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes)}${note}</div>`;
+            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes, id, `arm:${i}`)}${note}</div>`;
         }).join('');
         return `<div class="chain branch">${preH}<div class="chain-arms">${armsH}</div></div>`;
     }
 
     if (ch.type === 'complex') {
-        const preH = ch.pre.length ? `<div class="chain-pre">${nrow(ch.pre)}${AR}</div><div class="fork-vbar"></div>` : '';
+        const preH = ch.pre.length
+            ? `<div class="chain-pre">${nrow(ch.pre, id, 'pre')}${AR}</div><div class="fork-vbar"></div>`
+            : '';
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
             if (br.subs) {
-                return br.subs.map(s =>
-                    `<div class="chain-arm arm-${ab}"><span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes)}</div>`
+                return br.subs.map((s, si) =>
+                    `<div class="chain-arm arm-${ab}"><span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes, id, `sub:${i}:${si}`)}</div>`
                 ).join('');
             }
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes)}${note}</div>`;
+            return `<div class="chain-arm arm-${ab}">${nrow(br.nodes, id, `arm:${i}`)}${note}</div>`;
         }).join('');
         return `<div class="chain branch">${preH}<div class="chain-arms">${armsH}</div></div>`;
     }
     return '';
 }
 
-function renderCults(cultures) {
+function renderCults(cultures, bid) {
     return CULT_GRID.map(row =>
         row.map(c => {
             const on = cultures.includes(c);
-            return `<div class="csq ${on?'on':'off'}" style="${on?`background:${CULT_COLOR[c]};border-color:${CULT_COLOR[c]}`:''}"></div>`;
+            const style = on ? `background:${CULT_COLOR[c]};border-color:${CULT_COLOR[c]}` : '';
+            return `<div class="csq ${on?'on':'off'}" data-bid="${esc(bid)}" data-cult="${c}" title="${c}" style="${style}"></div>`;
         }).join('')
     ).join('');
 }
 
 function renderCard(b) {
     const fnote = b.chainNote ? `<div class="fnote">* ${esc(b.chainNote)}</div>` : '';
-    return `<div class="card">
+    return `<div class="card" data-bid="${esc(b.id)}">
         <div class="card-head">
             <div>
-                <div class="card-title">${esc(b.name)}</div>
+                <div class="card-title" data-bid="${esc(b.id)}" data-field="name">${esc(b.name)}</div>
                 ${b.note ? `<div class="card-note">${esc(b.note)}</div>` : ''}
             </div>
-            <div class="csq-grid">${renderCults(b.cultures)}</div>
+            <div class="csq-grid">${renderCults(b.cultures, b.id)}</div>
         </div>
         ${renderChain(b)}${fnote}
+        <div class="card-actions">
+            <button class="dup-btn" data-bid="${esc(b.id)}">⧉ Duplica</button>
+            <button class="del-btn" data-bid="${esc(b.id)}">✕ Elimina</button>
+        </div>
     </div>`;
 }
+
+// ── Data mutations ────────────────────────────────────────────────────────────
+
+function getBuilding(bid) { return BUILDINGS.find(x => x.id === bid); }
+
+function setNodeName(bid, path, name) {
+    const b = getBuilding(bid);
+    if (!b) return;
+    const [type, ...r] = path.split(':');
+    if (type === 'lin') b.chain.nodes[+r[0]] = name;
+    else if (type === 'pre') b.chain.pre[+r[0]] = name;
+    else if (type === 'arm') b.chain.branches[+r[0]].nodes[+r[1]] = name;
+    else if (type === 'sub') b.chain.branches[+r[0]].subs[+r[1]].nodes[+r[2]] = name;
+}
+
+function toggleCulture(bid, cult) {
+    const b = getBuilding(bid);
+    if (!b) return;
+    const i = b.cultures.indexOf(cult);
+    if (i >= 0) b.cultures.splice(i, 1); else b.cultures.push(cult);
+    const grid = document.querySelector(`.card[data-bid="${bid}"] .csq-grid`);
+    if (grid) grid.innerHTML = renderCults(b.cultures, bid);
+}
+
+function delBuilding(bid) {
+    if (!confirm('Eliminare questa catena?')) return;
+    const i = BUILDINGS.findIndex(x => x.id === bid);
+    if (i >= 0) { BUILDINGS.splice(i, 1); render(); }
+}
+
+function dupBuilding(bid) {
+    const b = getBuilding(bid);
+    if (!b) return;
+    const copy = JSON.parse(JSON.stringify(b));
+    copy.id = bid + '_' + Date.now();
+    copy.name = b.name + ' (copia)';
+    const i = BUILDINGS.findIndex(x => x.id === bid);
+    BUILDINGS.splice(i + 1, 0, copy);
+    render();
+}
+
+function addBuilding(cat) {
+    const id = 'new_' + Date.now();
+    BUILDINGS.push({ id, category: cat, name: 'Nuova Catena', cultures: [], chain: { type:'linear', nodes:['Edificio 1','Edificio 2'] } });
+    render();
+    // Scroll to new card
+    setTimeout(() => document.querySelector(`.card[data-bid="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
+}
+
+// ── Inline editing ────────────────────────────────────────────────────────────
+
+function startEditNode(node) {
+    const bid = node.dataset.bid;
+    const path = node.dataset.npath;
+    const origText = node.textContent.trim();
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = origText === '—' ? '' : origText;
+    input.className = 'cn-edit';
+    if (node.classList.contains('arm-a') || node.closest('.arm-a')) input.style.borderColor = '#5888c8';
+    if (node.classList.contains('arm-b') || node.closest('.arm-b')) input.style.borderColor = '#c87820';
+
+    const save = () => {
+        const newName = input.value.trim() || '—';
+        setNodeName(bid, path, newName);
+        const ph = newName === '—';
+        const span = document.createElement('span');
+        span.className = `cn${ph?' ph':''}`;
+        span.dataset.bid = bid; span.dataset.npath = path;
+        span.textContent = newName;
+        input.parentNode?.replaceChild(span, input);
+    };
+
+    input.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter') { ev.preventDefault(); save(); }
+        if (ev.key === 'Escape') {
+            const span = document.createElement('span');
+            span.className = node.className;
+            span.dataset.bid = bid; span.dataset.npath = path;
+            span.textContent = origText;
+            input.parentNode?.replaceChild(span, input);
+        }
+    });
+    input.addEventListener('blur', save, { once: true });
+
+    node.parentNode.replaceChild(input, node);
+    input.focus(); input.select();
+}
+
+function startEditTitle(titleEl) {
+    const bid = titleEl.dataset.bid;
+    const b = getBuilding(bid);
+    if (!b) return;
+    const origName = b.name;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = origName;
+    input.className = 'cn-edit';
+    input.style.cssText = 'font-weight:700;font-size:.78rem;border-color:#c8a030;';
+
+    const restore = (newName) => {
+        b.name = newName || origName;
+        titleEl.textContent = b.name;
+        titleEl.dataset.bid = bid; titleEl.dataset.field = 'name';
+        input.parentNode?.replaceChild(titleEl, input);
+    };
+
+    input.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter') { ev.preventDefault(); restore(input.value.trim()); }
+        if (ev.key === 'Escape') { restore(origName); }
+    });
+    input.addEventListener('blur', () => restore(input.value.trim()), { once: true });
+
+    titleEl.parentNode.replaceChild(input, titleEl);
+    input.focus(); input.select();
+}
+
+// ── State & render ────────────────────────────────────────────────────────────
 
 let activeCat = 'all', activeCult = 'all';
 
@@ -477,20 +651,45 @@ function render() {
     const html = CATEGORIES.map(cat => {
         if (activeCat !== 'all' && activeCat !== cat.id) return '';
         const shown = BUILDINGS.filter(b => b.category === cat.id && (activeCult==='all'||b.cultures.includes(activeCult)));
-        if (!shown.length) return '';
         const total = BUILDINGS.filter(b => b.category === cat.id).length;
+        if (!shown.length && !(activeCat === cat.id || activeCat === 'all')) return '';
         const countTxt = shown.length < total ? `${shown.length}/${total}` : `${total}`;
         return `<div class="cat-section">
             <div class="cat-header ${cat.cls}">
                 <span>${esc(cat.label)}</span>
                 <small>${countTxt}</small>
+                <button class="add-chain-btn" data-cat="${cat.id}">+ Aggiungi</button>
             </div>
-            <div class="cards">${shown.map(renderCard).join('')}</div>
+            ${shown.length ? `<div class="cards">${shown.map(renderCard).join('')}</div>` : ''}
         </div>`;
     }).join('');
     document.getElementById('content').innerHTML =
         html || `<div style="color:#9a7a40;padding:40px;text-align:center;font-style:italic">Nessun edificio trovato.</div>`;
 }
+
+// ── Event delegation on #content ─────────────────────────────────────────────
+
+const content = document.getElementById('content');
+
+content.addEventListener('dblclick', e => {
+    const node = e.target.closest('.cn[data-bid]');
+    if (node) { startEditNode(node); return; }
+    const title = e.target.closest('.card-title[data-bid]');
+    if (title) { startEditTitle(title); }
+});
+
+content.addEventListener('click', e => {
+    const sq = e.target.closest('.csq[data-bid]');
+    if (sq) { toggleCulture(sq.dataset.bid, sq.dataset.cult); return; }
+    const del = e.target.closest('.del-btn[data-bid]');
+    if (del) { delBuilding(del.dataset.bid); return; }
+    const dup = e.target.closest('.dup-btn[data-bid]');
+    if (dup) { dupBuilding(dup.dataset.bid); return; }
+    const add = e.target.closest('.add-chain-btn[data-cat]');
+    if (add) { addBuilding(add.dataset.cat); }
+});
+
+// ── Filter bar ────────────────────────────────────────────────────────────────
 
 document.querySelectorAll('[data-cat]').forEach(btn =>
     btn.addEventListener('click', () => {
