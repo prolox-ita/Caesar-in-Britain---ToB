@@ -411,32 +411,37 @@ function renderChain(b) {
     }
 
     if (ch.type === 'branch') {
-        const preH = ch.pre.length ? `<div class="row">${nrow(ch.pre)}</div>` : '';
+        const preNodes = ch.pre.length ? nrow(ch.pre) + AR : '';
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
             const lbl = `<span class="bl">${esc(br.label)}</span>`;
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            return `<div class="row arm-${ab}">${lbl}${nrow(br.nodes)}${note}</div>`;
+            const prefix = i === 0 ? preNodes : '';
+            return `<div class="row arm-${ab}">${prefix}${lbl}${nrow(br.nodes)}${note}</div>`;
         }).join('');
-        return `<div class="chain">${preH}${armsH}</div>`;
+        return `<div class="chain">${armsH}</div>`;
     }
 
     if (ch.type === 'complex') {
-        const preH = ch.pre.length ? `<div class="row">${nrow(ch.pre)}</div>` : '';
+        const preNodes = ch.pre.length ? nrow(ch.pre) + AR : '';
+        let firstArm = true;
         const armsH = ch.branches.map((br, i) => {
             const ab = i === 0 ? 'a' : 'b';
             const lbl = `<span class="bl">${esc(br.label)}</span>`;
             if (br.subs) {
-                return br.subs.map(s =>
-                    `<div class="row arm-${ab}">
-                        ${lbl}<span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes)}
-                    </div>`
-                ).join('');
+                return br.subs.map((s, si) => {
+                    const prefix = firstArm && si === 0 ? preNodes : '';
+                    if (firstArm && si === 0) firstArm = false;
+                    return `<div class="row arm-${ab}">
+                        ${prefix}${lbl}<span class="sub-lbl">${esc(s.label)}:</span>${nrow(s.nodes)}
+                    </div>`;
+                }).join('');
             }
             const note = br.note ? `<span class="bnote">${esc(br.note)}</span>` : '';
-            return `<div class="row arm-${ab}">${lbl}${nrow(br.nodes)}${note}</div>`;
+            const prefix = i === 0 ? preNodes : '';
+            return `<div class="row arm-${ab}">${prefix}${lbl}${nrow(br.nodes)}${note}</div>`;
         }).join('');
-        return `<div class="chain">${preH}${armsH}</div>`;
+        return `<div class="chain">${armsH}</div>`;
     }
     return '';
 }
