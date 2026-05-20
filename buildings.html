@@ -119,19 +119,36 @@
             width:12px; height:2px; background:#c87820; transform:translateY(-50%);
         }
 
-        /* Node */
+        /* Node — fixed width so T-levels align across arm-a / arm-b */
         .cn {
-            display:inline-flex; align-items:center; justify-content:center; text-align:center;
+            display:inline-flex; flex-direction:column; align-items:center; justify-content:flex-start;
             background:#e8dab8; border:1px solid #b89840;
-            border-radius:4px; padding:6px 10px;
-            font-size:.78rem; color:#2a1800; white-space:normal;
-            line-height:1.25; max-width:110px;
-            cursor:default; user-select:none;
+            border-radius:4px; padding:5px 6px;
+            font-size:.78rem; color:#2a1800;
+            width:108px; flex:0 0 108px;
+            line-height:1.25; cursor:default; user-select:none;
         }
+        .cn-main { text-align:center; white-space:normal; word-break:break-word; width:100%; }
         .cn.ph { opacity:.35; font-style:italic; }
         .cn[data-bid]:hover { border-color:#a07020; }
 
-        /* Inline edit input */
+        /* Note inside node */
+        .cn-note { font-size:.58rem; color:#7a5820; font-style:italic; line-height:1.2;
+                   margin-top:2px; text-align:center; width:100%; display:block; }
+        .cn-note:empty { display:none; }
+        .cn-note-btn { font-size:.55rem; color:#a08040; cursor:pointer; opacity:0;
+                       margin-top:1px; line-height:1; display:block; user-select:none; }
+        .cn:hover .cn-note-btn { opacity:.6; }
+        .cn-note-btn:hover { opacity:1 !important; color:#5a3800; }
+
+        /* Inline note edit */
+        .cn-note-edit {
+            width:100%; font-size:.58rem; font-family:inherit; font-style:italic;
+            background:#fffae0; border:1px solid #c8a030; border-radius:2px;
+            padding:1px 3px; outline:none; margin-top:2px; text-align:center;
+        }
+
+        /* Inline name edit input */
         .cn-edit {
             display:inline-flex; align-items:center;
             background:#fffae8; border:2px solid #c8a030;
@@ -144,10 +161,12 @@
 
         /* Tinted nodes per branch */
         .arm-a .cn { background:#dae8f8; border-color:#5888c8; color:#0a1e40; }
+        .arm-a .cn-note { color:#2a5080; }
         .arm-b .cn { background:#f8ead8; border-color:#c87820; color:#3a1800; }
+        .arm-b .cn-note { color:#7a4010; }
 
-        /* Arrow */
-        .ar { color:#a08040; font-size:.9rem; padding:0 4px; flex-shrink:0; }
+        /* Arrow — fixed width to keep column rhythm */
+        .ar { color:#a08040; font-size:.9rem; flex:0 0 22px; text-align:center; flex-shrink:0; }
         .arm-a .ar { color:#5888c8; }
         .arm-b .ar { color:#c87820; }
 
@@ -460,10 +479,19 @@ const BUILDINGS = [
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+function nodeName(n) { return typeof n === 'object' ? (n.name || '—') : (n || '—'); }
+function nodeNote(n) { return typeof n === 'object' ? (n.note || '') : ''; }
+
 function cn(n, bid, path) {
-    const ph = !n || n === '—';
+    const nm = nodeName(n);
+    const note = nodeNote(n);
+    const ph = !nm || nm === '—';
     const d = bid != null ? ` data-bid="${esc(bid)}" data-npath="${esc(path)}"` : '';
-    return `<span class="cn${ph?' ph':''}"${d}>${esc(ph?'—':n)}</span>`;
+    const noteHtml = `<span class="cn-note">${esc(note)}</span>`;
+    const noteBtn = bid != null
+        ? `<span class="cn-note-btn" data-bid="${esc(bid)}" data-npath="${esc(path)}" title="Nota">✎</span>`
+        : '';
+    return `<span class="cn${ph?' ph':''}"${d}><span class="cn-main">${esc(ph?'—':nm)}</span>${noteHtml}${noteBtn}</span>`;
 }
 
 const AR = '<span class="ar">→</span>';
@@ -568,14 +596,37 @@ function resetData() {
 
 function getBuilding(bid) { return BUILDINGS.find(x => x.id === bid); }
 
-function setNodeName(bid, path, name) {
-    const b = getBuilding(bid);
-    if (!b) return;
+function getNodeArr(b, path) {
     const [type, ...r] = path.split(':');
-    if (type === 'lin') b.chain.nodes[+r[0]] = name;
-    else if (type === 'pre') b.chain.pre[+r[0]] = name;
-    else if (type === 'arm') b.chain.branches[+r[0]].nodes[+r[1]] = name;
-    else if (type === 'sub') b.chain.branches[+r[0]].subs[+r[1]].nodes[+r[2]] = name;
+    if (type === 'lin') return [b.chain.nodes, +r[0]];
+    if (type === 'pre') return [b.chain.pre, +r[0]];
+    if (type === 'arm') return [b.chain.branches[+r[0]].nodes, +r[1]];
+    if (type === 'sub') return [b.chain.branches[+r[0]].subs[+r[1]].nodes, +r[2]];
+    return [null, 0];
+}
+
+function getNodeRaw(bid, path) {
+    const b = getBuilding(bid);
+    if (!b) return '';
+    const [arr, idx] = getNodeArr(b, path);
+    return arr ? arr[idx] : '';
+}
+
+function setNodeName(bid, path, name) {
+    const b = getBuilding(bid); if (!b) return;
+    const [arr, idx] = getNodeArr(b, path);
+    if (!arr) return;
+    const existNote = nodeNote(arr[idx]);
+    arr[idx] = existNote ? { name, note: existNote } : name;
+    saveData();
+}
+
+function setNodeNote(bid, path, note) {
+    const b = getBuilding(bid); if (!b) return;
+    const [arr, idx] = getNodeArr(b, path);
+    if (!arr) return;
+    const nm = nodeName(arr[idx]);
+    arr[idx] = note ? { name: nm, note } : nm;
     saveData();
 }
 
@@ -645,41 +696,72 @@ function addBuilding(cat) {
 function startEditNode(node) {
     const bid = node.dataset.bid;
     const path = node.dataset.npath;
-    const origText = node.textContent.trim();
+    const origName = nodeName(getNodeRaw(bid, path));
 
     const input = document.createElement('input');
     input.type = 'text';
-    input.value = origText === '—' ? '' : origText;
+    input.value = origName === '—' ? '' : origName;
     input.className = 'cn-edit';
-    if (node.classList.contains('arm-a') || node.closest('.arm-a')) input.style.borderColor = '#5888c8';
-    if (node.classList.contains('arm-b') || node.closest('.arm-b')) input.style.borderColor = '#c87820';
+    if (node.closest('.arm-a')) input.style.borderColor = '#5888c8';
+    if (node.closest('.arm-b')) input.style.borderColor = '#c87820';
 
-    const save = () => {
-        const newName = input.value.trim() || '—';
-        setNodeName(bid, path, newName);
-        const ph = newName === '—';
+    const restore = (newName) => {
+        setNodeName(bid, path, newName || '—');
+        // Re-render just this node in place
+        const raw = getNodeRaw(bid, path);
+        const ph = nodeName(raw) === '—';
         const span = document.createElement('span');
         span.className = `cn${ph?' ph':''}`;
         span.dataset.bid = bid; span.dataset.npath = path;
-        span.textContent = newName;
+        const note = nodeNote(raw);
+        const noteBtn = `<span class="cn-note-btn" data-bid="${bid}" data-npath="${path}" title="Nota">✎</span>`;
+        span.innerHTML = `<span class="cn-main">${esc(nodeName(raw))}</span><span class="cn-note">${esc(note)}</span>${noteBtn}`;
         input.parentNode?.replaceChild(span, input);
-        saveData();
+    };
+
+    input.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter') { ev.preventDefault(); restore(input.value.trim()); }
+        if (ev.key === 'Escape') { restore(origName); }
+    });
+    input.addEventListener('blur', () => restore(input.value.trim()), { once: true });
+
+    node.parentNode.replaceChild(input, node);
+    input.focus(); input.select();
+}
+
+function startEditNote(btn) {
+    const cn = btn.closest('.cn');
+    const bid = btn.dataset.bid;
+    const path = btn.dataset.npath;
+    const currentNote = nodeNote(getNodeRaw(bid, path));
+
+    let noteSpan = cn.querySelector('.cn-note');
+    if (!noteSpan) { noteSpan = document.createElement('span'); noteSpan.className = 'cn-note'; btn.before(noteSpan); }
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentNote;
+    input.className = 'cn-note-edit';
+    input.placeholder = 'nota...';
+
+    const save = () => {
+        const val = input.value.trim();
+        setNodeNote(bid, path, val);
+        noteSpan.textContent = val;
+        input.parentNode?.replaceChild(noteSpan, input);
+        btn.style.display = '';
     };
 
     input.addEventListener('keydown', ev => {
         if (ev.key === 'Enter') { ev.preventDefault(); save(); }
-        if (ev.key === 'Escape') {
-            const span = document.createElement('span');
-            span.className = node.className;
-            span.dataset.bid = bid; span.dataset.npath = path;
-            span.textContent = origText;
-            input.parentNode?.replaceChild(span, input);
-        }
+        if (ev.key === 'Escape') { input.parentNode?.replaceChild(noteSpan, input); btn.style.display = ''; }
     });
     input.addEventListener('blur', save, { once: true });
 
-    node.parentNode.replaceChild(input, node);
-    input.focus(); input.select();
+    noteSpan.parentNode.replaceChild(input, noteSpan);
+    btn.style.display = 'none';
+    input.focus();
+    if (input.value) input.select();
 }
 
 function startEditTitle(titleEl) {
@@ -748,6 +830,8 @@ content.addEventListener('dblclick', e => {
 });
 
 content.addEventListener('click', e => {
+    const noteBtn = e.target.closest('.cn-note-btn[data-bid]');
+    if (noteBtn) { e.stopPropagation(); startEditNote(noteBtn); return; }
     const sq = e.target.closest('.csq[data-bid]');
     if (sq) { toggleCulture(sq.dataset.bid, sq.dataset.cult); return; }
     const del = e.target.closest('.del-btn[data-bid]');
