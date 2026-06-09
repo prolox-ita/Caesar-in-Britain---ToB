@@ -59,9 +59,11 @@
         .cat-header span { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#fff; }
         .cat-header small { font-size:.68rem; color:rgba(255,255,255,0.55); }
 
-        .food-h     { background:#3a6010; }
-        .religion-h { background:#6a1880; }
-        .society-h  { background:#7a5000; }
+        .move-sel {
+            font-size:.65rem; font-family:inherit; padding:2px 5px;
+            border:1px solid #c8a848; border-radius:3px; background:#f0e4c0;
+            color:#6a4a18; cursor:pointer;
+        }
 
         /* ── 2-column grid ── */
         .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -230,10 +232,9 @@
 
     <div class="filter-bar">
         <span class="fl">Cat:</span>
-        <button class="active" data-cat="all">All</button>
-        <button data-cat="food">Food</button>
-        <button data-cat="religion">Religion</button>
-        <button data-cat="society">Society</button>
+        <button id="cat-all" class="active" data-cat="all">All</button>
+        <span id="cat-btns"></span>
+        <button id="add-cat-btn" title="Nuova sezione" style="padding:3px 8px;">＋ Sezione</button>
         <div class="sep"></div>
         <span class="fl">Cult:</span>
         <button class="cb active" data-cult="all">All</button>
@@ -255,10 +256,11 @@ const CULT_GRID  = [['romani','gauls'],['picti','belgae'],['hiberni','britanni']
 const CULT_COLOR = { romani:'#cc2222', gauls:'#999900', picti:'#1144cc', belgae:'#bb6600', hiberni:'#118833', britanni:'#1166ee' };
 
 const CATEGORIES = [
-    { id:'food',     label:'Food',     cls:'food-h' },
-    { id:'religion', label:'Religion', cls:'religion-h' },
-    { id:'society',  label:'Society',  cls:'society-h' },
+    { id:'food',     label:'Food',     color:'#3a6010' },
+    { id:'religion', label:'Religion', color:'#6a1880' },
+    { id:'society',  label:'Society',  color:'#7a5000' },
 ];
+const CAT_PALETTE = ['#1a4a7a','#7a1a1a','#1a6a5a','#5a4a1a','#4a1a5a','#2a5a4a','#6a4a0a','#4a3060'];
 
 const BUILDINGS = [
     // ── FOOD ──────────────────────────────────────────────────────────────────
@@ -565,6 +567,7 @@ function renderCard(b) {
         ${renderChain(b)}${fnote}
         <div class="card-actions">
             ${b.chain.type === 'linear' ? `<button class="fork-btn" data-bid="${esc(b.id)}">⑂ Biforca</button>` : ''}
+            ${CATEGORIES.length > 1 ? `<select class="move-sel" data-bid="${esc(b.id)}"><option value="">↦ Sposta...</option>${CATEGORIES.filter(c=>c.id!==b.category).map(c=>`<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('')}</select>` : ''}
             <button class="dup-btn" data-bid="${esc(b.id)}">⧉ Duplica</button>
             <button class="del-btn" data-bid="${esc(b.id)}">✕ Elimina</button>
         </div>
@@ -573,22 +576,31 @@ function renderCard(b) {
 
 // ── Persistence ───────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'mk1212_bld_v2';
+const STORAGE_KEY = 'mk1212_v3';
 
 function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(BUILDINGS));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ categories: CATEGORIES, buildings: BUILDINGS }));
 }
 
 function loadData() {
     try {
         const s = localStorage.getItem(STORAGE_KEY);
-        if (s) { const d = JSON.parse(s); BUILDINGS.length = 0; BUILDINGS.push(...d); }
+        if (s) {
+            const d = JSON.parse(s);
+            if (Array.isArray(d.buildings))  { BUILDINGS.length = 0;  BUILDINGS.push(...d.buildings); }
+            if (Array.isArray(d.categories)) { CATEGORIES.length = 0; CATEGORIES.push(...d.categories); }
+        } else {
+            // migrate from v2
+            const s2 = localStorage.getItem('mk1212_bld_v2');
+            if (s2) { const d = JSON.parse(s2); BUILDINGS.length = 0; BUILDINGS.push(...d); }
+        }
     } catch(e) { console.warn('loadData:', e); }
 }
 
 function resetData() {
     if (!confirm('Resettare tutte le modifiche ai dati originali?')) return;
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('mk1212_bld_v2');
     location.reload();
 }
 
@@ -689,6 +701,22 @@ function addBuilding(cat) {
     BUILDINGS.push({ id, category: cat, name: 'Nuova Catena', cultures: [], chain: { type:'linear', nodes:['Edificio 1','Edificio 2'] } });
     saveData(); render();
     setTimeout(() => document.querySelector(`.card[data-bid="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
+}
+
+function addCategory() {
+    const label = prompt('Nome della nuova sezione:')?.trim();
+    if (!label) return;
+    const id = label.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+    if (!id || CATEGORIES.find(c => c.id === id)) { alert('Sezione già esistente o nome non valido.'); return; }
+    const used = new Set(CATEGORIES.map(c => c.color));
+    const color = CAT_PALETTE.find(c => !used.has(c)) || '#4a4a4a';
+    CATEGORIES.push({ id, label, color });
+    saveData(); renderFilterCats(); render();
+}
+
+function moveBuilding(bid, newCat) {
+    const b = getBuilding(bid); if (!b || b.category === newCat) return;
+    b.category = newCat; saveData(); render();
 }
 
 // ── Inline editing ────────────────────────────────────────────────────────────
@@ -798,20 +826,30 @@ function startEditTitle(titleEl) {
 
 let activeCat = 'all', activeCult = 'all';
 
+function renderFilterCats() {
+    const container = document.getElementById('cat-btns');
+    if (!container) return;
+    container.innerHTML = CATEGORIES.map(cat =>
+        `<button data-cat="${esc(cat.id)}"${activeCat===cat.id?' class="active"':''}>${esc(cat.label)}</button>`
+    ).join('');
+    const allBtn = document.getElementById('cat-all');
+    if (allBtn) allBtn.classList.toggle('active', activeCat === 'all');
+}
+
 function render() {
     const html = CATEGORIES.map(cat => {
         if (activeCat !== 'all' && activeCat !== cat.id) return '';
         const shown = BUILDINGS.filter(b => b.category === cat.id && (activeCult==='all'||b.cultures.includes(activeCult)));
         const total = BUILDINGS.filter(b => b.category === cat.id).length;
-        if (!shown.length && !(activeCat === cat.id || activeCat === 'all')) return '';
+        if (!shown.length && activeCat === 'all') return '';
         const countTxt = shown.length < total ? `${shown.length}/${total}` : `${total}`;
         return `<div class="cat-section">
-            <div class="cat-header ${cat.cls}">
+            <div class="cat-header" style="background:${esc(cat.color)}">
                 <span>${esc(cat.label)}</span>
                 <small>${countTxt}</small>
                 <button class="add-chain-btn" data-cat="${cat.id}">+ Aggiungi</button>
             </div>
-            ${shown.length ? `<div class="cards">${shown.map(renderCard).join('')}</div>` : ''}
+            ${shown.length ? `<div class="cards">${shown.map(renderCard).join('')}</div>` : '<div style="color:rgba(255,255,255,.5);padding:6px 0 2px;font-size:.7rem;font-style:italic">Nessuna catena.</div>'}
         </div>`;
     }).join('');
     document.getElementById('content').innerHTML =
@@ -846,14 +884,22 @@ content.addEventListener('click', e => {
     if (add) { addBuilding(add.dataset.cat); }
 });
 
+content.addEventListener('change', e => {
+    const sel = e.target.closest('.move-sel[data-bid]');
+    if (sel && sel.value) moveBuilding(sel.dataset.bid, sel.value);
+});
+
 // ── Filter bar ────────────────────────────────────────────────────────────────
 
-document.querySelectorAll('[data-cat]').forEach(btn =>
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active'); activeCat = btn.dataset.cat; render();
-    })
-);
+document.querySelector('.filter-bar').addEventListener('click', e => {
+    const catBtn = e.target.closest('button[data-cat]');
+    if (catBtn) {
+        document.querySelectorAll('.filter-bar button[data-cat]').forEach(b => b.classList.remove('active'));
+        catBtn.classList.add('active'); activeCat = catBtn.dataset.cat; render(); return;
+    }
+    if (e.target.id === 'add-cat-btn') addCategory();
+});
+
 document.querySelectorAll('[data-cult]').forEach(btn =>
     btn.addEventListener('click', () => {
         document.querySelectorAll('[data-cult]').forEach(b => b.classList.remove('active'));
@@ -862,6 +908,7 @@ document.querySelectorAll('[data-cult]').forEach(btn =>
 );
 
 loadData();
+renderFilterCats();
 render();
 </script>
 </body>
