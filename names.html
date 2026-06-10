@@ -6,16 +6,13 @@
     <title>Names — MK1212</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Segoe UI',system-ui,sans-serif; background:#e8d9b0; color:#1a1008; font-size:13px; }
+        #app { max-width:1400px; margin:0 auto; padding:0 16px 60px; }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #e8d9b0; color: #1a1008; font-size: 13px; }
-        #app { max-width: 1400px; margin: 0 auto; padding: 0 16px 60px; }
-
-        header { padding: 14px 0 10px; border-bottom: 2px solid #b89848; margin-bottom: 0; display: flex; align-items: baseline; gap: 12px; }
+        header { padding:14px 0 10px; border-bottom:2px solid #b89848; display:flex; align-items:baseline; gap:12px; }
         header h1 { font-family:'Cinzel',serif; font-size:1.3rem; color:#5a3800; }
         header span { font-size:.75rem; color:#9a7a40; }
-        header a { font-size:.72rem; color:#9a7a40; text-decoration:none; margin-left:auto; }
-        header a:hover { color:#5a3800; text-decoration:underline; }
 
         .filter-bar { position:sticky; top:0; z-index:100; background:rgba(232,217,176,0.97); border-bottom:1px solid #c8a848; padding:7px 0; backdrop-filter:blur(4px); display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
         .fl { font-size:.65rem; font-weight:700; color:#9a7a40; text-transform:uppercase; letter-spacing:.08em; }
@@ -27,6 +24,8 @@
         .cb { opacity:.5; }
         .cb:hover { opacity:.8; }
         .cb.active { opacity:1; }
+        .import-lbl { padding:3px 11px; border-radius:3px; border:1px solid #c8a848; background:#f0e4c0; color:#6a4a18; font-size:.72rem; font-weight:600; cursor:pointer; transition:all .1s; }
+        .import-lbl:hover { background:#e8d49c; }
 
         /* ── Groups ── */
         .groups { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
@@ -35,38 +34,43 @@
 
         .group-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid #e0c878; }
         .cult-tag { display:inline-block; padding:2px 9px; border-radius:3px; font-size:.65rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.06em; flex-shrink:0; }
-        .group-label { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; color:#3a2000; flex:1; cursor:default; }
+        .group-label { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; color:#3a2000; cursor:default; }
+        .group-idx { font-size:.72rem; color:#9a7a40; font-family:monospace; cursor:default; padding:1px 5px; border-radius:2px; border:1px solid transparent; }
+        .group-idx:hover { border-color:#c8a848; background:#ede0c0; cursor:text; }
         .group-del { margin-left:auto; padding:2px 7px; font-size:.65rem; border-color:#c87060; color:#a03020; background:#fdf0ec; }
         .group-del:hover { background:#c03020; border-color:#a03020; color:#fff; }
 
-        /* ── 4-col name grid ── */
+        /* ── 4-column grid ── */
         .name-cols { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-
         .name-col { background:#ede0be; border:1px solid #d0b870; border-radius:3px; padding:5px 6px; display:flex; flex-direction:column; }
-        .col-head { font-size:.6rem; font-weight:700; color:#9a7a40; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid #c8a848; display:flex; align-items:center; gap:4px; white-space:nowrap; }
+        .col-head { font-size:.6rem; font-weight:700; color:#9a7a40; text-transform:uppercase; letter-spacing:.07em; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid #c8a848; display:flex; align-items:center; gap:4px; white-space:nowrap; }
         .col-num { display:inline-block; width:15px; height:15px; background:#b89840; color:#fff; border-radius:2px; font-size:.6rem; text-align:center; line-height:15px; flex-shrink:0; font-family:monospace; }
 
-        .name-list { flex:1; display:flex; flex-direction:column; gap:1px; max-height:220px; overflow-y:auto; margin-bottom:5px; }
+        .name-list { flex:1; display:flex; flex-direction:column; gap:1px; max-height:220px; overflow-y:auto; margin-bottom:4px; }
 
-        .name-item { display:flex; align-items:center; gap:3px; padding:2px 4px; border-radius:2px; font-size:.72rem; color:#2a1800; cursor:default; user-select:none; }
-        .name-item:hover { background:#f0e4c0; }
-        .name-txt { flex:1; }
-        .name-del { opacity:0; font-size:.6rem; color:#a03020; cursor:pointer; padding:0 2px; line-height:1; flex-shrink:0; background:none; border:none; font-weight:700; }
-        .name-item:hover .name-del { opacity:.5; }
-        .name-del:hover { opacity:1 !important; color:#c01010; }
+        /* ── Name item ── */
+        .nm { display:flex; align-items:center; gap:3px; padding:2px 3px; border-radius:2px; font-size:.72rem; color:#2a1800; cursor:default; user-select:none; }
+        .nm:hover { background:#f0e4c0; }
+        .nm-txt { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+        .nm-gen { padding:1px 4px; border-radius:2px; font-size:.6rem; font-weight:700; cursor:pointer; border:1px solid; flex-shrink:0; line-height:1.4; }
+        .nm-gen[data-g="0"] { background:#d8eaf8; border-color:#5888c8; color:#1a4a7a; }
+        .nm-gen[data-g="1"] { background:#f8d8ea; border-color:#c85888; color:#7a1a4a; }
+        .nm-freq { width:26px; font-size:.63rem; text-align:center; padding:1px 2px; border:1px solid #c8b860; border-radius:2px; background:#fffae0; outline:none; color:#3a2000; }
+        .nm-del { opacity:0; font-size:.6rem; color:#a03020; cursor:pointer; padding:0 2px; background:none; border:none; font-weight:700; flex-shrink:0; }
+        .nm:hover .nm-del { opacity:.5; }
+        .nm-del:hover { opacity:1 !important; color:#c01010; }
+        .nm-edit { flex:1; font-size:.72rem; font-family:inherit; border:1px solid #b89840; border-radius:2px; background:#fffae0; padding:1px 3px; outline:none; min-width:0; }
 
-        .name-add-input {
-            width:100%; font-size:.7rem; padding:2px 5px;
-            border:1px dashed #b89840; border-radius:2px;
-            background:#fffae8; font-family:inherit; outline:none; color:#3a2000;
-            margin-top:auto;
-        }
-        .name-add-input::placeholder { color:#c8a870; font-style:italic; }
-        .name-add-input:focus { border-style:solid; border-color:#a07828; background:#fffae0; }
+        /* ── Add row ── */
+        .add-row { border-top:1px dashed #c8a848; padding-top:5px; margin-top:2px; display:flex; flex-direction:column; gap:3px; }
+        .add-row-top { display:flex; gap:3px; align-items:center; }
+        .add-nm-inp { flex:1; font-size:.7rem; padding:2px 4px; border:1px dashed #b89840; border-radius:2px; background:#fffae8; outline:none; color:#3a2000; min-width:0; }
+        .add-nm-inp:focus { border-style:solid; border-color:#a07828; background:#fffae0; }
+        .add-gen-btn { padding:1px 4px; border-radius:2px; font-size:.6rem; font-weight:700; cursor:pointer; border:1px solid; flex-shrink:0; line-height:1.4; }
+        .add-freq-inp { width:26px; font-size:.63rem; text-align:center; padding:1px 2px; border:1px solid #b89840; border-radius:2px; background:#fffae0; outline:none; color:#3a2000; }
 
-        .name-edit-input { flex:1; font-size:.72rem; font-family:inherit; border:1px solid #b89840; border-radius:2px; background:#fffae0; padding:1px 4px; outline:none; min-width:0; }
-
-        .group-label-input { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; color:#3a2000; border:1px solid #a07828; border-radius:2px; padding:1px 5px; background:#fffae0; outline:none; flex:1; }
+        .group-label-edit { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; color:#3a2000; border:1px solid #a07828; border-radius:2px; padding:1px 5px; background:#fffae0; outline:none; }
+        .group-idx-edit { font-size:.72rem; color:#9a7a40; font-family:monospace; border:1px solid #a07828; border-radius:2px; padding:1px 5px; background:#fffae0; outline:none; width:70px; }
     </style>
 </head>
 <body>
@@ -82,6 +86,7 @@
         <span id="cult-btns"></span>
         <div class="sep"></div>
         <button id="add-group-btn" style="padding:3px 9px;">＋ Gruppo</button>
+        <button id="export-btn" onclick="exportCSV()" style="border-color:#206020;color:#104010;background:#e0f0e0;" title="Scarica CSV (apribile con Excel)">⬇ Excel</button>
         <button onclick="resetData()" style="border-color:#a03020;color:#801000;background:#f8e8e0;margin-left:auto;">↺ Reset</button>
     </div>
 
@@ -89,8 +94,8 @@
 </div>
 
 <script>
-// 0=Name  1=Surname  2=Clan Name  3=Family Name
-const CAT_LABELS = ['Name', 'Surname', 'Clan Name', 'Family Name'];
+// 0=Name  1=Clan Name  2=Family Name  3=Other Name
+const CAT_LABELS = ['Name', 'Clan Name', 'Family Name', 'Other Name'];
 
 const CULTURES = [
     { id:'britanni', label:'Britanni', color:'#1166ee' },
@@ -101,57 +106,87 @@ const CULTURES = [
     { id:'belgae',   label:'Belgae',   color:'#bb6600' },
 ];
 
+// Each name entry: { name:string, cat:0-3, gender:0=M/1=F, freq:number }
+// Each group: { id, index:number|null, culture, label, names:[] }
 const GROUPS = [
     {
-        id: 'britanni_g1', culture: 'britanni', label: 'Britanni',
-        names: [
-            ['Caractacus','Togodumnus','Boudicca','Cartimandua','Caratacus'],
-            ['ap Gwynn','ap Caratac','ferch Bran','map Cunobelin'],
-            ['Catuvellauni','Iceni','Trinovantes','Brigantes','Dobunni'],
-            ['House of Cunobelin','House of Bran'],
+        id:'britanni_g1', index:null, culture:'britanni', label:'Britanni',
+        names:[
+            {name:'Caractacus', cat:0, gender:0, freq:1},
+            {name:'Togodumnus', cat:0, gender:0, freq:1},
+            {name:'Boudicca',   cat:0, gender:1, freq:1},
+            {name:'Cartimandua',cat:0, gender:1, freq:1},
+            {name:'ap Gwynn',      cat:1, gender:0, freq:1},
+            {name:'ferch Bran',    cat:1, gender:1, freq:1},
+            {name:'map Cunobelin', cat:1, gender:0, freq:1},
+            {name:'Catuvellauni',  cat:2, gender:0, freq:1},
+            {name:'Iceni',         cat:2, gender:0, freq:1},
+            {name:'Trinovantes',   cat:2, gender:0, freq:1},
+            {name:'Brigantes',     cat:2, gender:0, freq:1},
+            {name:'House of Cunobelin', cat:3, gender:0, freq:1},
+            {name:'House of Bran',      cat:3, gender:0, freq:1},
         ]
     },
     {
-        id: 'hiberni_g1', culture: 'hiberni', label: 'Hiberni',
-        names: [
-            ['Finn','Niamh','Deirdre','Conall','Fergus','Aoife'],
-            ['Mac Colla','Mac Cumhaill','Ní Bhriain','Ua Néill'],
-            ['Uí Néill','Dál Fiatach','Dál Riata','Connachta'],
-            ['House of Conn','House of Mil','House of Niall'],
+        id:'hiberni_g1', index:null, culture:'hiberni', label:'Hiberni',
+        names:[
+            {name:'Finn',    cat:0, gender:0, freq:1},
+            {name:'Conall',  cat:0, gender:0, freq:1},
+            {name:'Fergus',  cat:0, gender:0, freq:1},
+            {name:'Niamh',   cat:0, gender:1, freq:1},
+            {name:'Deirdre', cat:0, gender:1, freq:1},
+            {name:'Aoife',   cat:0, gender:1, freq:1},
+            {name:'Mac Colla',   cat:1, gender:0, freq:1},
+            {name:'Mac Cumhaill',cat:1, gender:0, freq:1},
+            {name:'Ní Bhriain',  cat:1, gender:1, freq:1},
+            {name:'Ua Néill',    cat:1, gender:0, freq:1},
+            {name:'Uí Néill',    cat:2, gender:0, freq:1},
+            {name:'Dál Fiatach', cat:2, gender:0, freq:1},
+            {name:'Dál Riata',   cat:2, gender:0, freq:1},
+            {name:'Connachta',   cat:2, gender:0, freq:1},
+            {name:'House of Conn',  cat:3, gender:0, freq:1},
+            {name:'House of Niall', cat:3, gender:0, freq:1},
         ]
     },
     {
-        id: 'romani_g1', culture: 'romani', label: 'Romani',
-        names: [
-            ['Marcus','Gaius','Lucius','Publius','Titus','Quintus'],
-            ['Iulius','Claudius','Flavius','Aemilius'],
-            ['Gens Iulia','Gens Claudia','Gens Aemilia'],
-            ['Iulii','Claudii','Flavii'],
+        id:'romani_g1', index:310, culture:'romani', label:'Romani',
+        names:[
+            {name:'Marcus',  cat:0, gender:0, freq:2},
+            {name:'Gaius',   cat:0, gender:0, freq:2},
+            {name:'Lucius',  cat:0, gender:0, freq:2},
+            {name:'Publius', cat:0, gender:0, freq:1},
+            {name:'Titus',   cat:0, gender:0, freq:1},
+            {name:'Quintus', cat:0, gender:0, freq:1},
+            {name:'Caius',   cat:0, gender:0, freq:2},
+            {name:'Iulius',   cat:1, gender:0, freq:2},
+            {name:'Claudius', cat:1, gender:0, freq:1},
+            {name:'Flavius',  cat:1, gender:0, freq:1},
+            {name:'Aemilius', cat:1, gender:0, freq:1},
+            {name:'Julius',   cat:1, gender:0, freq:2},
+            {name:'Gens Iulia',   cat:2, gender:0, freq:2},
+            {name:'Gens Claudia', cat:2, gender:0, freq:1},
+            {name:'Gens Aemilia', cat:2, gender:0, freq:1},
+            {name:'Caesar',    cat:2, gender:0, freq:2},
+            {name:'Iulii',     cat:3, gender:0, freq:2},
+            {name:'Claudii',   cat:3, gender:0, freq:1},
+            {name:'Flavii',    cat:3, gender:0, freq:1},
+            {name:'Augustus',  cat:3, gender:0, freq:1},
         ]
     },
-    {
-        id: 'gauls_g1', culture: 'gauls', label: 'Gauls',
-        names: [[], [], [], []]
-    },
-    {
-        id: 'picti_g1', culture: 'picti', label: 'Picti',
-        names: [[], [], [], []]
-    },
-    {
-        id: 'belgae_g1', culture: 'belgae', label: 'Belgae',
-        names: [[], [], [], []]
-    },
+    {id:'gauls_g1',   index:null, culture:'gauls',   label:'Gauls',   names:[]},
+    {id:'picti_g1',   index:null, culture:'picti',   label:'Picti',   names:[]},
+    {id:'belgae_g1',  index:null, culture:'belgae',  label:'Belgae',  names:[]},
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function getCulture(id) { return CULTURES.find(c => c.id === id) || { id, label:id, color:'#7a7a7a' }; }
-function getGroup(id)   { return GROUPS.find(g => g.id === id); }
+function getGroup(id) { return GROUPS.find(g => g.id === id); }
 
 // ── Persistence ───────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'mk1212_names_v1';
+const STORAGE_KEY = 'mk1212_names_v2';
 
 function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ cultures: CULTURES, groups: GROUPS }));
@@ -166,13 +201,40 @@ function loadData() {
             if (Array.isArray(d.groups))   { GROUPS.length = 0;   GROUPS.push(...d.groups); }
         }
     } catch(e) { console.warn('loadData:', e); }
-    GROUPS.forEach(g => { while ((g.names||[]).length < 4) (g.names = g.names||[]).push([]); });
 }
 
 function resetData() {
     if (!confirm('Resettare tutti i dati dei nomi?')) return;
     localStorage.removeItem(STORAGE_KEY);
     location.reload();
+}
+
+// ── Export CSV (Excel) ─────────────────────────────────────────────────────────
+
+function exportCSV() {
+    const header = ['Group Index','Group Name','Culture','Name','Category','Gender','Frequency'];
+    const rows = [header];
+    GROUPS.forEach(g => {
+        (g.names || []).forEach(n => {
+            rows.push([
+                g.index ?? '',
+                g.label,
+                g.culture,
+                n.name,
+                n.cat,
+                n.gender,
+                n.freq,
+            ]);
+        });
+    });
+    const csv = '﻿' + rows.map(r =>
+        r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')
+    ).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+    a.download = 'mk1212_names.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
 }
 
 // ── Mutations ─────────────────────────────────────────────────────────────────
@@ -192,7 +254,7 @@ function addGroup() {
         cultId = cult.id;
     }
     const id = 'grp_' + Date.now();
-    GROUPS.push({ id, culture: cultId, label, names: [[],[],[],[]] });
+    GROUPS.push({ id, index: null, culture: cultId, label, names: [] });
     saveData(); render();
     setTimeout(() => document.querySelector(`.group-card[data-gid="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'start'}), 50);
 }
@@ -207,23 +269,38 @@ function delGroup(gid) {
 
 function buildCardHTML(g) {
     const cult = getCulture(g.culture);
+    const idxDisplay = g.index != null ? `#${g.index}` : '#—';
     const cols = [0,1,2,3].map(ci => {
-        const items = (g.names[ci] || []).map((nm, ni) =>
-            `<div class="name-item" data-gid="${esc(g.id)}" data-cat="${ci}" data-ni="${ni}">
-                <span class="name-txt">${esc(nm)}</span>
-                <button class="name-del" data-gid="${esc(g.id)}" data-cat="${ci}" data-ni="${ni}">✕</button>
+        const catNames = (g.names || [])
+            .map((n, ni) => ({...n, ni}))
+            .filter(n => n.cat === ci);
+        const items = catNames.map(n =>
+            `<div class="nm" data-gid="${esc(g.id)}" data-ni="${n.ni}">
+                <span class="nm-txt">${esc(n.name)}</span>
+                <span class="nm-gen" data-g="${n.gender}" data-gid="${esc(g.id)}" data-ni="${n.ni}">${n.gender===0?'M':'F'}</span>
+                <input class="nm-freq" type="number" min="1" max="9" value="${n.freq}" data-gid="${esc(g.id)}" data-ni="${n.ni}" title="Frequenza">
+                <button class="nm-del" data-gid="${esc(g.id)}" data-ni="${n.ni}">✕</button>
             </div>`
         ).join('');
+        // add row state preserved via data attributes
         return `<div class="name-col">
             <div class="col-head"><span class="col-num">${ci}</span>${esc(CAT_LABELS[ci])}</div>
             <div class="name-list">${items}</div>
-            <input class="name-add-input" type="text" placeholder="+ aggiungi..." data-gid="${esc(g.id)}" data-cat="${ci}" />
+            <div class="add-row">
+                <div class="add-row-top">
+                    <input class="add-nm-inp" type="text" placeholder="+ aggiungi..." data-gid="${esc(g.id)}" data-cat="${ci}">
+                    <span class="add-gen-btn nm-gen" data-g="0" data-toggle="1" data-gid="${esc(g.id)}" data-cat="${ci}" title="Sesso (click per cambiare)">M</span>
+                    <input class="add-freq-inp" type="number" min="1" max="9" value="1" data-gid="${esc(g.id)}" data-cat="${ci}" title="Frequenza">
+                </div>
+            </div>
         </div>`;
     }).join('');
+
     return `<div class="group-card" data-gid="${esc(g.id)}">
         <div class="group-head">
             <span class="cult-tag" style="background:${esc(cult.color)}">${esc(cult.label)}</span>
             <span class="group-label" data-gid="${esc(g.id)}">${esc(g.label)}</span>
+            <span class="group-idx" data-gid="${esc(g.id)}" title="Doppio click per modificare l'indice">${esc(idxDisplay)}</span>
             <button class="group-del" data-gid="${esc(g.id)}">✕ Elimina</button>
         </div>
         <div class="name-cols">${cols}</div>
@@ -243,8 +320,7 @@ let activeCult = 'all';
 
 function render() {
     const shown = activeCult === 'all' ? GROUPS : GROUPS.filter(g => g.culture === activeCult);
-    const el = document.getElementById('content');
-    el.innerHTML = shown.length
+    document.getElementById('content').innerHTML = shown.length
         ? `<div class="groups">${shown.map(buildCardHTML).join('')}</div>`
         : `<div style="color:#9a7a40;padding:40px;text-align:center;font-style:italic">Nessun gruppo trovato.</div>`;
 }
@@ -254,28 +330,69 @@ function render() {
 const content = document.getElementById('content');
 
 content.addEventListener('click', e => {
+    // Delete group
     const delG = e.target.closest('.group-del[data-gid]');
     if (delG) { delGroup(delG.dataset.gid); return; }
 
-    const delN = e.target.closest('.name-del[data-gid]');
+    // Delete name
+    const delN = e.target.closest('.nm-del[data-gid]');
     if (delN) {
         const g = getGroup(delN.dataset.gid); if (!g) return;
-        g.names[+delN.dataset.cat].splice(+delN.dataset.ni, 1);
+        g.names.splice(+delN.dataset.ni, 1);
         saveData(); render(); return;
+    }
+
+    // Toggle gender on existing name
+    const gen = e.target.closest('.nm-gen[data-gid]:not([data-toggle])');
+    if (gen) {
+        const g = getGroup(gen.dataset.gid); if (!g) return;
+        const nm = g.names[+gen.dataset.ni]; if (!nm) return;
+        nm.gender = nm.gender === 0 ? 1 : 0;
+        saveData();
+        gen.dataset.g = nm.gender;
+        gen.textContent = nm.gender === 0 ? 'M' : 'F';
+        return;
+    }
+
+    // Toggle gender on add row
+    const addGen = e.target.closest('.nm-gen[data-toggle]');
+    if (addGen) {
+        const cur = +addGen.dataset.g;
+        addGen.dataset.g = cur === 0 ? 1 : 0;
+        addGen.textContent = cur === 0 ? 'F' : 'M';
+        return;
+    }
+});
+
+content.addEventListener('change', e => {
+    // Frequency change on existing name
+    const freq = e.target.closest('.nm-freq[data-gid]');
+    if (freq) {
+        const g = getGroup(freq.dataset.gid); if (!g) return;
+        const nm = g.names[+freq.dataset.ni]; if (!nm) return;
+        nm.freq = Math.max(1, Math.min(9, +freq.value || 1));
+        freq.value = nm.freq;
+        saveData();
     }
 });
 
 content.addEventListener('keydown', e => {
-    const inp = e.target.closest('.name-add-input[data-gid]');
+    const inp = e.target.closest('.add-nm-inp[data-gid]');
     if (!inp) return;
     if (e.key === 'Enter') {
         e.preventDefault();
         const val = inp.value.trim(); if (!val) return;
-        const gid = inp.dataset.gid, cat = inp.dataset.cat;
+        const gid = inp.dataset.gid, cat = +inp.dataset.cat;
         const g = getGroup(gid); if (!g) return;
-        g.names[+cat].push(val);
+        // read gender and freq from siblings
+        const row = inp.closest('.add-row-top');
+        const gender = +(row.querySelector('.nm-gen[data-toggle]')?.dataset.g ?? 0);
+        const freq   = Math.max(1, +(row.querySelector('.add-freq-inp')?.value || 1));
+        g.names.push({ name: val, cat, gender, freq });
         saveData(); render();
-        setTimeout(() => document.querySelector(`.name-add-input[data-gid="${gid}"][data-cat="${cat}"]`)?.focus(), 20);
+        setTimeout(() => {
+            document.querySelector(`.add-nm-inp[data-gid="${gid}"][data-cat="${cat}"]`)?.focus();
+        }, 20);
     }
     if (e.key === 'Escape') { inp.value = ''; inp.blur(); }
 });
@@ -286,17 +403,17 @@ content.addEventListener('dblclick', e => {
     if (lbl) {
         const gid = lbl.dataset.gid, g = getGroup(gid); if (!g) return;
         const input = document.createElement('input');
-        input.type = 'text'; input.value = g.label; input.className = 'group-label-input';
-        let saved = false;
+        input.type = 'text'; input.value = g.label; input.className = 'group-label-edit';
+        let done = false;
         const save = () => {
-            if (saved) return; saved = true;
+            if (done) return; done = true;
             if (input.value.trim()) { g.label = input.value.trim(); saveData(); }
             lbl.textContent = g.label;
             input.parentNode?.replaceChild(lbl, input);
         };
         input.addEventListener('keydown', ev => {
             if (ev.key === 'Enter') { ev.preventDefault(); save(); }
-            if (ev.key === 'Escape') { saved = true; input.parentNode?.replaceChild(lbl, input); }
+            if (ev.key === 'Escape') { done = true; input.parentNode?.replaceChild(lbl, input); }
         });
         input.addEventListener('blur', save, { once:true });
         lbl.parentNode.replaceChild(input, lbl);
@@ -304,29 +421,55 @@ content.addEventListener('dblclick', e => {
         return;
     }
 
-    // Edit single name
-    const item = e.target.closest('.name-item[data-gid]');
-    if (item && !e.target.closest('.name-del')) {
-        const gid = item.dataset.gid, cat = +item.dataset.cat, ni = +item.dataset.ni;
-        const g = getGroup(gid); if (!g) return;
-        const origVal = g.names[cat][ni];
-        const txtSpan = item.querySelector('.name-txt');
+    // Edit group index
+    const idx = e.target.closest('.group-idx[data-gid]');
+    if (idx) {
+        const gid = idx.dataset.gid, g = getGroup(gid); if (!g) return;
         const input = document.createElement('input');
-        input.className = 'name-edit-input'; input.value = origVal;
-        let saved = false;
+        input.type = 'number'; input.value = g.index ?? ''; input.className = 'group-idx-edit';
+        input.placeholder = 'indice...';
+        let done = false;
         const save = () => {
-            if (saved) return; saved = true;
+            if (done) return; done = true;
             const v = input.value.trim();
-            if (v) g.names[cat][ni] = v; else g.names[cat].splice(ni, 1);
+            g.index = v !== '' ? +v : null;
+            saveData();
+            idx.textContent = g.index != null ? `#${g.index}` : '#—';
+            input.parentNode?.replaceChild(idx, input);
+        };
+        input.addEventListener('keydown', ev => {
+            if (ev.key === 'Enter') { ev.preventDefault(); save(); }
+            if (ev.key === 'Escape') { done = true; input.parentNode?.replaceChild(idx, input); }
+        });
+        input.addEventListener('blur', save, { once:true });
+        idx.parentNode.replaceChild(input, idx);
+        input.focus(); input.select();
+        return;
+    }
+
+    // Edit name text
+    const nm = e.target.closest('.nm[data-gid]');
+    if (nm && !e.target.closest('.nm-del') && !e.target.closest('.nm-gen') && !e.target.closest('.nm-freq')) {
+        const gid = nm.dataset.gid, ni = +nm.dataset.ni;
+        const g = getGroup(gid); if (!g) return;
+        const entry = g.names[ni]; if (!entry) return;
+        const origVal = entry.name;
+        const txtSpan = nm.querySelector('.nm-txt');
+        const input = document.createElement('input');
+        input.className = 'nm-edit'; input.value = origVal;
+        let done = false;
+        const save = () => {
+            if (done) return; done = true;
+            const v = input.value.trim();
+            if (v) entry.name = v; else g.names.splice(ni, 1);
             saveData(); render();
         };
         input.addEventListener('keydown', ev => {
             if (ev.key === 'Enter') { ev.preventDefault(); save(); }
             if (ev.key === 'Escape') {
-                saved = true;
-                const span = document.createElement('span');
-                span.className = 'name-txt'; span.textContent = origVal;
-                input.parentNode?.replaceChild(span, input);
+                done = true;
+                const s = document.createElement('span'); s.className = 'nm-txt'; s.textContent = origVal;
+                input.parentNode?.replaceChild(s, input);
             }
         });
         input.addEventListener('blur', save, { once:true });

@@ -59,6 +59,8 @@
         .cat-header span { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#fff; }
         .cat-header small { font-size:.68rem; color:rgba(255,255,255,0.55); }
 
+        .import-lbl { padding:3px 11px; border-radius:3px; border:1px solid #c8a848; background:#f0e4c0; color:#6a4a18; font-size:.72rem; font-weight:600; cursor:pointer; transition:all .1s; }
+        .import-lbl:hover { background:#e8d49c; border-color:#a07830; }
         .move-sel {
             font-size:.65rem; font-family:inherit; padding:2px 5px;
             border:1px solid #c8a848; border-radius:3px; background:#f0e4c0;
@@ -246,6 +248,8 @@
         <button class="cb" data-cult="britanni" style="color:#0048c0;border-color:#0048c0">Britanni</button>
         <div class="sep"></div>
         <button onclick="resetData()" style="border-color:#a03020;color:#801000;background:#f8e8e0;margin-left:auto;">↺ Reset</button>
+        <button onclick="exportState()" title="Scarica JSON con lo stato attuale" style="border-color:#206020;color:#104010;background:#e0f0e0;">⬇ Esporta</button>
+        <label class="import-lbl" title="Carica JSON esportato da un altro PC">⬆ Importa<input type="file" accept=".json" onchange="importState(event)" style="display:none"></label>
     </div>
 
     <div id="content"></div>
@@ -888,6 +892,33 @@ content.addEventListener('change', e => {
     const sel = e.target.closest('.move-sel[data-bid]');
     if (sel && sel.value) moveBuilding(sel.dataset.bid, sel.value);
 });
+
+// ── Export / Import ───────────────────────────────────────────────────────────
+
+function exportState() {
+    const data = JSON.stringify({ categories: CATEGORIES, buildings: BUILDINGS }, null, 2);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([data], { type:'application/json' }));
+    a.download = 'buildings_state.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function importState(e) {
+    const file = e.target.files[0]; if (!file) return;
+    e.target.value = '';
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const d = JSON.parse(ev.target.result);
+            if (d.buildings)  { BUILDINGS.length = 0;  BUILDINGS.push(...d.buildings); }
+            if (d.categories) { CATEGORIES.length = 0; CATEGORIES.push(...d.categories); }
+            saveData(); renderFilterCats(); render();
+            alert('Importazione completata.');
+        } catch(err) { alert('Errore nel file: ' + err.message); }
+    };
+    reader.readAsText(file);
+}
 
 // ── Filter bar ────────────────────────────────────────────────────────────────
 
