@@ -56,6 +56,8 @@
         .nm-gen[data-g="0"] { background:#d8eaf8; border-color:#5888c8; color:#1a4a7a; }
         .nm-gen[data-g="1"] { background:#f8d8ea; border-color:#c85888; color:#7a1a4a; }
         .nm-freq { width:26px; font-size:.63rem; text-align:center; padding:1px 2px; border:1px solid #c8b860; border-radius:2px; background:#fffae0; outline:none; color:#3a2000; }
+        .nm-age  { width:34px; font-size:.63rem; text-align:center; padding:1px 2px; border:1px solid #b8a870; border-radius:2px; background:#f8f0e0; outline:none; color:#3a2000; }
+        .nm-age::placeholder { color:#c8b090; font-style:italic; }
         .nm-del { opacity:0; font-size:.6rem; color:#a03020; cursor:pointer; padding:0 2px; background:none; border:none; font-weight:700; flex-shrink:0; }
         .nm:hover .nm-del { opacity:.5; }
         .nm-del:hover { opacity:1 !important; color:#c01010; }
@@ -68,6 +70,9 @@
         .add-nm-inp:focus { border-style:solid; border-color:#a07828; background:#fffae0; }
         .add-gen-btn { padding:1px 4px; border-radius:2px; font-size:.6rem; font-weight:700; cursor:pointer; border:1px solid; flex-shrink:0; line-height:1.4; }
         .add-freq-inp { width:26px; font-size:.63rem; text-align:center; padding:1px 2px; border:1px solid #b89840; border-radius:2px; background:#fffae0; outline:none; color:#3a2000; }
+        .add-age-inp  { width:34px; font-size:.63rem; text-align:center; padding:1px 2px; border:1px dashed #b8a870; border-radius:2px; background:#f8f0e0; outline:none; color:#3a2000; }
+        .add-age-inp::placeholder { color:#c8b090; font-style:italic; }
+        .add-age-inp:focus { border-style:solid; border-color:#908060; }
 
         .group-label-edit { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; color:#3a2000; border:1px solid #a07828; border-radius:2px; padding:1px 5px; background:#fffae0; outline:none; }
         .group-idx-edit { font-size:.72rem; color:#9a7a40; font-family:monospace; border:1px solid #a07828; border-radius:2px; padding:1px 5px; background:#fffae0; outline:none; width:70px; }
@@ -223,7 +228,7 @@ function resetData() {
 // ── Export CSV (Excel) ─────────────────────────────────────────────────────────
 
 function exportCSV() {
-    const header = ['Group Index','Group Name','Culture','Name','Category','Gender','Frequency'];
+    const header = ['Group Index','Group Name','Culture','Name','Category','Gender','Frequency','Age @56BCE'];
     const rows = [header];
     GROUPS.forEach(g => {
         (g.names || []).forEach(n => {
@@ -235,6 +240,7 @@ function exportCSV() {
                 n.cat,
                 n.gender,
                 n.freq,
+                n.age ?? '',
             ]);
         });
     });
@@ -303,6 +309,7 @@ function buildCardHTML(g) {
                 <span class="nm-txt">${esc(n.name)}</span>
                 <span class="nm-gen" data-g="${n.gender}" data-gid="${esc(g.id)}" data-ni="${n.ni}">${n.gender===0?'M':'F'}</span>
                 <input class="nm-freq" type="number" min="1" max="9" value="${n.freq}" data-gid="${esc(g.id)}" data-ni="${n.ni}" title="Frequenza">
+                <input class="nm-age" type="number" min="0" max="120" value="${n.age??''}" placeholder="età" data-gid="${esc(g.id)}" data-ni="${n.ni}" title="Età al 56 BCE">
                 <button class="nm-del" data-gid="${esc(g.id)}" data-ni="${n.ni}">✕</button>
             </div>`
         ).join('');
@@ -318,6 +325,7 @@ function buildCardHTML(g) {
                     <input class="add-nm-inp" type="text" placeholder="nome..." data-gid="${esc(g.id)}" data-cat="${ci}">
                     <span class="add-gen-btn nm-gen" data-g="0" data-toggle="1" data-gid="${esc(g.id)}" data-cat="${ci}" title="Sesso">M</span>
                     <input class="add-freq-inp" type="number" min="1" max="9" value="1" data-gid="${esc(g.id)}" data-cat="${ci}" title="Freq.">
+                    <input class="add-age-inp" type="number" min="0" max="120" placeholder="età" data-gid="${esc(g.id)}" data-cat="${ci}" title="Età al 56 BCE">
                     <button class="add-nm-btn" data-gid="${esc(g.id)}" data-cat="${ci}" title="Aggiungi">+</button>
                 </div>
             </div>
@@ -420,13 +428,19 @@ content.addEventListener('click', e => {
 });
 
 content.addEventListener('change', e => {
-    // Frequency change on existing name
     const freq = e.target.closest('.nm-freq[data-gid]');
     if (freq) {
         const g = getGroup(freq.dataset.gid); if (!g) return;
         const nm = g.names[+freq.dataset.ni]; if (!nm) return;
         nm.freq = Math.max(1, Math.min(9, +freq.value || 1));
         freq.value = nm.freq;
+        saveData(); return;
+    }
+    const age = e.target.closest('.nm-age[data-gid]');
+    if (age) {
+        const g = getGroup(age.dataset.gid); if (!g) return;
+        const nm = g.names[+age.dataset.ni]; if (!nm) return;
+        nm.age = age.value.trim() !== '' ? Math.max(0, Math.min(120, +age.value)) : null;
         saveData();
     }
 });
@@ -443,7 +457,9 @@ content.addEventListener('keydown', e => {
         const row = inp.closest('.add-row-top');
         const gender = +(row.querySelector('.nm-gen[data-toggle]')?.dataset.g ?? 0);
         const freq   = Math.max(1, +(row.querySelector('.add-freq-inp')?.value || 1));
-        g.names.push({ name: val, cat, gender, freq });
+        const ageRaw = row.querySelector('.add-age-inp')?.value.trim();
+        const age    = ageRaw !== '' && ageRaw != null ? Math.max(0, +ageRaw) : null;
+        g.names.push({ name: val, cat, gender, freq, age });
         saveData(); render();
         setTimeout(() => {
             document.querySelector(`.add-nm-inp[data-gid="${gid}"][data-cat="${cat}"]`)?.focus();
