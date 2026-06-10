@@ -71,6 +71,16 @@
 
         .group-label-edit { font-family:'Cinzel',serif; font-size:.82rem; font-weight:700; color:#3a2000; border:1px solid #a07828; border-radius:2px; padding:1px 5px; background:#fffae0; outline:none; }
         .group-idx-edit { font-size:.72rem; color:#9a7a40; font-family:monospace; border:1px solid #a07828; border-radius:2px; padding:1px 5px; background:#fffae0; outline:none; width:70px; }
+
+        /* ── Column reorder ── */
+        .col-move { padding:0 3px; font-size:.58rem; background:none; border:none; color:#b89840; cursor:pointer; border-radius:2px; line-height:1; flex-shrink:0; }
+        .col-move:hover:not(:disabled) { background:#e0cc90; color:#3a2000; }
+        .col-move:disabled { opacity:.2; cursor:default; }
+        .col-head-lbl { flex:1; }
+
+        /* ── Add row "+" button ── */
+        .add-nm-btn { padding:1px 7px; font-size:.75rem; border:1px solid #b89840; border-radius:2px; background:#f0e4c0; color:#6a4a18; cursor:pointer; flex-shrink:0; font-weight:700; line-height:1.4; }
+        .add-nm-btn:hover { background:#e8d49c; }
     </style>
 </head>
 <body>
@@ -110,7 +120,7 @@ const CULTURES = [
 // Each group: { id, index:number|null, culture, label, names:[] }
 const GROUPS = [
     {
-        id:'britanni_g1', index:null, culture:'britanni', label:'Britanni',
+        id:'britanni_g1', index:null, culture:'britanni', label:'Britanni', colOrder:[0,1,2,3],
         names:[
             {name:'Caractacus', cat:0, gender:0, freq:1},
             {name:'Togodumnus', cat:0, gender:0, freq:1},
@@ -128,7 +138,7 @@ const GROUPS = [
         ]
     },
     {
-        id:'hiberni_g1', index:null, culture:'hiberni', label:'Hiberni',
+        id:'hiberni_g1', index:null, culture:'hiberni', label:'Hiberni', colOrder:[0,1,2,3],
         names:[
             {name:'Finn',    cat:0, gender:0, freq:1},
             {name:'Conall',  cat:0, gender:0, freq:1},
@@ -149,7 +159,7 @@ const GROUPS = [
         ]
     },
     {
-        id:'romani_g1', index:310, culture:'romani', label:'Romani',
+        id:'romani_g1', index:310, culture:'romani', label:'Romani', colOrder:[0,1,2,3],
         names:[
             {name:'Marcus',  cat:0, gender:0, freq:2},
             {name:'Gaius',   cat:0, gender:0, freq:2},
@@ -173,9 +183,9 @@ const GROUPS = [
             {name:'Augustus',  cat:3, gender:0, freq:1},
         ]
     },
-    {id:'gauls_g1',   index:null, culture:'gauls',   label:'Gauls',   names:[]},
-    {id:'picti_g1',   index:null, culture:'picti',   label:'Picti',   names:[]},
-    {id:'belgae_g1',  index:null, culture:'belgae',  label:'Belgae',  names:[]},
+    {id:'gauls_g1',  index:null, culture:'gauls',  label:'Gauls',  colOrder:[0,1,2,3], names:[]},
+    {id:'picti_g1',  index:null, culture:'picti',  label:'Picti',  colOrder:[0,1,2,3], names:[]},
+    {id:'belgae_g1', index:null, culture:'belgae', label:'Belgae', colOrder:[0,1,2,3], names:[]},
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -201,6 +211,7 @@ function loadData() {
             if (Array.isArray(d.groups))   { GROUPS.length = 0;   GROUPS.push(...d.groups); }
         }
     } catch(e) { console.warn('loadData:', e); }
+    GROUPS.forEach(g => { if (!g.colOrder) g.colOrder = [0,1,2,3]; });
 }
 
 function resetData() {
@@ -254,7 +265,7 @@ function addGroup() {
         cultId = cult.id;
     }
     const id = 'grp_' + Date.now();
-    GROUPS.push({ id, index: null, culture: cultId, label, names: [] });
+    GROUPS.push({ id, index: null, culture: cultId, label, colOrder:[0,1,2,3], names: [] });
     saveData(); render();
     setTimeout(() => document.querySelector(`.group-card[data-gid="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'start'}), 50);
 }
@@ -265,12 +276,25 @@ function delGroup(gid) {
     if (i >= 0) { GROUPS.splice(i, 1); saveData(); render(); }
 }
 
+function reorderCol(gid, cat, dir) {
+    const g = getGroup(gid); if (!g) return;
+    if (!g.colOrder) g.colOrder = [0,1,2,3];
+    const pos = g.colOrder.indexOf(cat);
+    if (pos === -1) return;
+    const newPos = dir === 'left' ? pos - 1 : pos + 1;
+    if (newPos < 0 || newPos >= g.colOrder.length) return;
+    [g.colOrder[pos], g.colOrder[newPos]] = [g.colOrder[newPos], g.colOrder[pos]];
+    saveData(); render();
+}
+
 // ── Render ─────────────────────────────────────────────────────────────────────
 
 function buildCardHTML(g) {
     const cult = getCulture(g.culture);
     const idxDisplay = g.index != null ? `#${g.index}` : '#—';
-    const cols = [0,1,2,3].map(ci => {
+    const order = g.colOrder || [0,1,2,3];
+    const cols = order.map((ci, pos) => {
+        const isFirst = pos === 0, isLast = pos === order.length - 1;
         const catNames = (g.names || [])
             .map((n, ni) => ({...n, ni}))
             .filter(n => n.cat === ci);
@@ -282,15 +306,19 @@ function buildCardHTML(g) {
                 <button class="nm-del" data-gid="${esc(g.id)}" data-ni="${n.ni}">✕</button>
             </div>`
         ).join('');
-        // add row state preserved via data attributes
         return `<div class="name-col">
-            <div class="col-head"><span class="col-num">${ci}</span>${esc(CAT_LABELS[ci])}</div>
+            <div class="col-head">
+                <button class="col-move" data-gid="${esc(g.id)}" data-cat="${ci}" data-dir="left" ${isFirst?'disabled':''}title="Sposta a sinistra">◀</button>
+                <span class="col-num">${ci}</span><span class="col-head-lbl">${esc(CAT_LABELS[ci])}</span>
+                <button class="col-move" data-gid="${esc(g.id)}" data-cat="${ci}" data-dir="right" ${isLast?'disabled':''}title="Sposta a destra">▶</button>
+            </div>
             <div class="name-list">${items}</div>
             <div class="add-row">
                 <div class="add-row-top">
-                    <input class="add-nm-inp" type="text" placeholder="+ aggiungi..." data-gid="${esc(g.id)}" data-cat="${ci}">
-                    <span class="add-gen-btn nm-gen" data-g="0" data-toggle="1" data-gid="${esc(g.id)}" data-cat="${ci}" title="Sesso (click per cambiare)">M</span>
-                    <input class="add-freq-inp" type="number" min="1" max="9" value="1" data-gid="${esc(g.id)}" data-cat="${ci}" title="Frequenza">
+                    <input class="add-nm-inp" type="text" placeholder="nome..." data-gid="${esc(g.id)}" data-cat="${ci}">
+                    <span class="add-gen-btn nm-gen" data-g="0" data-toggle="1" data-gid="${esc(g.id)}" data-cat="${ci}" title="Sesso">M</span>
+                    <input class="add-freq-inp" type="number" min="1" max="9" value="1" data-gid="${esc(g.id)}" data-cat="${ci}" title="Freq.">
+                    <button class="add-nm-btn" data-gid="${esc(g.id)}" data-cat="${ci}" title="Aggiungi">+</button>
                 </div>
             </div>
         </div>`;
@@ -360,6 +388,33 @@ content.addEventListener('click', e => {
         const cur = +addGen.dataset.g;
         addGen.dataset.g = cur === 0 ? 1 : 0;
         addGen.textContent = cur === 0 ? 'F' : 'M';
+        return;
+    }
+
+    // "+" button — add name from input
+    const addBtn = e.target.closest('.add-nm-btn[data-gid]');
+    if (addBtn) {
+        const gid = addBtn.dataset.gid, cat = +addBtn.dataset.cat;
+        const row = addBtn.closest('.add-row-top');
+        const inp = row.querySelector('.add-nm-inp');
+        const val = inp?.value.trim();
+        if (val) {
+            const g = getGroup(gid); if (!g) return;
+            const gender = +(row.querySelector('.nm-gen[data-toggle]')?.dataset.g ?? 0);
+            const freq   = Math.max(1, +(row.querySelector('.add-freq-inp')?.value || 1));
+            g.names.push({ name: val, cat, gender, freq });
+            saveData(); render();
+            setTimeout(() => document.querySelector(`.add-nm-inp[data-gid="${gid}"][data-cat="${cat}"]`)?.focus(), 20);
+        } else {
+            inp?.focus();
+        }
+        return;
+    }
+
+    // ◀ ▶ column reorder
+    const colMove = e.target.closest('.col-move[data-gid]');
+    if (colMove && !colMove.disabled) {
+        reorderCol(colMove.dataset.gid, +colMove.dataset.cat, colMove.dataset.dir);
         return;
     }
 });
