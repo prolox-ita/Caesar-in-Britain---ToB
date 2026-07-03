@@ -108,8 +108,11 @@
         #miss-panel { border-top:1px solid #1a1a1a; padding:8px 14px; flex-shrink:0; max-height:160px; overflow-y:auto; }
         #miss-panel:empty { display:none; }
         .miss-head { font-size:.6rem; letter-spacing:.1em; color:#5a2a2a; text-transform:uppercase; margin-bottom:5px; }
-        .miss-item { font-size:.68rem; color:#5a3030; padding:1px 0; }
-        .miss-item::before { content:'✗ '; color:#7a2a2a; }
+        .miss-item { font-size:.68rem; color:#5a3030; padding:2px 0; display:flex; align-items:baseline; gap:6px; }
+        .miss-item::before { content:'✗'; color:#7a2a2a; flex-shrink:0; }
+        .miss-ext { color:#7a4040; font-size:.6rem; flex-shrink:0; }
+        .miss-path { color:#5a3030; }
+        .warn-badge { font-size:.55rem; padding:0 4px; border-radius:2px; background:rgba(150,100,0,.18); color:#a07828; flex-shrink:0; }
     </style>
 </head>
 <body>
@@ -256,18 +259,26 @@ async function ingestFiles(fileList) {
 
 // ── Tree builder ──────────────────────────────────────────────────────────────
 
-function buildNode(key, ancestors) {
+// fullPath = the original reference string (full game path); key = basename lc for lookup
+function buildNode(key, fullPath, ancestors) {
     const entry = FILES.get(key);
-    if (!entry) return { key, missing: true };
-    if (ancestors.has(key)) return { key, entry, cycle: true };
+    if (!entry) return { key, fullPath, missing: true };
+    if (ancestors.has(key)) return { key, fullPath, entry, cycle: true };
     const next = new Set(ancestors); next.add(key);
-    return { key, entry, children: entry.refs.map(r => ({ ref: r, child: buildNode(r.bkey, next) })) };
+    return { key, fullPath, entry, children: entry.refs.map(r => ({ ref: r, child: buildNode(r.bkey, r.path, next) })) };
 }
 
-function collectMissing(node, out = new Set()) {
-    if (node.missing) { out.add(node.key); return out; }
+// Returns Map<bkey, {fullPath, type}>
+function collectMissing(node, out = new Map()) {
+    if (node.missing) { out.set(node.key, { fullPath: node.fullPath, type: '?' }); return out; }
     if (node.cycle)   return out;
-    for (const { child } of (node.children || [])) collectMissing(child, out);
+    for (const { ref, child } of (node.children || [])) {
+        if (child.missing) {
+            out.set(child.key, { fullPath: child.fullPath || (ref ? ref.path : child.key), type: ref ? ref.type : '?' });
+        } else {
+            collectMissing(child, out);
+        }
+    }
     return out;
 }
 
@@ -275,6 +286,7 @@ function collectMissing(node, out = new Set()) {
 
 function typeClass(type) { return { vmd:'t-vmd', vm:'t-vm', rm:'t-rm' }[type] || 't-rm'; }
 function typeBadge(type) { return { vmd:'VMD', vm:'VM', rm:'RM' }[type] || '?'; }
+function typeExt(type)   { return { vmd:'.variantmeshdefinition', vm:'.variantmesh', rm:'.rigid_model_v2' }[type] || '?'; }
 function typeIcon(type)  { return { vmd:'◈', vm:'◇', rm:'○' }[type] || '·'; }
 
 function renderNode(node, depth, ref) {
@@ -282,13 +294,15 @@ function renderNode(node, depth, ref) {
     const dispName = ref ? ref.base : node.key;
 
     if (node.missing) {
+        const fullPath = node.fullPath || (ref ? ref.path : node.key);
+        const extLabel = ref ? typeExt(ref.type) : '?';
         return `<div class="tnode">
-            <div class="trow" style="padding-left:${8 + indent}px">
+            <div class="trow" style="padding-left:${8 + indent}px" title="Cercato: ${esc(fullPath)}">
                 <span class="tcheck miss">✗</span>
                 <span class="ticon t-miss">?</span>
                 <span class="tname t-miss">${esc(dispName)}</span>
-                ${ref ? `<span class="tpath t-miss">${esc(dirOf(ref.path))}</span>` : ''}
-                <span class="tbadge miss">${ref ? typeBadge(ref.type) : '?'} MISSING</span>
+                <span class="tpath t-miss" style="color:#4a2a2a;font-size:.58rem">${esc(fullPath)}</span>
+                <span class="tbadge miss">${esc(extLabel)} MISSING</span>
             </div>
         </div>`;
     }
@@ -310,6 +324,7 @@ function renderNode(node, depth, ref) {
     const icon = typeIcon(entry.type);
     const badge = typeBadge(entry.type);
     const missingCount = children ? children.filter(c => c.child.missing).length : 0;
+    const noRefs = entry.type !== 'rm' && entry.refs.length === 0;
 
     const id = 'tn_' + Math.random().toString(36).slice(2);
     const arrowHtml = hasChildren
@@ -320,17 +335,22 @@ function renderNode(node, depth, ref) {
         ? `<div class="tchildren">${children.map(({ref:r, child}) => renderNode(child, depth + 1, r)).join('')}</div>`
         : '';
 
+    const warnBadge = noRefs ? `<span class="warn-badge">⚠ nessun ref trovato</span>` : '';
+
     const missBadge = missingCount > 0
-        ? `<span class="tbadge miss">✗ ${missingCount} missing</span>`
+        ? `<span class="tbadge miss">✗ ${missingCount} mancante${missingCount > 1 ? 'i' : ''}</span>`
         : `<span class="tbadge ${entry.type}">${badge}</span>`;
 
+    const refPath = ref ? ref.path : node.fullPath || '';
+
     return `<div class="tnode topen" id="${id}">
-        <div class="trow ${cls}" style="padding-left:${8 + indent}px" ${hasChildren ? `onclick="toggleNode('${id}')"` : ''}>
+        <div class="trow ${cls}" style="padding-left:${8 + indent}px" title="${esc(refPath)}" ${hasChildren ? `onclick="toggleNode('${id}')"` : ''}>
             ${arrowHtml}
             <span class="tcheck ok">✓</span>
             <span class="ticon ${cls}">${icon}</span>
             <span class="tname ${cls}">${esc(entry.name)}</span>
-            ${ref ? `<span class="tpath">${esc(dirOf(ref.path))}</span>` : ''}
+            ${ref ? `<span class="tpath" style="font-size:.57rem">${esc(dirOf(ref.path))}</span>` : ''}
+            ${warnBadge}
             ${missBadge}
         </div>
         ${childrenHtml}
@@ -369,14 +389,18 @@ function selectFile(key) {
         return;
     }
 
-    const node    = buildNode(key, new Set());
+    const node    = buildNode(key, key, new Set());
     const missing = collectMissing(node);
 
     document.getElementById('tree-empty').style.display = 'none';
     body.innerHTML = renderNode(node, 0, null);
 
     if (missing.size) {
-        const items = [...missing].map(k => `<div class="miss-item">${esc(k)}</div>`).join('');
+        const items = [...missing.entries()].map(([k, m]) => {
+            const ext = typeExt(m.type);
+            const display = m.fullPath || k;
+            return `<div class="miss-item"><span class="miss-ext">${esc(ext)}</span><span class="miss-path">${esc(display)}</span></div>`;
+        }).join('');
         miss.innerHTML = `<div class="miss-head">✗ File mancanti (${missing.size})</div>${items}`;
     } else {
         miss.innerHTML = '';
