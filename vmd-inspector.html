@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMD Inspector</title>
+    <style>
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+        body { background:#111; color:#bbb; font-family:'Consolas','Courier New',monospace; font-size:12px; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+        header { padding:7px 14px; background:#1a1a1a; border-bottom:1px solid #C5B358; display:flex; align-items:center; gap:14px; flex-shrink:0; }
+        header h1 { font-size:.8rem; letter-spacing:.18em; color:#C5B358; font-weight:normal; }
+        .hint { font-size:.65rem; color:#444; flex:1; }
+
+        .page-nav { display:flex; gap:2px; background:#161616; padding:3px 14px; border-bottom:1px solid #1a1a1a; flex-shrink:0; }
+        .nav-link { padding:3px 10px; font-size:.68rem; color:#555; text-decoration:none; border-radius:2px; letter-spacing:.06em; }
+        .nav-link:hover { color:#bbb; background:rgba(255,255,255,.04); }
+        .nav-link.active { color:#C5B358; background:rgba(197,179,88,.08); }
+
+        /* ── Drop zone ── */
+        #dropzone {
+            margin:10px 14px 0; border:1px dashed #2a2a2a; border-radius:4px;
+            padding:14px 20px; text-align:center; color:#444; font-size:.75rem;
+            cursor:pointer; transition:border-color .15s, color .15s; flex-shrink:0;
+        }
+        #dropzone.drag { border-color:#C5B358; color:#C5B358; }
+        #dropzone label { cursor:pointer; }
+        #dropzone input { display:none; }
+        #dropzone span { color:#C5B358; text-decoration:underline; cursor:pointer; }
+        #dropzone.compact { padding:6px 20px; }
+
+        /* ── Stats bar ── */
+        #stats { display:flex; gap:14px; padding:7px 14px; font-size:.68rem; color:#444; border-bottom:1px solid #1a1a1a; flex-shrink:0; }
+        .stat-badge { display:inline-flex; align-items:center; gap:5px; }
+        .stat-dot { width:7px; height:7px; border-radius:50%; }
+        #clear-btn { margin-left:auto; color:#4a2a2a; cursor:pointer; font-size:.65rem; border:none; background:none; font-family:inherit; }
+        #clear-btn:hover { color:#c84040; }
+
+        /* ── Main layout ── */
+        .main { display:flex; flex:1; overflow:hidden; }
+
+        /* ── Left: file list ── */
+        #file-list { width:260px; flex-shrink:0; border-right:1px solid #1e1e1e; display:flex; flex-direction:column; overflow:hidden; }
+        .fl-group { flex-shrink:0; }
+        .fl-group-head { padding:5px 10px; background:#161616; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:#444; border-bottom:1px solid #1a1a1a; cursor:pointer; display:flex; align-items:center; gap:5px; }
+        .fl-group-head:hover { color:#666; }
+        .fl-count { margin-left:auto; color:#333; }
+        .fl-group-body { overflow-y:auto; }
+        .fl-item { padding:4px 14px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-left:2px solid transparent; font-size:.72rem; }
+        .fl-item:hover { background:rgba(255,255,255,.03); }
+        .fl-item.active { border-left-color:#C5B358; color:#C5B358; background:rgba(197,179,88,.06); }
+        .fl-item.active.vm  { border-left-color:#5a9aaa; color:#7ab8c8; }
+        .fl-item.active.rm  { border-left-color:#666; color:#999; }
+        .fl-item.fl-missing { color:#3a2020; border-left-color:transparent; font-style:italic; }
+
+        /* ── Right: tree ── */
+        #tree-panel { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+        #tree-head { padding:7px 14px; background:#161616; border-bottom:1px solid #1e1e1e; flex-shrink:0; display:flex; align-items:baseline; gap:10px; }
+        #tree-title { font-size:.75rem; color:#C5B358; }
+        #tree-sub   { font-size:.62rem; color:#444; }
+        #tree-body  { flex:1; overflow-y:auto; padding:6px 0; }
+        #tree-body::-webkit-scrollbar { width:3px; }
+        #tree-body::-webkit-scrollbar-thumb { background:#2a2a2a; border-radius:2px; }
+
+        /* ── Empty state ── */
+        .empty { display:flex; align-items:center; justify-content:center; flex:1; color:#2a2a2a; font-size:.8rem; }
+
+        /* ── Tree nodes ── */
+        .tnode { user-select:none; }
+        .trow {
+            display:flex; align-items:center; gap:5px;
+            padding:3px 0; cursor:pointer; white-space:nowrap;
+            border-left:2px solid transparent;
+        }
+        .trow:hover { background:rgba(255,255,255,.025); }
+        .trow.topen { }
+        .tindent { display:inline-block; flex-shrink:0; }
+        .tarrow { font-size:8px; color:#333; transition:transform .1s; flex-shrink:0; width:10px; text-align:center; }
+        .topen > .trow-inner > .tarrow { transform:rotate(90deg); }
+        .tchildren { display:none; }
+        .topen > .tchildren { display:block; }
+
+        .ticon { font-size:.7rem; flex-shrink:0; }
+        .tname { flex:1; overflow:hidden; text-overflow:ellipsis; }
+        .tpath { font-size:.58rem; color:#333; margin-left:4px; }
+        .tbadge { font-size:.55rem; padding:0 4px; border-radius:2px; flex-shrink:0; }
+
+        /* type colours */
+        .t-vmd  { color:#C5B358; }
+        .t-vm   { color:#7ab8c8; }
+        .t-rm   { color:#888; }
+        .t-miss { color:#5a2a2a; font-style:italic; }
+        .t-cycle { color:#806090; }
+
+        .tbadge.vmd  { background:rgba(197,179,88,.15); color:#a09040; }
+        .tbadge.vm   { background:rgba(90,154,170,.15); color:#4a8898; }
+        .tbadge.rm   { background:rgba(80,80,80,.2); color:#666; }
+        .tbadge.miss { background:rgba(120,30,30,.25); color:#7a3030; }
+        .tbadge.cycle { background:rgba(100,60,140,.2); color:#806090; }
+
+        .tcheck { font-size:.65rem; flex-shrink:0; }
+        .tcheck.ok   { color:#3a7a3a; }
+        .tcheck.miss { color:#7a2a2a; }
+        .tcheck.cyc  { color:#806090; }
+
+        /* ── Missing summary ── */
+        #miss-panel { border-top:1px solid #1a1a1a; padding:8px 14px; flex-shrink:0; max-height:160px; overflow-y:auto; }
+        #miss-panel:empty { display:none; }
+        .miss-head { font-size:.6rem; letter-spacing:.1em; color:#5a2a2a; text-transform:uppercase; margin-bottom:5px; }
+        .miss-item { font-size:.68rem; color:#5a3030; padding:1px 0; }
+        .miss-item::before { content:'✗ '; color:#7a2a2a; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>&#9671; VMD INSPECTOR</h1>
+    <span class="hint">Trascina file VMD / variantmesh / rigid_model — analisi composizione a cascata</span>
+</header>
+<nav class="page-nav">
+    <a href="vmd-viewer.html" class="nav-link">&#9671; VMD Viewer</a>
+    <a href="vmd-inspector.html" class="nav-link active">&#9741; VMD Inspector</a>
+</nav>
+
+<div id="dropzone">
+    <label>
+        <input type="file" id="file-input" multiple accept=".variantmeshdefinition,.variantmesh,.rigid_model_v2">
+        Trascina qui i file <strong>.variantmeshdefinition</strong> / <strong>.variantmesh</strong> / <strong>.rigid_model_v2</strong>
+        &nbsp;·&nbsp; <span>seleziona file</span>
+    </label>
+</div>
+
+<div id="stats" style="display:none">
+    <span class="stat-badge"><span class="stat-dot" style="background:#C5B358"></span><span id="cnt-vmd">0 VMD</span></span>
+    <span class="stat-badge"><span class="stat-dot" style="background:#7ab8c8"></span><span id="cnt-vm">0 variantmesh</span></span>
+    <span class="stat-badge"><span class="stat-dot" style="background:#666"></span><span id="cnt-rm">0 rigid_model</span></span>
+    <span class="stat-badge" id="cnt-miss-badge" style="display:none"><span class="stat-dot" style="background:#7a2a2a"></span><span id="cnt-miss"></span></span>
+    <button id="clear-btn" onclick="clearAll()">✕ Cancella tutto</button>
+</div>
+
+<div class="main">
+    <div id="file-list">
+        <div id="fl-empty" class="empty" style="font-size:.7rem">Nessun file caricato</div>
+        <div id="fl-vmd"  class="fl-group" style="display:none">
+            <div class="fl-group-head" onclick="toggleGroup('fl-vmd')">
+                <span style="color:#C5B358">◈</span> variantmeshdefinition <span class="fl-count" id="fc-vmd"></span>
+            </div>
+            <div class="fl-group-body" id="fb-vmd"></div>
+        </div>
+        <div id="fl-vm" class="fl-group" style="display:none">
+            <div class="fl-group-head" onclick="toggleGroup('fl-vm')">
+                <span style="color:#7ab8c8">◇</span> variantmesh <span class="fl-count" id="fc-vm"></span>
+            </div>
+            <div class="fl-group-body" id="fb-vm"></div>
+        </div>
+        <div id="fl-rm" class="fl-group" style="display:none">
+            <div class="fl-group-head" onclick="toggleGroup('fl-rm')">
+                <span style="color:#666">○</span> rigid_model_v2 <span class="fl-count" id="fc-rm"></span>
+            </div>
+            <div class="fl-group-body" id="fb-rm"></div>
+        </div>
+    </div>
+
+    <div id="tree-panel">
+        <div id="tree-head" style="display:none">
+            <span id="tree-title"></span>
+            <span id="tree-sub"></span>
+        </div>
+        <div id="tree-body">
+            <div class="empty" id="tree-empty">Seleziona un file per vedere la composizione</div>
+        </div>
+        <div id="miss-panel"></div>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+// ── Storage ───────────────────────────────────────────────────────────────────
+// Map<lowerName, { name, type, refs: [{path, base, type}] }>
+const FILES = new Map();
+let selectedKey = null;
+
+const EXT_RE = /\.(variantmeshdefinition|variantmesh|rigid_model_v2)$/i;
+const ATTR_RE = /["']([^"'\s]+\.(?:variantmeshdefinition|variantmesh|rigid_model_v2))["']/gi;
+const TEXT_RE = /([^\s<>"']+\.(?:variantmeshdefinition|variantmesh|rigid_model_v2))/gi;
+
+function fileType(name) {
+    const n = name.toLowerCase();
+    if (n.endsWith('.variantmeshdefinition')) return 'vmd';
+    if (n.endsWith('.variantmesh'))           return 'vm';
+    if (n.endsWith('.rigid_model_v2'))        return 'rm';
+    return 'unknown';
+}
+
+function basename(path) { return path.split(/[\\/]/).pop(); }
+function baseKey(path)  { return basename(path).toLowerCase(); }
+
+function parseRefs(content) {
+    const seen = new Set();
+    const refs  = [];
+
+    const add = (path) => {
+        const k = path.toLowerCase();
+        if (!seen.has(k) && EXT_RE.test(path)) {
+            seen.add(k);
+            refs.push({ path, base: basename(path), bkey: baseKey(path), type: fileType(path) });
+        }
+    };
+
+    // XML walk
+    try {
+        const doc = new DOMParser().parseFromString(content, 'text/xml');
+        if (!doc.querySelector('parseerror')) {
+            const walk = el => {
+                for (const attr of el.attributes) add(attr.value.trim());
+                if (!el.children.length) add(el.textContent.trim());
+                for (const child of el.children) walk(child);
+            };
+            walk(doc.documentElement);
+        }
+    } catch(_) {}
+
+    // Regex fallback
+    let m;
+    ATTR_RE.lastIndex = 0;
+    while ((m = ATTR_RE.exec(content)) !== null) add(m[1]);
+    TEXT_RE.lastIndex = 0;
+    while ((m = TEXT_RE.exec(content)) !== null) add(m[1]);
+
+    return refs;
+}
+
+// ── File ingestion ────────────────────────────────────────────────────────────
+
+async function ingestFiles(fileList) {
+    const promises = [];
+    for (const file of fileList) {
+        const type = fileType(file.name);
+        if (type === 'unknown') continue;
+        const key = file.name.toLowerCase();
+        if (type === 'rm') {
+            FILES.set(key, { name: file.name, type, refs: [] });
+        } else {
+            promises.push(new Promise(res => {
+                const r = new FileReader();
+                r.onload = e => { FILES.set(key, { name: file.name, type, refs: parseRefs(e.target.result) }); res(); };
+                r.readAsText(file);
+            }));
+        }
+    }
+    await Promise.all(promises);
+    refreshUI();
+}
+
+// ── Tree builder ──────────────────────────────────────────────────────────────
+
+function buildNode(key, ancestors) {
+    const entry = FILES.get(key);
+    if (!entry) return { key, missing: true };
+    if (ancestors.has(key)) return { key, entry, cycle: true };
+    const next = new Set(ancestors); next.add(key);
+    return { key, entry, children: entry.refs.map(r => ({ ref: r, child: buildNode(r.bkey, next) })) };
+}
+
+function collectMissing(node, out = new Set()) {
+    if (node.missing) { out.add(node.key); return out; }
+    if (node.cycle)   return out;
+    for (const { child } of (node.children || [])) collectMissing(child, out);
+    return out;
+}
+
+// ── Tree render ───────────────────────────────────────────────────────────────
+
+function typeClass(type) { return { vmd:'t-vmd', vm:'t-vm', rm:'t-rm' }[type] || 't-rm'; }
+function typeBadge(type) { return { vmd:'VMD', vm:'VM', rm:'RM' }[type] || '?'; }
+function typeIcon(type)  { return { vmd:'◈', vm:'◇', rm:'○' }[type] || '·'; }
+
+function renderNode(node, depth, ref) {
+    const indent = depth * 16;
+    const dispName = ref ? ref.base : node.key;
+
+    if (node.missing) {
+        return `<div class="tnode">
+            <div class="trow" style="padding-left:${8 + indent}px">
+                <span class="tcheck miss">✗</span>
+                <span class="ticon t-miss">?</span>
+                <span class="tname t-miss">${esc(dispName)}</span>
+                ${ref ? `<span class="tpath t-miss">${esc(dirOf(ref.path))}</span>` : ''}
+                <span class="tbadge miss">${ref ? typeBadge(ref.type) : '?'} MISSING</span>
+            </div>
+        </div>`;
+    }
+
+    if (node.cycle) {
+        return `<div class="tnode">
+            <div class="trow" style="padding-left:${8 + indent}px">
+                <span class="tcheck cyc">↺</span>
+                <span class="ticon t-cycle">◈</span>
+                <span class="tname t-cycle">${esc(dispName)}</span>
+                <span class="tbadge cycle">CICLO</span>
+            </div>
+        </div>`;
+    }
+
+    const { entry, children } = node;
+    const hasChildren = children && children.length > 0;
+    const cls = typeClass(entry.type);
+    const icon = typeIcon(entry.type);
+    const badge = typeBadge(entry.type);
+    const missingCount = children ? children.filter(c => c.child.missing).length : 0;
+
+    const id = 'tn_' + Math.random().toString(36).slice(2);
+    const arrowHtml = hasChildren
+        ? `<span class="tarrow" onclick="event.stopPropagation();toggleNode('${id}')">&#9654;</span>`
+        : `<span style="width:10px;display:inline-block;flex-shrink:0"></span>`;
+
+    const childrenHtml = hasChildren
+        ? `<div class="tchildren">${children.map(({ref:r, child}) => renderNode(child, depth + 1, r)).join('')}</div>`
+        : '';
+
+    const missBadge = missingCount > 0
+        ? `<span class="tbadge miss">✗ ${missingCount} missing</span>`
+        : `<span class="tbadge ${entry.type}">${badge}</span>`;
+
+    return `<div class="tnode topen" id="${id}">
+        <div class="trow ${cls}" style="padding-left:${8 + indent}px" ${hasChildren ? `onclick="toggleNode('${id}')"` : ''}>
+            ${arrowHtml}
+            <span class="tcheck ok">✓</span>
+            <span class="ticon ${cls}">${icon}</span>
+            <span class="tname ${cls}">${esc(entry.name)}</span>
+            ${ref ? `<span class="tpath">${esc(dirOf(ref.path))}</span>` : ''}
+            ${missBadge}
+        </div>
+        ${childrenHtml}
+    </div>`;
+}
+
+function dirOf(path) {
+    const parts = path.replace(/\\/g,'/').split('/');
+    return parts.length > 1 ? parts.slice(0,-1).join('/') + '/' : '';
+}
+
+function toggleNode(id) {
+    document.getElementById(id)?.classList.toggle('topen');
+}
+
+// ── Select & display ──────────────────────────────────────────────────────────
+
+function selectFile(key) {
+    selectedKey = key;
+    document.querySelectorAll('.fl-item').forEach(el => el.classList.remove('active'));
+    const el = document.querySelector(`.fl-item[data-key="${CSS.escape(key)}"]`);
+    if (el) el.classList.add('active');
+
+    const entry = FILES.get(key);
+    const body  = document.getElementById('tree-body');
+    const head  = document.getElementById('tree-head');
+    const miss  = document.getElementById('miss-panel');
+
+    head.style.display = 'flex';
+    document.getElementById('tree-title').textContent = entry ? entry.name : key;
+    document.getElementById('tree-sub').textContent   = entry ? entry.type.toUpperCase() : '';
+
+    if (!entry && !FILES.has(key)) {
+        body.innerHTML = '<div class="empty">File non caricato</div>';
+        miss.innerHTML = '';
+        return;
+    }
+
+    const node    = buildNode(key, new Set());
+    const missing = collectMissing(node);
+
+    document.getElementById('tree-empty').style.display = 'none';
+    body.innerHTML = renderNode(node, 0, null);
+
+    if (missing.size) {
+        const items = [...missing].map(k => `<div class="miss-item">${esc(k)}</div>`).join('');
+        miss.innerHTML = `<div class="miss-head">✗ File mancanti (${missing.size})</div>${items}`;
+    } else {
+        miss.innerHTML = '';
+    }
+}
+
+// ── UI refresh ────────────────────────────────────────────────────────────────
+
+function refreshUI() {
+    const vmds = [...FILES.values()].filter(f => f.type === 'vmd');
+    const vms  = [...FILES.values()].filter(f => f.type === 'vm');
+    const rms  = [...FILES.values()].filter(f => f.type === 'rm');
+
+    const allReferenced = new Set();
+    for (const f of FILES.values()) f.refs.forEach(r => allReferenced.add(r.bkey));
+
+    const totalMiss = countTotalMissing();
+
+    // Stats
+    document.getElementById('stats').style.display = FILES.size ? 'flex' : 'none';
+    document.getElementById('cnt-vmd').textContent = `${vmds.length} VMD`;
+    document.getElementById('cnt-vm').textContent  = `${vms.length} variantmesh`;
+    document.getElementById('cnt-rm').textContent  = `${rms.length} rigid_model`;
+    const missB = document.getElementById('cnt-miss-badge');
+    if (totalMiss > 0) {
+        missB.style.display = 'inline-flex';
+        document.getElementById('cnt-miss').textContent = `${totalMiss} missing`;
+    } else { missB.style.display = 'none'; }
+
+    // Drop zone compact
+    document.getElementById('dropzone').classList.toggle('compact', FILES.size > 0);
+
+    // File list
+    document.getElementById('fl-empty').style.display = FILES.size ? 'none' : 'flex';
+
+    renderGroup('fl-vmd', 'fb-vmd', 'fc-vmd', vmds, allReferenced);
+    renderGroup('fl-vm',  'fb-vm',  'fc-vm',  vms,  allReferenced);
+    renderGroup('fl-rm',  'fb-rm',  'fc-rm',  rms,  allReferenced);
+
+    if (selectedKey) selectFile(selectedKey);
+}
+
+function renderGroup(groupId, bodyId, cntId, entries, allReferenced) {
+    const group = document.getElementById(groupId);
+    const body  = document.getElementById(bodyId);
+    const cnt   = document.getElementById(cntId);
+    if (!entries.length) { group.style.display = 'none'; return; }
+    group.style.display = 'block';
+    cnt.textContent = entries.length;
+    body.innerHTML = entries.map(f => {
+        const key = f.name.toLowerCase();
+        const isRoot = !allReferenced.has(key);
+        const rootMark = isRoot ? ' <span style="color:#3a3a3a;font-size:.55rem">ROOT</span>' : '';
+        return `<div class="fl-item ${f.type}" data-key="${esc(key)}" onclick="selectFile('${esc(key)}')" title="${esc(f.name)}">${esc(f.name)}${rootMark}</div>`;
+    }).join('');
+}
+
+function countTotalMissing() {
+    const allReferenced = new Set();
+    for (const f of FILES.values()) f.refs.forEach(r => allReferenced.add(r.bkey));
+    let count = 0;
+    for (const k of allReferenced) if (!FILES.has(k)) count++;
+    return count;
+}
+
+function toggleGroup(id) {
+    const body = document.getElementById(id).querySelector('.fl-group-body');
+    if (body) body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
+function clearAll() {
+    FILES.clear(); selectedKey = null;
+    document.getElementById('tree-body').innerHTML = '<div class="empty" id="tree-empty">Seleziona un file per vedere la composizione</div>';
+    document.getElementById('tree-head').style.display = 'none';
+    document.getElementById('miss-panel').innerHTML = '';
+    refreshUI();
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Drop / input events ───────────────────────────────────────────────────────
+
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', e => { dz.classList.remove('drag'); });
+dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag');
+    if (e.dataTransfer.files.length) ingestFiles(e.dataTransfer.files);
+});
+document.getElementById('file-input').addEventListener('change', e => {
+    if (e.target.files.length) { ingestFiles(e.target.files); e.target.value = ''; }
+});
+</script>
+</body>
+</html>
