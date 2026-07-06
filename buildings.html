@@ -260,9 +260,11 @@ const CULT_GRID  = [['romani','gauls'],['picti','belgae'],['hiberni','britanni']
 const CULT_COLOR = { romani:'#cc2222', gauls:'#999900', picti:'#1144cc', belgae:'#bb6600', hiberni:'#118833', britanni:'#1166ee' };
 
 const CATEGORIES = [
-    { id:'food',     label:'Food',     color:'#3a6010' },
-    { id:'religion', label:'Religion', color:'#6a1880' },
-    { id:'society',  label:'Society',  color:'#7a5000' },
+    { id:'food',              label:'Food',               color:'#3a6010' },
+    { id:'religion',          label:'Religion',           color:'#6a1880' },
+    { id:'society',           label:'Society',            color:'#7a5000' },
+    { id:'principale_civile', label:'Principale Civile',  color:'#1a4a7a' },
+    { id:'principale_mil',    label:'Principale Militare',color:'#7a1a1a' },
 ];
 const CAT_PALETTE = ['#1a4a7a','#7a1a1a','#1a6a5a','#5a4a1a','#4a1a5a','#2a5a4a','#6a4a0a','#4a3060'];
 
@@ -478,6 +480,58 @@ const BUILDINGS = [
           { label:'A', nodes:['Hall of the Vergobret','Senate of the Tribe','Grand Council of Gaul'] },
           { label:'B', nodes:['Druid Court','Sacred Tribunal','Seat of the Arch Druid'] },
       ]}
+    },
+
+    // ── PRINCIPALE CIVILE ──────────────────────────────────────────────────────
+    { id:'civ_romani', category:'principale_civile', name:'Civile — Romani',
+      cultures:['romani'],
+      chain:{ type:'linear', nodes:['Vicus','Civitas','Municipium','Colonia'] }
+    },
+    { id:'civ_britanni', category:'principale_civile', name:'Civile — Britanni',
+      cultures:['britanni'],
+      chain:{ type:'linear', nodes:['Tref','Tref Mawr','Cantref','Caer'] }
+    },
+    { id:'civ_picti', category:'principale_civile', name:'Civile — Picti',
+      cultures:['picti'],
+      chain:{ type:'linear', nodes:['Tùn','Baile','Ráth','Broch'] }
+    },
+    { id:'civ_hiberni', category:'principale_civile', name:'Civile — Hiberni',
+      cultures:['hiberni'],
+      chain:{ type:'linear', nodes:['Lios','Ráth','Caiseal','Cathair'] }
+    },
+    { id:'civ_gauls', category:'principale_civile', name:'Civile — Gauls',
+      cultures:['gauls'],
+      chain:{ type:'linear', nodes:['—','—','—','—'] }
+    },
+    { id:'civ_belgae', category:'principale_civile', name:'Civile — Belgae',
+      cultures:['belgae'],
+      chain:{ type:'linear', nodes:['—','—','—','—'] }
+    },
+
+    // ── PRINCIPALE MILITARE ────────────────────────────────────────────────────
+    { id:'mil_romani', category:'principale_mil', name:'Militare — Romani',
+      cultures:['romani'],
+      chain:{ type:'linear', nodes:['Castellum','Castra Stativa','Castra Maiora','Colonia Veteranorum'] }
+    },
+    { id:'mil_britanni', category:'principale_mil', name:'Militare — Britanni',
+      cultures:['britanni'],
+      chain:{ type:'linear', nodes:['Gwylfa','Dùn','Caer Mawr','Dùn Mawr'] }
+    },
+    { id:'mil_picti', category:'principale_mil', name:'Militare — Picti',
+      cultures:['picti'],
+      chain:{ type:'linear', nodes:['Gwylfa','Ráth','Dùn','Dùn Mòr'] }
+    },
+    { id:'mil_hiberni', category:'principale_mil', name:'Militare — Hiberni',
+      cultures:['hiberni'],
+      chain:{ type:'linear', nodes:['Dún','Ráth Mór','Caiseal','Dún Mór'] }
+    },
+    { id:'mil_gauls', category:'principale_mil', name:'Militare — Gauls',
+      cultures:['gauls'],
+      chain:{ type:'linear', nodes:['—','—','—','—'] }
+    },
+    { id:'mil_belgae', category:'principale_mil', name:'Militare — Belgae',
+      cultures:['belgae'],
+      chain:{ type:'linear', nodes:['—','—','—','—'] }
     },
 ];
 
