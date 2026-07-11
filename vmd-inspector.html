@@ -22,37 +22,37 @@
         #dropzone {
             margin:10px 14px 0; border:1px dashed #2a2a2a; border-radius:4px;
             padding:14px 20px; text-align:center; color:#444; font-size:.75rem;
-            cursor:pointer; transition:border-color .15s, color .15s; flex-shrink:0;
+            transition:border-color .15s, color .15s; flex-shrink:0;
         }
         #dropzone.drag { border-color:#C5B358; color:#C5B358; }
-        #dropzone label { cursor:pointer; }
         #dropzone input { display:none; }
-        #dropzone span { color:#C5B358; text-decoration:underline; cursor:pointer; }
+        #dropzone span  { color:#C5B358; text-decoration:underline; cursor:pointer; }
+        #dropzone label { cursor:pointer; }
         #dropzone.compact { padding:6px 20px; }
 
         /* ── Stats bar ── */
-        #stats { display:flex; gap:14px; padding:7px 14px; font-size:.68rem; color:#444; border-bottom:1px solid #1a1a1a; flex-shrink:0; }
+        #stats { display:flex; gap:14px; padding:7px 14px; font-size:.68rem; color:#444; border-bottom:1px solid #1a1a1a; flex-shrink:0; flex-wrap:wrap; align-items:center; }
         .stat-badge { display:inline-flex; align-items:center; gap:5px; }
         .stat-dot { width:7px; height:7px; border-radius:50%; }
         #clear-btn { margin-left:auto; color:#4a2a2a; cursor:pointer; font-size:.65rem; border:none; background:none; font-family:inherit; }
         #clear-btn:hover { color:#c84040; }
+        #path-ind { font-size:.6rem; padding:1px 6px; border-radius:2px; background:rgba(60,120,60,.18); color:#4a8a4a; display:none; }
 
         /* ── Main layout ── */
         .main { display:flex; flex:1; overflow:hidden; }
 
         /* ── Left: file list ── */
-        #file-list { width:260px; flex-shrink:0; border-right:1px solid #1e1e1e; display:flex; flex-direction:column; overflow:hidden; }
+        #file-list { width:280px; flex-shrink:0; border-right:1px solid #1e1e1e; display:flex; flex-direction:column; overflow:hidden; }
         .fl-group { flex-shrink:0; }
         .fl-group-head { padding:5px 10px; background:#161616; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:#444; border-bottom:1px solid #1a1a1a; cursor:pointer; display:flex; align-items:center; gap:5px; }
         .fl-group-head:hover { color:#666; }
         .fl-count { margin-left:auto; color:#333; }
         .fl-group-body { overflow-y:auto; }
-        .fl-item { padding:4px 14px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-left:2px solid transparent; font-size:.72rem; }
+        .fl-item { padding:4px 14px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-left:2px solid transparent; font-size:.68rem; }
         .fl-item:hover { background:rgba(255,255,255,.03); }
         .fl-item.active { border-left-color:#C5B358; color:#C5B358; background:rgba(197,179,88,.06); }
-        .fl-item.active.vm  { border-left-color:#5a9aaa; color:#7ab8c8; }
-        .fl-item.active.rm  { border-left-color:#666; color:#999; }
-        .fl-item.fl-missing { color:#3a2020; border-left-color:transparent; font-style:italic; }
+        .fl-item.active.vm { border-left-color:#5a9aaa; color:#7ab8c8; }
+        .fl-item.active.rm { border-left-color:#666; color:#999; }
 
         /* ── Right: tree ── */
         #tree-panel { flex:1; overflow:hidden; display:flex; flex-direction:column; }
@@ -68,58 +68,64 @@
 
         /* ── Tree nodes ── */
         .tnode { user-select:none; }
-        .trow {
-            display:flex; align-items:center; gap:5px;
-            padding:3px 0; cursor:pointer; white-space:nowrap;
-            border-left:2px solid transparent;
-        }
+        .trow { display:flex; align-items:center; gap:5px; padding:3px 0; cursor:pointer; white-space:nowrap; border-left:2px solid transparent; }
         .trow:hover { background:rgba(255,255,255,.025); }
-        .trow.topen { }
-        .tindent { display:inline-block; flex-shrink:0; }
-        .tarrow { font-size:8px; color:#333; transition:transform .1s; flex-shrink:0; width:10px; text-align:center; }
-        .topen > .trow-inner > .tarrow { transform:rotate(90deg); }
         .tchildren { display:none; }
         .topen > .tchildren { display:block; }
 
+        .tarrow { font-size:8px; color:#333; transition:transform .1s; flex-shrink:0; width:10px; text-align:center; }
+        .topen > .trow > .tarrow { transform:rotate(90deg); }
         .ticon { font-size:.7rem; flex-shrink:0; }
         .tname { flex:1; overflow:hidden; text-overflow:ellipsis; }
-        .tpath { font-size:.58rem; color:#333; margin-left:4px; }
+        .tpath { font-size:.57rem; color:#2e2e2e; margin-left:2px; }
         .tbadge { font-size:.55rem; padding:0 4px; border-radius:2px; flex-shrink:0; }
 
         /* type colours */
-        .t-vmd  { color:#C5B358; }
-        .t-vm   { color:#7ab8c8; }
-        .t-rm   { color:#888; }
-        .t-miss { color:#5a2a2a; font-style:italic; }
+        .t-vmd   { color:#C5B358; }
+        .t-vm    { color:#7ab8c8; }
+        .t-rm    { color:#888; }
+        .t-miss  { color:#5a2a2a; font-style:italic; }
         .t-cycle { color:#806090; }
+        .t-amb   { color:#b08020; }
 
-        .tbadge.vmd  { background:rgba(197,179,88,.15); color:#a09040; }
-        .tbadge.vm   { background:rgba(90,154,170,.15); color:#4a8898; }
-        .tbadge.rm   { background:rgba(80,80,80,.2); color:#666; }
-        .tbadge.miss { background:rgba(120,30,30,.25); color:#7a3030; }
+        .tbadge.vmd   { background:rgba(197,179,88,.15); color:#a09040; }
+        .tbadge.vm    { background:rgba(90,154,170,.15); color:#4a8898; }
+        .tbadge.rm    { background:rgba(80,80,80,.2); color:#666; }
+        .tbadge.miss  { background:rgba(120,30,30,.25); color:#7a3030; }
         .tbadge.cycle { background:rgba(100,60,140,.2); color:#806090; }
+        .tbadge.amb   { background:rgba(150,100,0,.2); color:#b08020; }
 
-        .tcheck { font-size:.65rem; flex-shrink:0; }
+        .tcheck      { font-size:.65rem; flex-shrink:0; }
         .tcheck.ok   { color:#3a7a3a; }
         .tcheck.miss { color:#7a2a2a; }
         .tcheck.cyc  { color:#806090; }
+        .tcheck.amb  { color:#b08020; }
+
+        /* confidence badges */
+        .conf-badge { font-size:.52rem; padding:0 4px; border-radius:2px; flex-shrink:0; }
+        .conf-badge.basename { background:rgba(150,100,0,.2); color:#b08020; }
+        .conf-badge.suffix   { background:rgba(50,100,50,.18); color:#4a8a50; }
 
         /* ── Missing summary ── */
-        #miss-panel { border-top:1px solid #1a1a1a; padding:8px 14px; flex-shrink:0; max-height:160px; overflow-y:auto; }
+        #miss-panel { border-top:1px solid #1a1a1a; padding:8px 14px; flex-shrink:0; max-height:180px; overflow-y:auto; }
         #miss-panel:empty { display:none; }
         .miss-head { font-size:.6rem; letter-spacing:.1em; color:#5a2a2a; text-transform:uppercase; margin-bottom:5px; }
-        .miss-item { font-size:.68rem; color:#5a3030; padding:2px 0; display:flex; align-items:baseline; gap:6px; }
+        .miss-item { font-size:.67rem; color:#5a3030; padding:2px 0; display:flex; align-items:baseline; gap:6px; }
         .miss-item::before { content:'✗'; color:#7a2a2a; flex-shrink:0; }
-        .miss-ext { color:#7a4040; font-size:.6rem; flex-shrink:0; }
+        .miss-ext  { color:#7a4040; font-size:.59rem; flex-shrink:0; }
         .miss-path { color:#5a3030; }
+
         .warn-badge { font-size:.55rem; padding:0 4px; border-radius:2px; background:rgba(150,100,0,.18); color:#a07828; flex-shrink:0; }
+
+        /* ── Ambiguous candidates list ── */
+        .amb-cand { font-size:.58rem; color:#6a5020; padding:2px 0; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>&#9671; VMD INSPECTOR</h1>
-    <span class="hint">Trascina file VMD / variantmesh / rigid_model — analisi composizione a cascata</span>
+    <span class="hint">Trascina file o cartelle — analisi composizione a cascata con verifica percorso</span>
 </header>
 <nav class="page-nav">
     <a href="vmd-viewer.html" class="nav-link">&#9671; VMD Viewer</a>
@@ -129,8 +135,11 @@
 <div id="dropzone">
     <label>
         <input type="file" id="file-input" multiple accept=".variantmeshdefinition,.variantmesh,.rigid_model_v2">
-        Trascina qui i file <strong>.variantmeshdefinition</strong> / <strong>.variantmesh</strong> / <strong>.rigid_model_v2</strong>
-        &nbsp;·&nbsp; <span>seleziona file</span>
+        Trascina qui <strong>file</strong> o <strong>cartelle</strong> &nbsp;·&nbsp;
+        <span onclick="document.getElementById('file-input').click()">seleziona file</span>
+        &nbsp;·&nbsp;
+        <span onclick="document.getElementById('folder-input').click()">seleziona cartella</span>
+        <input type="file" id="folder-input" webkitdirectory multiple style="display:none">
     </label>
 </div>
 
@@ -139,13 +148,14 @@
     <span class="stat-badge"><span class="stat-dot" style="background:#7ab8c8"></span><span id="cnt-vm">0 variantmesh</span></span>
     <span class="stat-badge"><span class="stat-dot" style="background:#666"></span><span id="cnt-rm">0 rigid_model</span></span>
     <span class="stat-badge" id="cnt-miss-badge" style="display:none"><span class="stat-dot" style="background:#7a2a2a"></span><span id="cnt-miss"></span></span>
+    <span id="path-ind">&#10003; percorsi relativi</span>
     <button id="clear-btn" onclick="clearAll()">✕ Cancella tutto</button>
 </div>
 
 <div class="main">
     <div id="file-list">
         <div id="fl-empty" class="empty" style="font-size:.7rem">Nessun file caricato</div>
-        <div id="fl-vmd"  class="fl-group" style="display:none">
+        <div id="fl-vmd" class="fl-group" style="display:none">
             <div class="fl-group-head" onclick="toggleGroup('fl-vmd')">
                 <span style="color:#C5B358">◈</span> variantmeshdefinition <span class="fl-count" id="fc-vmd"></span>
             </div>
@@ -180,12 +190,12 @@
 <script>
 'use strict';
 
-// ── Storage ───────────────────────────────────────────────────────────────────
-// Map<lowerName, { name, type, refs: [{path, base, type}] }>
+// Map<key (normalized relative path or lowercase name), { name, relPath, type, refs }>
+// relPath = normalized relative path when available (folder drop), null otherwise
 const FILES = new Map();
 let selectedKey = null;
 
-const EXT_RE = /\.(variantmeshdefinition|variantmesh|rigid_model_v2)$/i;
+const EXT_RE  = /\.(variantmeshdefinition|variantmesh|rigid_model_v2)$/i;
 const ATTR_RE = /["']([^"'\s]+\.(?:variantmeshdefinition|variantmesh|rigid_model_v2))["']/gi;
 const TEXT_RE = /([^\s<>"']+\.(?:variantmeshdefinition|variantmesh|rigid_model_v2))/gi;
 
@@ -197,58 +207,111 @@ function fileType(name) {
     return 'unknown';
 }
 
-function basename(path) { return path.split(/[\\/]/).pop(); }
-function baseKey(path)  { return basename(path).toLowerCase(); }
+function normPath(p) { return String(p||'').replace(/\\/g,'/').replace(/^\/+/,'').toLowerCase(); }
+function basename(p) { return String(p).replace(/\\/g,'/').split('/').pop(); }
+function baseKey(p)  { return basename(p).toLowerCase(); }
 
 function parseRefs(content) {
-    const seen = new Set();
-    const refs  = [];
-
+    const seen = new Set(), refs = [];
     const add = (path) => {
+        path = path.trim();
         const k = path.toLowerCase();
         if (!seen.has(k) && EXT_RE.test(path)) {
             seen.add(k);
             refs.push({ path, base: basename(path), bkey: baseKey(path), type: fileType(path) });
         }
     };
-
-    // XML walk
     try {
         const doc = new DOMParser().parseFromString(content, 'text/xml');
-        if (!doc.querySelector('parseerror')) {
-            const walk = el => {
-                for (const attr of el.attributes) add(attr.value.trim());
-                if (!el.children.length) add(el.textContent.trim());
-                for (const child of el.children) walk(child);
-            };
-            walk(doc.documentElement);
-        }
+        const walk = el => {
+            for (const attr of el.attributes) add(attr.value);
+            if (!el.children.length) add(el.textContent);
+            for (const child of el.children) walk(child);
+        };
+        walk(doc.documentElement);
     } catch(_) {}
-
-    // Regex fallback
     let m;
-    ATTR_RE.lastIndex = 0;
-    while ((m = ATTR_RE.exec(content)) !== null) add(m[1]);
-    TEXT_RE.lastIndex = 0;
-    while ((m = TEXT_RE.exec(content)) !== null) add(m[1]);
-
+    ATTR_RE.lastIndex = 0; while ((m = ATTR_RE.exec(content)) !== null) add(m[1]);
+    TEXT_RE.lastIndex = 0; while ((m = TEXT_RE.exec(content)) !== null) add(m[1]);
     return refs;
 }
 
-// ── File ingestion ────────────────────────────────────────────────────────────
+// ── Path-aware matching ───────────────────────────────────────────────────────
+// Returns:
+//   { key, entry, confidence:'exact'|'suffix'|'basename' }
+//   { ambiguous:true, candidates:[{key,entry}], confidence }
+//   null → not found
+
+function findEntry(refPath) {
+    const ref   = normPath(refPath);
+    const bname = ref.split('/').pop();
+
+    // 1. Exact
+    if (FILES.has(ref)) return { key:ref, entry:FILES.get(ref), confidence:'exact' };
+
+    // 2. Suffix: ref ends with /key  OR  key ends with /ref
+    const suffixMatches = [];
+    for (const [key, entry] of FILES) {
+        if (ref.endsWith('/' + key) || key.endsWith('/' + ref)) {
+            suffixMatches.push({ key, entry });
+        }
+    }
+    if (suffixMatches.length === 1) return { ...suffixMatches[0], confidence:'suffix' };
+    if (suffixMatches.length  >  1) return { ambiguous:true, candidates:suffixMatches, confidence:'suffix' };
+
+    // 3. Basename only (fallback — may produce false positives!)
+    const bnameMatches = [];
+    for (const [key, entry] of FILES) {
+        if (key.split('/').pop() === bname) bnameMatches.push({ key, entry });
+    }
+    if (bnameMatches.length === 1) return { ...bnameMatches[0], confidence:'basename' };
+    if (bnameMatches.length  >  1) return { ambiguous:true, candidates:bnameMatches, confidence:'basename' };
+
+    return null;
+}
+
+// ── Folder-aware ingestion ────────────────────────────────────────────────────
+
+async function collectFromEntry(entry) {
+    if (entry.isFile) {
+        return new Promise(res => entry.file(f => {
+            f._relPath = entry.fullPath.replace(/^\/+/, '');
+            res([f]);
+        }, () => res([])));
+    }
+    if (entry.isDirectory) {
+        const reader = entry.createReader();
+        const all = [];
+        await new Promise(res => {
+            const read = () => reader.readEntries(batch => {
+                if (!batch.length) { res(); return; }
+                all.push(...batch); read();
+            });
+            read();
+        });
+        const results = await Promise.all(all.map(collectFromEntry));
+        return results.flat();
+    }
+    return [];
+}
 
 async function ingestFiles(fileList) {
     const promises = [];
     for (const file of fileList) {
         const type = fileType(file.name);
         if (type === 'unknown') continue;
-        const key = file.name.toLowerCase();
+        const relPath = normPath(file._relPath || file.webkitRelativePath || '');
+        const key = relPath || file.name.toLowerCase();
+        if (FILES.has(key)) continue;
         if (type === 'rm') {
-            FILES.set(key, { name: file.name, type, refs: [] });
+            FILES.set(key, { name:file.name, relPath:relPath||null, type, refs:[] });
         } else {
             promises.push(new Promise(res => {
                 const r = new FileReader();
-                r.onload = e => { FILES.set(key, { name: file.name, type, refs: parseRefs(e.target.result) }); res(); };
+                r.onload = e => {
+                    FILES.set(key, { name:file.name, relPath:relPath||null, type, refs:parseRefs(e.target.result) });
+                    res();
+                };
                 r.readAsText(file);
             }));
         }
@@ -259,57 +322,107 @@ async function ingestFiles(fileList) {
 
 // ── Tree builder ──────────────────────────────────────────────────────────────
 
-// fullPath = the original reference string (full game path); key = basename lc for lookup
-function buildNode(key, fullPath, ancestors) {
-    const entry = FILES.get(key);
-    if (!entry) return { key, fullPath, missing: true };
-    if (ancestors.has(key)) return { key, fullPath, entry, cycle: true };
+// Build node for a child reference (refPath = full game path from VMD)
+function buildNode(refPath, ancestors) {
+    const match    = findEntry(refPath);
+    const dispBase = basename(refPath);
+
+    if (!match) return { dispBase, fullPath:refPath, missing:true };
+
+    if (match.ambiguous) {
+        return { dispBase, fullPath:refPath, ambiguous:true, candidates:match.candidates, confidence:match.confidence };
+    }
+
+    const { key, entry, confidence } = match;
+    if (ancestors.has(key)) return { dispBase, fullPath:refPath, entry, cycle:true };
+
     const next = new Set(ancestors); next.add(key);
-    return { key, fullPath, entry, children: entry.refs.map(r => ({ ref: r, child: buildNode(r.bkey, r.path, next) })) };
+    return {
+        dispBase, fullPath:refPath, entry, key, confidence,
+        children: entry.refs.map(r => ({ ref:r, child:buildNode(r.path, next) }))
+    };
 }
 
-// Returns Map<bkey, {fullPath, type}>
+// Build root node from a known FILES key (left panel selection)
+function buildRootNode(fileKey) {
+    const entry = FILES.get(fileKey);
+    if (!entry) return { dispBase:fileKey, fullPath:fileKey, missing:true };
+    const next = new Set([fileKey]);
+    return {
+        dispBase:entry.name, fullPath:fileKey, entry, key:fileKey, confidence:'exact',
+        children: entry.refs.map(r => ({ ref:r, child:buildNode(r.path, next) }))
+    };
+}
+
+// Returns Map<fullPath, {type}>
 function collectMissing(node, out = new Map()) {
-    if (node.missing) { out.set(node.key, { fullPath: node.fullPath, type: '?' }); return out; }
-    if (node.cycle)   return out;
+    if (node.missing)   { out.set(node.fullPath, { type:'?' }); return out; }
+    if (node.cycle || node.ambiguous) return out;
     for (const { ref, child } of (node.children || [])) {
-        if (child.missing) {
-            out.set(child.key, { fullPath: child.fullPath || (ref ? ref.path : child.key), type: ref ? ref.type : '?' });
-        } else {
-            collectMissing(child, out);
-        }
+        if (child.missing) out.set(child.fullPath, { type: ref ? ref.type : '?' });
+        else collectMissing(child, out);
     }
     return out;
 }
 
 // ── Tree render ───────────────────────────────────────────────────────────────
 
-function typeClass(type) { return { vmd:'t-vmd', vm:'t-vm', rm:'t-rm' }[type] || 't-rm'; }
-function typeBadge(type) { return { vmd:'VMD', vm:'VM', rm:'RM' }[type] || '?'; }
-function typeExt(type)   { return { vmd:'.variantmeshdefinition', vm:'.variantmesh', rm:'.rigid_model_v2' }[type] || '?'; }
-function typeIcon(type)  { return { vmd:'◈', vm:'◇', rm:'○' }[type] || '·'; }
+function typeClass(t) { return { vmd:'t-vmd', vm:'t-vm', rm:'t-rm' }[t] || 't-rm'; }
+function typeBadge(t) { return { vmd:'VMD', vm:'VM', rm:'RM' }[t] || '?'; }
+function typeExt(t)   { return { vmd:'.variantmeshdefinition', vm:'.variantmesh', rm:'.rigid_model_v2' }[t] || '?'; }
+function typeIcon(t)  { return { vmd:'◈', vm:'◇', rm:'○' }[t] || '·'; }
+
+function dirOf(path) {
+    const parts = path.replace(/\\/g,'/').split('/');
+    return parts.length > 1 ? parts.slice(0,-1).join('/') + '/' : '';
+}
+function toggleNode(id) { document.getElementById(id)?.classList.toggle('topen'); }
 
 function renderNode(node, depth, ref) {
-    const indent = depth * 16;
-    const dispName = ref ? ref.base : node.key;
+    const indent   = depth * 16;
+    const dispName = node.dispBase || (ref ? ref.base : node.fullPath);
 
+    // ── Missing ──
     if (node.missing) {
-        const fullPath = node.fullPath || (ref ? ref.path : node.key);
         const extLabel = ref ? typeExt(ref.type) : '?';
         return `<div class="tnode">
-            <div class="trow" style="padding-left:${8 + indent}px" title="Cercato: ${esc(fullPath)}">
+            <div class="trow" style="padding-left:${8+indent}px" title="Cercato: ${esc(node.fullPath)}">
+                <span style="width:10px;flex-shrink:0"></span>
                 <span class="tcheck miss">✗</span>
                 <span class="ticon t-miss">?</span>
                 <span class="tname t-miss">${esc(dispName)}</span>
-                <span class="tpath t-miss" style="color:#4a2a2a;font-size:.58rem">${esc(fullPath)}</span>
+                <span class="tpath t-miss" style="color:#4a2020">${esc(node.fullPath)}</span>
                 <span class="tbadge miss">${esc(extLabel)} MISSING</span>
             </div>
         </div>`;
     }
 
+    // ── Ambiguous ──
+    if (node.ambiguous) {
+        const id   = 'tn_' + Math.random().toString(36).slice(2);
+        const conf = node.confidence === 'basename' ? '≈ solo nome' : '⊂ percorso';
+        return `<div class="tnode topen" id="${id}">
+            <div class="trow" style="padding-left:${8+indent}px" title="${esc(node.fullPath)}" onclick="toggleNode('${id}')">
+                <span class="tarrow">&#9654;</span>
+                <span class="tcheck amb">⚠</span>
+                <span class="ticon t-amb">?</span>
+                <span class="tname t-amb">${esc(dispName)}</span>
+                <span class="tpath" style="color:#6a5020">${esc(node.fullPath)}</span>
+                <span class="tbadge amb">AMBIGUO ${conf} (${node.candidates.length})</span>
+            </div>
+            <div class="tchildren">
+                ${node.candidates.map(c =>
+                    `<div class="amb-cand" style="padding-left:${8+indent+16}px">· ${esc(c.key)}</div>`
+                ).join('')}
+            </div>
+        </div>`;
+    }
+
+    // ── Cycle ──
     if (node.cycle) {
         return `<div class="tnode">
-            <div class="trow" style="padding-left:${8 + indent}px">
+            <div class="trow" style="padding-left:${8+indent}px">
+                <span style="width:10px;flex-shrink:0"></span>
                 <span class="tcheck cyc">↺</span>
                 <span class="ticon t-cycle">◈</span>
                 <span class="tname t-cycle">${esc(dispName)}</span>
@@ -318,13 +431,20 @@ function renderNode(node, depth, ref) {
         </div>`;
     }
 
-    const { entry, children } = node;
-    const hasChildren = children && children.length > 0;
-    const cls = typeClass(entry.type);
-    const icon = typeIcon(entry.type);
-    const badge = typeBadge(entry.type);
-    const missingCount = children ? children.filter(c => c.child.missing).length : 0;
-    const noRefs = entry.type !== 'rm' && entry.refs.length === 0;
+    // ── Present ──
+    const { entry, children, confidence } = node;
+    const hasChildren  = children && children.length > 0;
+    const cls          = typeClass(entry.type);
+    const icon         = typeIcon(entry.type);
+    const badge        = typeBadge(entry.type);
+    const missingCount = children ? children.filter(c => c.child.missing).length   : 0;
+    const ambigCount   = children ? children.filter(c => c.child.ambiguous).length : 0;
+    const noRefs       = entry.type !== 'rm' && entry.refs.length === 0;
+
+    const confBadge = {
+        basename: `<span class="conf-badge basename" title="Trovato solo per nome — potrebbe essere il file sbagliato se ne esistono con lo stesso nome in cartelle diverse">≈ solo nome</span>`,
+        suffix:   `<span class="conf-badge suffix" title="Trovato per percorso parziale">⊂ percorso</span>`,
+    }[confidence] || '';
 
     const id = 'tn_' + Math.random().toString(36).slice(2);
     const arrowHtml = hasChildren
@@ -332,38 +452,30 @@ function renderNode(node, depth, ref) {
         : `<span style="width:10px;display:inline-block;flex-shrink:0"></span>`;
 
     const childrenHtml = hasChildren
-        ? `<div class="tchildren">${children.map(({ref:r, child}) => renderNode(child, depth + 1, r)).join('')}</div>`
+        ? `<div class="tchildren">${children.map(({ref:r,child}) => renderNode(child, depth+1, r)).join('')}</div>`
         : '';
 
-    const warnBadge = noRefs ? `<span class="warn-badge">⚠ nessun ref trovato</span>` : '';
-
-    const missBadge = missingCount > 0
-        ? `<span class="tbadge miss">✗ ${missingCount} mancante${missingCount > 1 ? 'i' : ''}</span>`
+    const warnBadge  = noRefs ? `<span class="warn-badge">⚠ nessun ref</span>` : '';
+    const statusBadge = (missingCount > 0 || ambigCount > 0)
+        ? `<span class="tbadge miss">${[missingCount > 0 ? `✗ ${missingCount}` : '', ambigCount > 0 ? `⚠ ${ambigCount}` : ''].filter(Boolean).join(' ')}</span>`
         : `<span class="tbadge ${entry.type}">${badge}</span>`;
 
     const refPath = ref ? ref.path : node.fullPath || '';
+    const dirHint = ref ? dirOf(ref.path) : '';
 
     return `<div class="tnode topen" id="${id}">
-        <div class="trow ${cls}" style="padding-left:${8 + indent}px" title="${esc(refPath)}" ${hasChildren ? `onclick="toggleNode('${id}')"` : ''}>
+        <div class="trow ${cls}" style="padding-left:${8+indent}px" title="${esc(refPath)}" ${hasChildren ? `onclick="toggleNode('${id}')"` : ''}>
             ${arrowHtml}
             <span class="tcheck ok">✓</span>
             <span class="ticon ${cls}">${icon}</span>
             <span class="tname ${cls}">${esc(entry.name)}</span>
-            ${ref ? `<span class="tpath" style="font-size:.57rem">${esc(dirOf(ref.path))}</span>` : ''}
+            ${dirHint ? `<span class="tpath">${esc(dirHint)}</span>` : ''}
+            ${confBadge}
             ${warnBadge}
-            ${missBadge}
+            ${statusBadge}
         </div>
         ${childrenHtml}
     </div>`;
-}
-
-function dirOf(path) {
-    const parts = path.replace(/\\/g,'/').split('/');
-    return parts.length > 1 ? parts.slice(0,-1).join('/') + '/' : '';
-}
-
-function toggleNode(id) {
-    document.getElementById(id)?.classList.toggle('topen');
 }
 
 // ── Select & display ──────────────────────────────────────────────────────────
@@ -371,8 +483,7 @@ function toggleNode(id) {
 function selectFile(key) {
     selectedKey = key;
     document.querySelectorAll('.fl-item').forEach(el => el.classList.remove('active'));
-    const el = document.querySelector(`.fl-item[data-key="${CSS.escape(key)}"]`);
-    if (el) el.classList.add('active');
+    document.querySelector(`.fl-item[data-key="${CSS.escape(key)}"]`)?.classList.add('active');
 
     const entry = FILES.get(key);
     const body  = document.getElementById('tree-body');
@@ -383,23 +494,18 @@ function selectFile(key) {
     document.getElementById('tree-title').textContent = entry ? entry.name : key;
     document.getElementById('tree-sub').textContent   = entry ? entry.type.toUpperCase() : '';
 
-    if (!entry && !FILES.has(key)) {
-        body.innerHTML = '<div class="empty">File non caricato</div>';
-        miss.innerHTML = '';
-        return;
-    }
+    if (!entry) { body.innerHTML = '<div class="empty">File non caricato</div>'; miss.innerHTML = ''; return; }
 
-    const node    = buildNode(key, key, new Set());
+    const node    = buildRootNode(key);
     const missing = collectMissing(node);
 
     document.getElementById('tree-empty').style.display = 'none';
     body.innerHTML = renderNode(node, 0, null);
 
     if (missing.size) {
-        const items = [...missing.entries()].map(([k, m]) => {
+        const items = [...missing.entries()].map(([fp, m]) => {
             const ext = typeExt(m.type);
-            const display = m.fullPath || k;
-            return `<div class="miss-item"><span class="miss-ext">${esc(ext)}</span><span class="miss-path">${esc(display)}</span></div>`;
+            return `<div class="miss-item"><span class="miss-ext">${esc(ext)}</span><span class="miss-path">${esc(fp)}</span></div>`;
         }).join('');
         miss.innerHTML = `<div class="miss-head">✗ File mancanti (${missing.size})</div>${items}`;
     } else {
@@ -409,66 +515,81 @@ function selectFile(key) {
 
 // ── UI refresh ────────────────────────────────────────────────────────────────
 
+function computeReferencedKeys() {
+    const out = new Set();
+    for (const f of FILES.values())
+        for (const r of f.refs) {
+            const m = findEntry(r.path);
+            if (m && !m.ambiguous) out.add(m.key);
+        }
+    return out;
+}
+
+function countTotalMissing() {
+    let n = 0;
+    const seen = new Set();
+    for (const f of FILES.values())
+        for (const r of f.refs) {
+            const fp = normPath(r.path);
+            if (seen.has(fp)) continue; seen.add(fp);
+            if (!findEntry(r.path)) n++;
+        }
+    return n;
+}
+
 function refreshUI() {
     const vmds = [...FILES.values()].filter(f => f.type === 'vmd');
     const vms  = [...FILES.values()].filter(f => f.type === 'vm');
     const rms  = [...FILES.values()].filter(f => f.type === 'rm');
-
-    const allReferenced = new Set();
-    for (const f of FILES.values()) f.refs.forEach(r => allReferenced.add(r.bkey));
-
+    const hasPaths = [...FILES.values()].some(f => f.relPath);
     const totalMiss = countTotalMissing();
+    const refKeys   = computeReferencedKeys();
 
-    // Stats
     document.getElementById('stats').style.display = FILES.size ? 'flex' : 'none';
     document.getElementById('cnt-vmd').textContent = `${vmds.length} VMD`;
     document.getElementById('cnt-vm').textContent  = `${vms.length} variantmesh`;
     document.getElementById('cnt-rm').textContent  = `${rms.length} rigid_model`;
     const missB = document.getElementById('cnt-miss-badge');
-    if (totalMiss > 0) {
-        missB.style.display = 'inline-flex';
-        document.getElementById('cnt-miss').textContent = `${totalMiss} missing`;
-    } else { missB.style.display = 'none'; }
+    if (totalMiss > 0) { missB.style.display = 'inline-flex'; document.getElementById('cnt-miss').textContent = `${totalMiss} missing`; }
+    else missB.style.display = 'none';
 
-    // Drop zone compact
+    document.getElementById('path-ind').style.display = hasPaths ? 'inline-flex' : 'none';
     document.getElementById('dropzone').classList.toggle('compact', FILES.size > 0);
-
-    // File list
     document.getElementById('fl-empty').style.display = FILES.size ? 'none' : 'flex';
 
-    renderGroup('fl-vmd', 'fb-vmd', 'fc-vmd', vmds, allReferenced);
-    renderGroup('fl-vm',  'fb-vm',  'fc-vm',  vms,  allReferenced);
-    renderGroup('fl-rm',  'fb-rm',  'fc-rm',  rms,  allReferenced);
+    renderGroup('fl-vmd','fb-vmd','fc-vmd', vmds, refKeys);
+    renderGroup('fl-vm', 'fb-vm', 'fc-vm',  vms,  refKeys);
+    renderGroup('fl-rm', 'fb-rm', 'fc-rm',  rms,  refKeys);
 
     if (selectedKey) selectFile(selectedKey);
 }
 
-function renderGroup(groupId, bodyId, cntId, entries, allReferenced) {
+function renderGroup(groupId, bodyId, cntId, entries, refKeys) {
     const group = document.getElementById(groupId);
     const body  = document.getElementById(bodyId);
     const cnt   = document.getElementById(cntId);
     if (!entries.length) { group.style.display = 'none'; return; }
     group.style.display = 'block';
     cnt.textContent = entries.length;
+
+    // detect basename duplicates
+    const nameCounts = new Map();
+    for (const f of entries) nameCounts.set(f.name.toLowerCase(), (nameCounts.get(f.name.toLowerCase())||0)+1);
+
     body.innerHTML = entries.map(f => {
-        const key = f.name.toLowerCase();
-        const isRoot = !allReferenced.has(key);
-        const rootMark = isRoot ? ' <span style="color:#3a3a3a;font-size:.55rem">ROOT</span>' : '';
-        return `<div class="fl-item ${f.type}" data-key="${esc(key)}" onclick="selectFile('${esc(key)}')" title="${esc(f.name)}">${esc(f.name)}${rootMark}</div>`;
+        const key     = f.relPath || f.name.toLowerCase();
+        const isDup   = nameCounts.get(f.name.toLowerCase()) > 1;
+        const isRoot  = !refKeys.has(key);
+        const dupMark  = isDup  ? ' <span style="color:#b08020;font-size:.52rem" title="Stesso nome in cartelle diverse">⚠dup</span>' : '';
+        const rootMark = isRoot ? ' <span style="color:#3a3a3a;font-size:.52rem">ROOT</span>' : '';
+        const label   = f.relPath || f.name;
+        return `<div class="fl-item ${f.type}" data-key="${esc(key)}" onclick="selectFile('${esc(key)}')" title="${esc(f.relPath||f.name)}">${esc(label)}${dupMark}${rootMark}</div>`;
     }).join('');
 }
 
-function countTotalMissing() {
-    const allReferenced = new Set();
-    for (const f of FILES.values()) f.refs.forEach(r => allReferenced.add(r.bkey));
-    let count = 0;
-    for (const k of allReferenced) if (!FILES.has(k)) count++;
-    return count;
-}
-
 function toggleGroup(id) {
-    const body = document.getElementById(id).querySelector('.fl-group-body');
-    if (body) body.style.display = body.style.display === 'none' ? '' : 'none';
+    const b = document.getElementById(id)?.querySelector('.fl-group-body');
+    if (b) b.style.display = b.style.display === 'none' ? '' : 'none';
 }
 
 function clearAll() {
@@ -485,12 +606,27 @@ function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 
 const dz = document.getElementById('dropzone');
 dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag'); });
-dz.addEventListener('dragleave', e => { dz.classList.remove('drag'); });
-dz.addEventListener('drop', e => {
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', async e => {
     e.preventDefault(); dz.classList.remove('drag');
+    const items = [...(e.dataTransfer.items || [])];
+    if (items.length && items[0].webkitGetAsEntry) {
+        const allFiles = [];
+        for (const item of items) {
+            if (item.kind !== 'file') continue;
+            const entry = item.webkitGetAsEntry();
+            if (entry) allFiles.push(...await collectFromEntry(entry));
+            else { const f = item.getAsFile(); if (f) allFiles.push(f); }
+        }
+        if (allFiles.length) { ingestFiles(allFiles); return; }
+    }
     if (e.dataTransfer.files.length) ingestFiles(e.dataTransfer.files);
 });
+
 document.getElementById('file-input').addEventListener('change', e => {
+    if (e.target.files.length) { ingestFiles(e.target.files); e.target.value = ''; }
+});
+document.getElementById('folder-input').addEventListener('change', e => {
     if (e.target.files.length) { ingestFiles(e.target.files); e.target.value = ''; }
 });
 </script>
