@@ -36,7 +36,9 @@
         .stat-dot { width:7px; height:7px; border-radius:50%; }
         #clear-btn { margin-left:auto; color:#4a2a2a; cursor:pointer; font-size:.65rem; border:none; background:none; font-family:inherit; }
         #clear-btn:hover { color:#c84040; }
-        #path-ind { font-size:.6rem; padding:1px 6px; border-radius:2px; background:rgba(60,120,60,.18); color:#4a8a4a; display:none; }
+        #path-ind   { font-size:.6rem; padding:1px 6px; border-radius:2px; background:rgba(60,120,60,.18); color:#4a8a4a; display:none; }
+        #load-warn  { font-size:.6rem; padding:1px 6px; border-radius:2px; background:rgba(120,40,0,.2); color:#c06020; display:none; cursor:pointer; }
+        #load-warn:hover { background:rgba(120,40,0,.35); }
 
         /* ── Main layout ── */
         .main { display:flex; flex:1; overflow:hidden; }
@@ -149,6 +151,7 @@
     <span class="stat-badge"><span class="stat-dot" style="background:#666"></span><span id="cnt-rm">0 rigid_model</span></span>
     <span class="stat-badge" id="cnt-miss-badge" style="display:none"><span class="stat-dot" style="background:#7a2a2a"></span><span id="cnt-miss"></span></span>
     <span id="path-ind">&#10003; percorsi relativi</span>
+    <span id="load-warn" title="Clicca per vedere dettagli" onclick="showFailedDirs()"></span>
     <button id="clear-btn" onclick="clearAll()">✕ Cancella tutto</button>
 </div>
 
@@ -193,7 +196,8 @@
 // Map<key (normalized relative path or lowercase name), { name, relPath, type, refs }>
 // relPath = normalized relative path when available (folder drop), null otherwise
 const FILES = new Map();
-let selectedKey = null;
+let selectedKey  = null;
+const FAILED_DIRS = [];   // directories that could not be read
 
 const EXT_RE  = /\.(variantmeshdefinition|variantmesh|rigid_model_v2)$/i;
 const ATTR_RE = /["']([^"'\s]+\.(?:variantmeshdefinition|variantmesh|rigid_model_v2))["']/gi;
@@ -274,28 +278,47 @@ function findEntry(refPath) {
 
 async function collectFromEntry(entry) {
     if (entry.isFile) {
-        return new Promise(res => entry.file(f => {
-            f._relPath = entry.fullPath.replace(/^\/+/, '');
-            res([f]);
-        }, () => res([])));
+        return new Promise(res => entry.file(
+            f => { f._relPath = entry.fullPath.replace(/^\/+/, ''); res([f]); },
+            err => {
+                console.warn('[VMD Inspector] impossibile leggere file:', entry.fullPath, err);
+                FAILED_DIRS.push(entry.fullPath);
+                res([]);
+            }
+        ));
     }
     if (entry.isDirectory) {
         const reader = entry.createReader();
         const all = [];
         await new Promise(res => {
-            const read = () => reader.readEntries(batch => {
-                if (!batch.length) { res(); return; }
-                all.push(...batch); read();
-            });
+            const read = () => reader.readEntries(
+                batch => {
+                    if (!batch.length) { res(); return; }
+                    all.push(...batch);
+                    read();
+                },
+                err => {
+                    // Directory could not be read (permissions, symlink, special folder, etc.)
+                    console.warn('[VMD Inspector] impossibile leggere cartella:', entry.fullPath, err);
+                    FAILED_DIRS.push(entry.fullPath);
+                    res(); // resolve anyway so the rest of the tree continues
+                }
+            );
             read();
         });
-        const results = await Promise.all(all.map(collectFromEntry));
-        return results.flat();
+        // Process sequentially to avoid overwhelming the browser with concurrent FS ops
+        const files = [];
+        for (const e of all) {
+            const found = await collectFromEntry(e);
+            files.push(...found);
+        }
+        return files;
     }
     return [];
 }
 
 async function ingestFiles(fileList) {
+    FAILED_DIRS.length = 0;
     const promises = [];
     for (const file of fileList) {
         const type = fileType(file.name);
@@ -554,6 +577,13 @@ function refreshUI() {
     else missB.style.display = 'none';
 
     document.getElementById('path-ind').style.display = hasPaths ? 'inline-flex' : 'none';
+    const warnEl = document.getElementById('load-warn');
+    if (FAILED_DIRS.length > 0) {
+        warnEl.style.display = 'inline-flex';
+        warnEl.textContent = `⚠ ${FAILED_DIRS.length} cartel${FAILED_DIRS.length > 1 ? 'le' : 'la'} non leggibil${FAILED_DIRS.length > 1 ? 'i' : 'e'}`;
+    } else {
+        warnEl.style.display = 'none';
+    }
     document.getElementById('dropzone').classList.toggle('compact', FILES.size > 0);
     document.getElementById('fl-empty').style.display = FILES.size ? 'none' : 'flex';
 
@@ -592,8 +622,13 @@ function toggleGroup(id) {
     if (b) b.style.display = b.style.display === 'none' ? '' : 'none';
 }
 
+function showFailedDirs() {
+    if (!FAILED_DIRS.length) return;
+    alert('Cartelle/file non leggibili (' + FAILED_DIRS.length + '):\n\n' + FAILED_DIRS.join('\n'));
+}
+
 function clearAll() {
-    FILES.clear(); selectedKey = null;
+    FILES.clear(); selectedKey = null; FAILED_DIRS.length = 0;
     document.getElementById('tree-body').innerHTML = '<div class="empty" id="tree-empty">Seleziona un file per vedere la composizione</div>';
     document.getElementById('tree-head').style.display = 'none';
     document.getElementById('miss-panel').innerHTML = '';
