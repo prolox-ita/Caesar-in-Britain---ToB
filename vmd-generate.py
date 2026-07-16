@@ -179,6 +179,25 @@ def extract_dds_refs(filepath):
         return []
 
 
+def _resolve_model(ref, model_by_name):
+    """Percorso canonico per un ref .rigid_model_v2, None se non trovato.
+    Usa corrispondenza per suffisso di percorso quando più file hanno lo stesso
+    nome basename (evita false-positive da collisioni in cartelle diverse)."""
+    norm = ref.replace("\\", "/").lower()
+    name = norm.split("/")[-1]
+    candidates = model_by_name.get(name, [])
+    if not candidates:
+        return None
+    if len(candidates) == 1:
+        return candidates[0]
+    # Più candidati: prova suffisso del percorso
+    suffix_matches = [c for c in candidates
+                      if norm.endswith("/" + c.lower()) or c.lower().endswith("/" + norm)]
+    if suffix_matches:
+        return suffix_matches[0]
+    return candidates[0]   # fallback: primo trovato
+
+
 def build_data():
     print("\n── Scansione ──────────────────────────────")
     models_tree   = scan_models(CONFIG["models_roots"])
@@ -186,12 +205,14 @@ def build_data():
     center_vmds   = scan_center_vmds(CONFIG["vmds_root"], CONFIG.get("variants_root"))
     right_vmds    = scan_right_vmds(CONFIG["variants_root"])
 
-    # Mappa nome_file (lowercase) → path scansionato completo
-    # Es. "fp_dc_leather_skullcap.rigid_model_v2" → "characters/heads/fp_dc_leather_skullcap.rigid_model_v2"
-    model_by_name = {}
+    # Mappa nome_file (lowercase) → lista di percorsi completi.
+    # Usa una lista per gestire file con lo stesso nome in cartelle diverse
+    # (es. man/crests/foo.rm e characters/foo.rm): _resolve_model sceglie
+    # il candidato giusto usando il suffisso del percorso di riferimento.
+    model_by_name = {}   # basename_lower → [percorso_completo, ...]
     for folder, files in models_tree.items():
         for f in files:
-            model_by_name[f.lower()] = f"{folder}/{f}"
+            model_by_name.setdefault(f.lower(), []).append(f"{folder}/{f}")
 
     # Risolvi i model refs dei VMD centrali usando il nome file come chiave
     unresolved_models = 0
@@ -199,8 +220,9 @@ def build_data():
         resolved, missing, vm_refs = [], [], []
         for ref in vmd["models"]:
             name = Path(ref).name.lower()
-            if name in model_by_name:
-                resolved.append(model_by_name[name])
+            m = _resolve_model(ref, model_by_name)
+            if m:
+                resolved.append(m)
             elif name.endswith(".variantmesh"):
                 vm_refs.append(ref)   # file intermedio — non è ⚠
             else:
@@ -271,8 +293,9 @@ def build_data():
         resolved_m, missing_m, vm_refs_v = [], [], []
         for ref in variant.pop("_raw_models", []):
             name = Path(ref).name.lower()
-            if name in model_by_name:
-                resolved_m.append(model_by_name[name])
+            m = _resolve_model(ref, model_by_name)
+            if m:
+                resolved_m.append(m)
             elif name.endswith(".variantmesh"):
                 vm_refs_v.append(ref)   # file intermedio — non è ⚠
             else:
@@ -318,8 +341,8 @@ def build_data():
                 name = Path(ref).name.lower()
                 if name.endswith(".variantmesh"):
                     continue   # .variantmesh annidati: non ricorsiamo
-                if name in model_by_name:
-                    resolved = model_by_name[name]
+                resolved = _resolve_model(ref, model_by_name)
+                if resolved:
                     if resolved not in models_list:
                         models_list.append(resolved)
                 else:
@@ -369,9 +392,11 @@ def build_data():
         # Legge anche eventuali .hex con la stessa logica
         for ext in ("*.rigid_model_v2", "*.hex"):
             for bin_f in sorted(root_path.rglob(ext)):
-                model_path = model_by_name.get(bin_f.name.lower())
-                if model_path is None:
+                if bin_f.name.lower() not in model_by_name:
                     continue   # file non censito nella models_tree, salta
+                bin_rel    = bin_f.parent.relative_to(root_path)
+                bin_folder = str(bin_rel).replace("\\", "/") if str(bin_rel) != "." else root_path.name
+                model_path = f"{bin_folder}/{bin_f.name}"
                 models_read += 1
                 dds_refs = extract_dds_refs(bin_f)
                 for ref in dds_refs:
