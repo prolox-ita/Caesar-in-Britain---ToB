@@ -628,6 +628,7 @@
                     <canvas id="lavorataCanvas"></canvas>
                     <canvas id="overlayCanvas"></canvas>
                     <canvas id="markersCanvas"></canvas>
+                    <canvas id="resourcesCanvas"></canvas>
                     <canvas id="interactiveCanvas"></canvas>
                 </div>
             </div>
@@ -640,6 +641,7 @@
             <div class="view-slider" id="regionsSlider" style="display:flex">
                 <button class="vs-btn active" id="vsBtnMap" onclick="setViewMode('regions')">Map</button>
                 <button class="vs-btn" id="vsBtnWealth" onclick="setViewMode('wealth')">Wealth</button>
+                <button class="vs-btn" id="vsBtnResources" onclick="setViewMode('resources')">Resources</button>
             </div>
             <div class="view-slider" id="factionsSlider" style="display:none">
                 <button class="vs-btn active" id="vsBtnFactions" onclick="setViewMode('factions')">Factions</button>
@@ -865,6 +867,25 @@
             return '#' + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
         }
 
+        // --- Resource data ---
+        const RESOURCES = {
+            tin:    { label: 'Tin',    color: '#9eb3c7', abbr: 'TN' },
+            lead:   { label: 'Lead',   color: '#5c6a7a', abbr: 'PB' },
+            copper: { label: 'Copper', color: '#b87333', abbr: 'CU' },
+            bronze: { label: 'Bronze', color: '#cd7f32', abbr: 'BZ' },
+            iron:   { label: 'Iron',   color: '#708090', abbr: 'FE' },
+            silver: { label: 'Silver', color: '#aaaabc', abbr: 'AG' },
+            gold:   { label: 'Gold',   color: '#daa520', abbr: 'AU' },
+            wood:   { label: 'Wood',   color: '#3d6b3a', abbr: 'WD' },
+            salt:   { label: 'Salt',   color: '#b8ccd8', abbr: 'SA' },
+            amber:  { label: 'Amber',  color: '#d4820a', abbr: 'AM' },
+        };
+        const RESOURCES_KEY = 'cib_resources_v1';
+        let resourceData = {};
+        try { const rs = localStorage.getItem(RESOURCES_KEY); if (rs) resourceData = JSON.parse(rs); } catch(e) {}
+        function saveResources() { try { localStorage.setItem(RESOURCES_KEY, JSON.stringify(resourceData)); } catch(e) {} }
+        function getResource(key) { return resourceData[key] || null; }
+
         function calcCentroid(hexIdx) {
             if (!REGION_RUNS) return null;
             const runs = REGION_RUNS[hexIdx];
@@ -941,6 +962,32 @@
             ctx.restore();
         }
 
+        function drawResourceIcon(ctx, cx, cy, sz, resource) {
+            const def = RESOURCES[resource];
+            if (!def) return;
+            ctx.save();
+            ctx.translate(cx, cy);
+            const s = sz / 18;
+            ctx.shadowColor = 'rgba(0,0,0,0.65)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1;
+            ctx.beginPath();
+            ctx.arc(0, 0, 8 * s, 0, Math.PI * 2);
+            ctx.fillStyle = def.color;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+            ctx.lineWidth = 1.5 * s;
+            ctx.stroke();
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.font = `bold ${Math.max(6, Math.round(7 * s))}px 'Consolas','Courier New',monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(def.abbr, 0, 0.5 * s);
+            ctx.restore();
+        }
+
         function drawMarkers() {
             const ctx = markersCanvas.getContext('2d');
             ctx.clearRect(0, 0, markersCanvas.width, markersCanvas.height);
@@ -955,6 +1002,25 @@
                 if (!pos) return;
                 if (portoSet.has(region.new_key)) drawAnchor(ctx, pos.x * scaleX, pos.y * scaleY, sz);
                 else drawTemple(ctx, pos.x * scaleX, pos.y * scaleY, sz);
+            });
+        }
+
+        function drawResources() {
+            const ctx = resourcesCanvas.getContext('2d');
+            ctx.clearRect(0, 0, resourcesCanvas.width, resourcesCanvas.height);
+            if (viewMode !== 'resources') return;
+            if (!REGION_RUNS || resourcesCanvas.width === 0) return;
+            const scaleX = resourcesCanvas.width / MAP_W;
+            const scaleY = resourcesCanvas.height / MAP_H;
+            const sz = Math.max(10, Math.min(18, resourcesCanvas.width / 60));
+            HEX_LIST.forEach((hex, hexIdx) => {
+                const region = COLOR_MAP[hex];
+                if (!region || region.sea) return;
+                const res = getResource(region.new_key);
+                if (!res) return;
+                const pos = getMarkerPos(hexIdx);
+                if (!pos) return;
+                drawResourceIcon(ctx, pos.x * scaleX, pos.y * scaleY, sz, res);
             });
         }
 
@@ -1021,13 +1087,16 @@
                 if (data.edited && idx !== undefined) lavorataSet.add(idx);
                 if (data.porto) portoSet.add(key);
                 if (data.wealth !== undefined) wealthData[key] = data.wealth;
+                if (data.resource) resourceData[key] = data.resource;
             }
             saveLavorata();
             savePorto();
             saveWealth();
+            saveResources();
             drawLavorata();
             drawMarkers();
-            if (viewMode === 'wealth') drawFactions();
+            if (viewMode === 'wealth' || viewMode === 'resources') drawFactions();
+            drawResources();
         }
 
         function loadRegionStatusFromFile(inp) {
@@ -1056,6 +1125,9 @@
                 regionStatus[key].edited = idx !== undefined && lavorataSet.has(idx);
                 regionStatus[key].porto = portoSet.has(key);
                 regionStatus[key].wealth = getWealth(key);
+                const res = getResource(key);
+                if (res) regionStatus[key].resource = res;
+                else delete regionStatus[key].resource;
             }
             const blob = new Blob([JSON.stringify(regionStatus, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
@@ -1332,7 +1404,7 @@
 
         function _syncSubBtns() {
             const map = {
-                regions: 'vsBtnMap', wealth: 'vsBtnWealth',
+                regions: 'vsBtnMap', wealth: 'vsBtnWealth', resources: 'vsBtnResources',
                 factions: 'vsBtnFactions', cultures: 'vsBtnCultures'
             };
             Object.entries(map).forEach(([m, id]) => {
@@ -1349,13 +1421,19 @@
             document.getElementById("regionsSlider").style.display = !isFactions ? "flex" : "none";
             document.getElementById("factionsSlider").style.display = isFactions ? "flex" : "none";
             _syncSubBtns();
-            if (viewMode === 'factions' || viewMode === 'cultures' || viewMode === 'wealth') {
+            if (viewMode === 'factions' || viewMode === 'cultures' || viewMode === 'wealth' || viewMode === 'resources') {
                 drawFactions();
-                if (selectedSet.size === 0) { if (viewMode === 'wealth') showWealthLegend(); else showFactionLegend(); }
+                drawResources();
+                if (selectedSet.size === 0) {
+                    if (viewMode === 'wealth') showWealthLegend();
+                    else if (viewMode === 'resources') showResourceLegend();
+                    else showFactionLegend();
+                }
                 else if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx);
                 else showMultiSelectInfo();
             } else {
                 factionCanvas.getContext("2d").clearRect(0, 0, factionCanvas.width, factionCanvas.height);
+                drawResources(); // clears resourcesCanvas since viewMode !== 'resources'
                 if (selectedSet.size === 0) clearInfoPanel();
                 else if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx);
                 else showMultiSelectInfo();
@@ -1364,20 +1442,22 @@
 
         function setViewMode(subMode) {
             viewMode = subMode;
-            if (subMode === 'regions' || subMode === 'wealth') lastRegionsSubMode = subMode;
+            if (subMode === 'regions' || subMode === 'wealth' || subMode === 'resources') lastRegionsSubMode = subMode;
             else lastFactionsSubMode = subMode;
             _syncSubBtns();
-            if (subMode === 'factions' || subMode === 'cultures' || subMode === 'wealth') {
+            if (subMode === 'factions' || subMode === 'cultures' || subMode === 'wealth' || subMode === 'resources') {
                 drawFactions();
             } else {
                 factionCanvas.getContext("2d").clearRect(0, 0, factionCanvas.width, factionCanvas.height);
             }
+            drawResources();
             drawHighlight(currentHoverIdx);
             if (selectedSet.size === 1) showRegionInfo(currentSelectedIdx);
             else if (selectedSet.size > 1) showMultiSelectInfo();
             else {
                 if (subMode === 'factions' || subMode === 'cultures') showFactionLegend();
                 else if (subMode === 'wealth') showWealthLegend();
+                else if (subMode === 'resources') showResourceLegend();
                 else clearInfoPanel();
             }
         }
@@ -1391,6 +1471,7 @@
         const lavorataCanvas = document.getElementById("lavorataCanvas");
         const overlayCanvas = document.getElementById("overlayCanvas");
         const markersCanvas = document.getElementById("markersCanvas");
+        const resourcesCanvas = document.getElementById("resourcesCanvas");
         const interactiveCanvas = document.getElementById("interactiveCanvas");
         const infoPanel = document.getElementById("infoBody");
         const searchInput = document.getElementById("searchInput");
@@ -1406,16 +1487,17 @@
             const h = mapImage.clientHeight;
             if (w === 0 || h === 0) { requestAnimationFrame(resizeCanvases); return; }
             if (interactiveCanvas.width === w && interactiveCanvas.height === h) return;
-            [factionCanvas, bordersCanvas, lavorataCanvas, overlayCanvas, markersCanvas, interactiveCanvas].forEach(c => {
+            [factionCanvas, bordersCanvas, lavorataCanvas, overlayCanvas, markersCanvas, resourcesCanvas, interactiveCanvas].forEach(c => {
                 c.width = w; c.height = h;
                 c.style.width = w + "px"; c.style.height = h + "px";
             });
-            if (viewMode === 'factions' || viewMode === 'cultures' || viewMode === 'wealth') drawFactions();
+            if (viewMode === 'factions' || viewMode === 'cultures' || viewMode === 'wealth' || viewMode === 'resources') drawFactions();
             buildBorders(w, h);
             drawBorders();
             drawLavorata();
             drawHighlight(currentHoverIdx);
             drawMarkers();
+            drawResources();
         }
 
         function drawFactions() {
@@ -1428,8 +1510,8 @@
                 const region = COLOR_MAP[hex];
                 if (!region || region.sea) return;
                 const fname = FACTION_DATA[region.new_key];
-                // Wealth applies to all regions regardless of faction assignment
-                if (!fname && viewMode !== "wealth") return;
+                // Wealth and Resources apply to all regions regardless of faction assignment
+                if (!fname && viewMode !== "wealth" && viewMode !== "resources") return;
                 let col;
                 if (viewMode === "cultures") {
                     const cname = CULTURE_MAP[fname];
@@ -1437,6 +1519,10 @@
                     col = CULTURES[cname].color;
                 } else if (viewMode === "wealth") {
                     col = wealthColor(getEffectiveWealth(region.new_key));
+                } else if (viewMode === "resources") {
+                    const res = getResource(region.new_key);
+                    if (!res || !RESOURCES[res]) return;
+                    col = RESOURCES[res].color;
                 } else {
                     if (!FACTIONS[fname]) return;
                     col = FACTIONS[fname].color;
@@ -1668,13 +1754,20 @@
                     </label>
                 </div>
                 ${!region.sea ? `
-                <div class="detail-row" style="border-bottom:none;padding-top:8px;">
+                <div class="detail-row" style="padding-top:8px;">
                     <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#1144bb;font-size:1rem;">
                         <input type="checkbox" id="portoCheck" ${portoSet.has(region.new_key) ? "checked" : ""}
                                style="width:18px;height:18px;cursor:pointer;accent-color:#1144bb;">
                         Porto
                     </label>
                 </div>` : ''}
+                <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:12px;border-bottom:none;">
+                    <span class="detail-label">Risorsa:</span>
+                    <select class="assign-select" id="resourceSelect">
+                        <option value="">— Nessuna —</option>
+                        ${Object.entries(RESOURCES).map(([k, def]) => `<option value="${k}" ${getResource(region.new_key) === k ? 'selected' : ''}>${def.label}</option>`).join('')}
+                    </select>
+                </div>
             </div>
         </div>
     `;
@@ -1725,6 +1818,13 @@
             });
             document.getElementById("wealthNum").addEventListener("change", function () {
                 applyWealth(Math.max(100, Math.min(310, parseInt(this.value) || 150)));
+            });
+            document.getElementById("resourceSelect").addEventListener("change", function () {
+                const res = this.value;
+                if (res) resourceData[region.new_key] = res;
+                else delete resourceData[region.new_key];
+                saveResources();
+                if (viewMode === 'resources') { drawFactions(); drawResources(); }
             });
         }
 
@@ -1797,9 +1897,33 @@
         </div>`;
         }
 
+        function showResourceLegend() {
+            infoPanel.classList.remove("empty");
+            const counts = {};
+            Object.values(resourceData).forEach(r => { if (r) counts[r] = (counts[r] || 0) + 1; });
+            const items = Object.entries(RESOURCES).map(([key, def]) => {
+                const c = counts[key] || 0;
+                return `<div class="fl-item">
+                    <span class="legend-swatch" style="background:${def.color};border:2px solid rgba(255,255,255,0.4)"></span>
+                    <span class="fl-name">${def.label}</span>
+                    <span class="fl-count">${c}</span>
+                </div>`;
+            }).join('');
+            infoPanel.innerHTML = `
+        <div class="faction-legend">
+            <h3>Resources</h3>
+            ${items}
+            <div class="legend-unassigned" style="margin-top:8px">
+                <span class="legend-swatch" style="background:transparent;border:1.5px dashed #bbb"></span>
+                <span>None</span>
+            </div>
+        </div>`;
+        }
+
         function clearInfoPanel() {
             if (viewMode === 'factions' || viewMode === 'cultures') { showFactionLegend(); return; }
             if (viewMode === 'wealth') { showWealthLegend(); return; }
+            if (viewMode === 'resources') { showResourceLegend(); return; }
             infoPanel.classList.add("empty");
             infoPanel.innerHTML = "<p>Click on a region to view information</p>";
         }
