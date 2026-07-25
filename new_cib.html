@@ -882,9 +882,27 @@
         };
         const RESOURCES_KEY = 'cib_resources_v1';
         let resourceData = {};
-        try { const rs = localStorage.getItem(RESOURCES_KEY); if (rs) resourceData = JSON.parse(rs); } catch(e) {}
+        try {
+            const rs = localStorage.getItem(RESOURCES_KEY);
+            if (rs) {
+                const parsed = JSON.parse(rs);
+                for (const [k, v] of Object.entries(parsed)) {
+                    // migrate: string → array
+                    const arr = Array.isArray(v) ? v : (v ? [v] : []);
+                    if (arr.length) resourceData[k] = arr;
+                }
+            }
+        } catch(e) {}
         function saveResources() { try { localStorage.setItem(RESOURCES_KEY, JSON.stringify(resourceData)); } catch(e) {} }
-        function getResource(key) { return resourceData[key] || null; }
+        function getResources(key) { return resourceData[key] || []; }
+        function hasResource(key, res) { return getResources(key).includes(res); }
+        function toggleResource(key, res) {
+            const arr = getResources(key).slice();
+            const idx = arr.indexOf(res);
+            if (idx >= 0) arr.splice(idx, 1); else arr.push(res);
+            if (arr.length) resourceData[key] = arr; else delete resourceData[key];
+            saveResources();
+        }
 
         function calcCentroid(hexIdx) {
             if (!REGION_RUNS) return null;
@@ -962,29 +980,108 @@
             ctx.restore();
         }
 
-        function drawResourceIcon(ctx, cx, cy, sz, resource) {
-            const def = RESOURCES[resource];
-            if (!def) return;
+        // Cache of canvas patterns for multi-resource regions (keyed by sorted resource list)
+        const resourcePatternCache = {};
+
+        function makeResourcePattern(ctx, keys) {
+            const cacheKey = keys.join('|');
+            if (resourcePatternCache[cacheKey]) return resourcePatternCache[cacheKey];
+            const colors = keys.map(k => RESOURCES[k]?.color).filter(Boolean);
+            const n = colors.length;
+            if (n < 2) return null;
+
+            const W = 60, H = 60;
+            const pc = document.createElement('canvas');
+            pc.width = W; pc.height = H;
+            const px = pc.getContext('2d');
+
+            const bandH = H / n;
+            const amp = Math.min(7, bandH * 0.38);
+            const CYCLES = 2; // full sine cycles across tile width
+
+            // Fill with last color as base
+            px.fillStyle = colors[n - 1];
+            px.fillRect(0, 0, W, H);
+
+            // Paint bands top-down: each fills from y=0 to its wavy boundary
+            for (let i = 0; i < n - 1; i++) {
+                const boundary = (i + 1) * bandH;
+                const phase = i * 1.1; // phase offset per boundary for variety
+
+                px.fillStyle = colors[i];
+                px.beginPath();
+                px.moveTo(0, 0);
+                px.lineTo(W, 0);
+                // Right edge down to wavy boundary
+                px.lineTo(W, boundary + amp * Math.sin(W * CYCLES * 2 * Math.PI / W + phase));
+                // Wavy boundary right-to-left
+                for (let x = W; x >= 0; x--) {
+                    px.lineTo(x, boundary + amp * Math.sin(x * CYCLES * 2 * Math.PI / W + phase));
+                }
+                px.closePath();
+                px.fill();
+            }
+
+            const pattern = ctx.createPattern(pc, 'repeat');
+            resourcePatternCache[cacheKey] = pattern;
+            return pattern;
+        }
+
+        function drawResourceIcon(ctx, cx, cy, sz, resourceKeys) {
+            const n = resourceKeys.length;
+            if (!n) return;
             ctx.save();
             ctx.translate(cx, cy);
             const s = sz / 18;
+            const r = 8 * s;
+
             ctx.shadowColor = 'rgba(0,0,0,0.65)';
             ctx.shadowBlur = 4;
             ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1;
-            ctx.beginPath();
-            ctx.arc(0, 0, 8 * s, 0, Math.PI * 2);
-            ctx.fillStyle = def.color;
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-            ctx.lineWidth = 1.5 * s;
-            ctx.stroke();
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#fff';
-            ctx.font = `bold ${Math.max(6, Math.round(7 * s))}px 'Consolas','Courier New',monospace`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(def.abbr, 0, 0.5 * s);
+
+            if (n === 1) {
+                const def = RESOURCES[resourceKeys[0]];
+                if (!def) { ctx.restore(); return; }
+                ctx.beginPath();
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.fillStyle = def.color;
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+                ctx.lineWidth = 1.5 * s;
+                ctx.stroke();
+                ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fff';
+                ctx.font = `bold ${Math.max(6, Math.round(7 * s))}px 'Consolas','Courier New',monospace`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(def.abbr, 0, 0.5 * s);
+            } else {
+                // Pie sectors, one per resource
+                const step = (Math.PI * 2) / n;
+                const start = -Math.PI / 2;
+                for (let i = 0; i < n; i++) {
+                    const def = RESOURCES[resourceKeys[i]];
+                    if (!def) continue;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.arc(0, 0, r, start + i * step, start + (i + 1) * step);
+                    ctx.closePath();
+                    ctx.fillStyle = def.color;
+                    ctx.fill();
+                }
+                ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+                // Outer ring
+                ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+                ctx.lineWidth = 1.5 * s; ctx.stroke();
+                // Dividing lines
+                ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+                ctx.lineWidth = s;
+                for (let i = 0; i < n; i++) {
+                    const a = start + i * step;
+                    ctx.beginPath(); ctx.moveTo(0, 0);
+                    ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); ctx.stroke();
+                }
+            }
             ctx.restore();
         }
 
@@ -1016,11 +1113,11 @@
             HEX_LIST.forEach((hex, hexIdx) => {
                 const region = COLOR_MAP[hex];
                 if (!region || region.sea) return;
-                const res = getResource(region.new_key);
-                if (!res) return;
+                const keys = getResources(region.new_key);
+                if (!keys.length) return;
                 const pos = getMarkerPos(hexIdx);
                 if (!pos) return;
-                drawResourceIcon(ctx, pos.x * scaleX, pos.y * scaleY, sz, res);
+                drawResourceIcon(ctx, pos.x * scaleX, pos.y * scaleY, sz, keys);
             });
         }
 
@@ -1087,7 +1184,10 @@
                 if (data.edited && idx !== undefined) lavorataSet.add(idx);
                 if (data.porto) portoSet.add(key);
                 if (data.wealth !== undefined) wealthData[key] = data.wealth;
-                if (data.resource) resourceData[key] = data.resource;
+                if (data.resource) {
+                    const arr = Array.isArray(data.resource) ? data.resource : [data.resource];
+                    if (arr.length) resourceData[key] = arr;
+                }
             }
             saveLavorata();
             savePorto();
@@ -1125,8 +1225,8 @@
                 regionStatus[key].edited = idx !== undefined && lavorataSet.has(idx);
                 regionStatus[key].porto = portoSet.has(key);
                 regionStatus[key].wealth = getWealth(key);
-                const res = getResource(key);
-                if (res) regionStatus[key].resource = res;
+                const res = getResources(key);
+                if (res.length) regionStatus[key].resource = res;
                 else delete regionStatus[key].resource;
             }
             const blob = new Blob([JSON.stringify(regionStatus, null, 2)], { type: 'application/json' });
@@ -1520,9 +1620,26 @@
                 } else if (viewMode === "wealth") {
                     col = wealthColor(getEffectiveWealth(region.new_key));
                 } else if (viewMode === "resources") {
-                    const res = getResource(region.new_key);
-                    if (!res || !RESOURCES[res]) return;
-                    col = RESOURCES[res].color;
+                    const keys = getResources(region.new_key);
+                    if (!keys.length) return;
+                    const runs = REGION_RUNS[hexIdx];
+                    if (keys.length === 1) {
+                        const c = RESOURCES[keys[0]]?.color;
+                        if (!c) return;
+                        const r = parseInt(c.slice(1,3),16), g = parseInt(c.slice(3,5),16), b = parseInt(c.slice(5,7),16);
+                        ctx.fillStyle = `rgba(${r},${g},${b},0.65)`;
+                        for (let i = 0; i < runs.length; i += 3)
+                            ctx.fillRect(runs[i+1]*scaleX, runs[i]*scaleY, (runs[i+2]-runs[i+1]+1)*scaleX, scaleY+0.5);
+                    } else {
+                        const pat = makeResourcePattern(ctx, keys);
+                        if (!pat) return;
+                        ctx.globalAlpha = 0.65;
+                        ctx.fillStyle = pat;
+                        for (let i = 0; i < runs.length; i += 3)
+                            ctx.fillRect(runs[i+1]*scaleX, runs[i]*scaleY, (runs[i+2]-runs[i+1]+1)*scaleX, scaleY+0.5);
+                        ctx.globalAlpha = 1;
+                    }
+                    return;
                 } else {
                     if (!FACTIONS[fname]) return;
                     col = FACTIONS[fname].color;
@@ -1762,11 +1879,16 @@
                     </label>
                 </div>` : ''}
                 <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:12px;border-bottom:none;">
-                    <span class="detail-label">Risorsa:</span>
-                    <select class="assign-select" id="resourceSelect">
-                        <option value="">— Nessuna —</option>
-                        ${Object.entries(RESOURCES).map(([k, def]) => `<option value="${k}" ${getResource(region.new_key) === k ? 'selected' : ''}>${def.label}</option>`).join('')}
-                    </select>
+                    <span class="detail-label">Risorse:</span>
+                    <div id="resourceChecks" style="display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:5px;">
+                        ${Object.entries(RESOURCES).map(([k, def]) => `
+                        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.82rem;color:#3a2a10;white-space:nowrap;">
+                            <input type="checkbox" data-res="${k}" ${hasResource(region.new_key, k) ? 'checked' : ''}
+                                   style="width:14px;height:14px;cursor:pointer;accent-color:${def.color};">
+                            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${def.color};border:1.5px solid rgba(0,0,0,.25);flex-shrink:0;"></span>
+                            ${def.label}
+                        </label>`).join('')}
+                    </div>
                 </div>
             </div>
         </div>
@@ -1819,11 +1941,10 @@
             document.getElementById("wealthNum").addEventListener("change", function () {
                 applyWealth(Math.max(100, Math.min(310, parseInt(this.value) || 150)));
             });
-            document.getElementById("resourceSelect").addEventListener("change", function () {
-                const res = this.value;
-                if (res) resourceData[region.new_key] = res;
-                else delete resourceData[region.new_key];
-                saveResources();
+            document.getElementById("resourceChecks").addEventListener("change", function (e) {
+                const cb = e.target;
+                if (!cb.dataset.res) return;
+                toggleResource(region.new_key, cb.dataset.res);
                 if (viewMode === 'resources') { drawFactions(); drawResources(); }
             });
         }
@@ -1842,6 +1963,22 @@
                 `<div style="font-size:.82rem;color:#4a3a25;padding:4px 0;border-bottom:1px solid rgba(212,175,55,.15)">${escapeHtml(r.name)}</div>`
             ).join('');
 
+            // Resource state across selection: 'all' | 'some' | 'none'
+            const resState = {};
+            Object.keys(RESOURCES).forEach(res => {
+                const n = regions.filter(r => hasResource(r.new_key, res)).length;
+                resState[res] = n === 0 ? 'none' : n === regions.length ? 'all' : 'some';
+            });
+            const resChecksHtml = Object.entries(RESOURCES).map(([k, def]) => {
+                const st = resState[k];
+                return `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.82rem;color:#3a2a10;white-space:nowrap;">
+                    <input type="checkbox" data-res="${k}" ${st === 'all' ? 'checked' : ''} data-ind="${st === 'some' ? '1' : '0'}"
+                           style="width:14px;height:14px;cursor:pointer;accent-color:${def.color};">
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${def.color};border:1.5px solid rgba(0,0,0,.25);flex-shrink:0;"></span>
+                    ${def.label}${st === 'some' ? ' <span style="font-size:.68rem;color:#888;font-style:italic">parziale</span>' : ''}
+                </label>`;
+            }).join('');
+
             infoPanel.innerHTML = `
         <h2 style="font-size:1.35rem">${indices.length} regions selected</h2>
         <div class="info-content">
@@ -1858,9 +1995,15 @@
                         Effettivo medio: <strong>${avgEff}</strong>
                     </div>
                 </div>
+                <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding-top:10px;border-bottom:none;">
+                    <span class="detail-label">Risorse:</span>
+                    <div id="resourceChecksM" style="display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:5px;">
+                        ${resChecksHtml}
+                    </div>
+                </div>
             </div>
             <div style="margin:12px 0 6px;font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;color:#5a4a2f;letter-spacing:.08em;text-transform:uppercase">Selected</div>
-            <div style="max-height:220px;overflow-y:auto">${regionList}</div>
+            <div style="max-height:180px;overflow-y:auto">${regionList}</div>
         </div>`;
 
             function applyMultiWealth(v) {
@@ -1877,6 +2020,24 @@
             });
             document.getElementById("wealthNumM").addEventListener("change", function () {
                 applyMultiWealth(Math.max(150, Math.min(250, parseInt(this.value) || 150)));
+            });
+
+            // Set indeterminate state for partial checkboxes
+            document.getElementById("resourceChecksM").querySelectorAll("input[data-ind='1']").forEach(cb => {
+                cb.indeterminate = true;
+            });
+
+            document.getElementById("resourceChecksM").addEventListener("change", function (e) {
+                const cb = e.target;
+                const res = cb.dataset.res;
+                if (!res) return;
+                cb.indeterminate = false;
+                if (cb.checked) {
+                    regions.forEach(r => { if (!hasResource(r.new_key, res)) toggleResource(r.new_key, res); });
+                } else {
+                    regions.forEach(r => { if (hasResource(r.new_key, res)) toggleResource(r.new_key, res); });
+                }
+                if (viewMode === 'resources') { drawFactions(); drawResources(); }
             });
         }
 
@@ -1900,7 +2061,9 @@
         function showResourceLegend() {
             infoPanel.classList.remove("empty");
             const counts = {};
-            Object.values(resourceData).forEach(r => { if (r) counts[r] = (counts[r] || 0) + 1; });
+            Object.values(resourceData).forEach(arr => {
+                (Array.isArray(arr) ? arr : arr ? [arr] : []).forEach(r => { counts[r] = (counts[r] || 0) + 1; });
+            });
             const items = Object.entries(RESOURCES).map(([key, def]) => {
                 const c = counts[key] || 0;
                 return `<div class="fl-item">
