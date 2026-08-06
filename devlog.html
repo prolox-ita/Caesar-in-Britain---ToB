@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devlog — Caesars in Britain</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        /* ── Devlog page-specific styles ── */
+        .devlog-hero {
+            background:
+                linear-gradient(180deg, rgba(10, 4, 0, 0.80) 0%, rgba(60, 10, 5, 0.65) 50%, rgba(10, 4, 0, 0.90) 100%),
+                var(--bg-dark);
+            min-height: 32vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 40px 60px;
+            border-bottom: 1px solid rgba(197, 179, 88, 0.2);
+            position: relative;
+        }
+
+        .devlog-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--accent-gold);
+        }
+
+        .devlog-eyebrow {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5em;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .devlog-page-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 0.1em;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+            margin-bottom: 18px;
+        }
+
+        .devlog-page-sub {
+            font-style: italic;
+            font-size: 1rem;
+            color: rgba(245, 237, 216, 0.65);
+            max-width: 560px;
+        }
+
+        /* ── Devlog feed ── */
+        .devlog-feed {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 80px 40px 120px;
+        }
+
+        .devlog-entry {
+            border-left: 3px solid rgba(197, 179, 88, 0.25);
+            padding: 0 0 64px 36px;
+            position: relative;
+        }
+
+        .devlog-entry::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 8px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            border: 2px solid var(--accent-gold);
+            box-shadow: 0 0 12px rgba(139, 26, 26, 0.6);
+        }
+
+        .devlog-entry:last-child {
+            border-left-color: transparent;
+            padding-bottom: 0;
+        }
+
+        .devlog-meta {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .devlog-date {
+            font-family: 'Cinzel', serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+        }
+
+        .devlog-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 2px;
+            background: rgba(139, 26, 26, 0.2);
+            border: 1px solid rgba(139, 26, 26, 0.4);
+            color: var(--stone);
+        }
+
+        .devlog-tag.tag-feature {
+            background: rgba(30, 80, 40, 0.2);
+            border-color: rgba(40, 120, 60, 0.4);
+            color: #8ecf8e;
+        }
+
+        .devlog-tag.tag-art {
+            background: rgba(60, 40, 100, 0.2);
+            border-color: rgba(100, 70, 160, 0.4);
+            color: #b89ee0;
+        }
+
+        .devlog-tag.tag-balance {
+            background: rgba(80, 60, 10, 0.2);
+            border-color: rgba(180, 140, 20, 0.4);
+            color: var(--accent-gold);
+        }
+
+        .devlog-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+            font-weight: 700;
+            color: var(--text-parchment);
+            letter-spacing: 0.06em;
+            margin-bottom: 18px;
+            line-height: 1.3;
+        }
+
+        .devlog-body {
+            font-size: 0.97rem;
+            color: rgba(245, 237, 216, 0.8);
+            line-height: 1.95;
+        }
+
+        .devlog-body p {
+            margin-bottom: 14px;
+        }
+
+        .devlog-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .devlog-body strong {
+            color: var(--text-parchment);
+            font-weight: 700;
+        }
+
+        .devlog-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: center;
+            margin: 0 0 72px;
+        }
+
+        .devlog-divider span {
+            display: block;
+            height: 1px;
+            width: 60px;
+            background: var(--gold-dim);
+        }
+
+        .devlog-divider-text {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--stone);
+        }
+
+        /* ── Empty state ── */
+        .devlog-empty {
+            text-align: center;
+            padding: 80px 0;
+            color: rgba(245, 237, 216, 0.35);
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        /* ── Back link ── */
+        .devlog-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            text-decoration: none;
+            margin-bottom: 48px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .devlog-back:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo" style="text-decoration:none">Caesars in Britain</a>
+        <ul class="nav-links">
+            <li><a href="index.html#history">History</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li class="nav-dropdown-wrap">
+                <a href="#" class="btn-small nav-dropdown-trigger">Download &#9660;</a>
+                <ul class="nav-dropdown">
+                    <li><a href="#" class="nav-dropdown-item nav-dropdown-disabled">Steam Workshop<span class="nav-dd-soon">Soon</span></a></li>
+                    <li><a href="devlog.html" class="nav-dropdown-item">Devlog</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <header class="devlog-hero">
+        <p class="devlog-eyebrow">&#9876; SPQR</p>
+        <h1 class="devlog-page-title">Devlog</h1>
+        <p class="devlog-page-sub">Development notes, progress reports, and behind-the-scenes updates on Caesars in Britain.</p>
+    </header>
+
+    <main class="devlog-feed">
+        <a href="index.html" class="devlog-back">&#8592; Back to Home</a>
+
+        <div class="devlog-divider">
+            <span></span>
+            <span class="devlog-divider-text">Entries</span>
+            <span></span>
+        </div>
+
+        <!-- ── Entries: newest first ── -->
+
+        <article class="devlog-entry">
+            <div class="devlog-meta">
+                <span class="devlog-date">Coming Soon</span>
+                <span class="devlog-tag">Work in Progress</span>
+            </div>
+            <h2 class="devlog-title">First Devlog Entry</h2>
+            <div class="devlog-body">
+                <p>Development updates will appear here as the mod progresses. Check back soon for news on faction rosters, campaign mechanics, and map work.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer class="footer">
+        <p></p>
+    </footer>
+
+</body>
+
+</html>
