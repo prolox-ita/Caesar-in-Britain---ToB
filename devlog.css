@@ -1,0 +1,355 @@
+/* ═══════════════════════════════════════════════════════════
+   devlog.css — shared styles for devlog index + entry pages
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Back link (shared) ─────────────────────────────────── */
+.devlog-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    text-decoration: none;
+    margin-bottom: 48px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.devlog-back:hover { opacity: 1; }
+
+/* ══════════════════════════════════════════════════════════
+   INDEX PAGE  (devlog.html)
+   ══════════════════════════════════════════════════════════ */
+
+.devlog-hero {
+    background:
+        linear-gradient(180deg, rgba(10,4,0,0.80) 0%, rgba(60,10,5,0.65) 50%, rgba(10,4,0,0.90) 100%),
+        var(--bg-dark);
+    min-height: 32vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 40px 60px;
+    border-bottom: 1px solid rgba(197,179,88,0.2);
+    position: relative;
+}
+
+.devlog-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--accent-gold);
+}
+
+.devlog-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.devlog-page-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 0.1em;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.7);
+    margin-bottom: 18px;
+}
+
+.devlog-page-sub {
+    font-style: italic;
+    font-size: 1rem;
+    color: rgba(245,237,216,0.65);
+    max-width: 560px;
+}
+
+.devlog-index-body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 80px 40px 120px;
+}
+
+.devlog-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 56px;
+}
+
+.devlog-divider span {
+    display: block;
+    height: 1px;
+    width: 60px;
+    background: var(--gold-dim);
+}
+
+.devlog-divider-text {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--stone);
+}
+
+/* ── Devlog cards ─────────────────────────────────────── */
+.devlog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.devlog-card {
+    display: block;
+    text-decoration: none;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(197,179,88,0.12);
+    border-left: 3px solid var(--accent-red);
+    padding: 28px 32px;
+    transition: border-left-color 0.2s, background 0.2s, transform 0.2s;
+    border-radius: 2px;
+}
+
+.devlog-card:hover {
+    border-left-color: var(--accent-gold);
+    background: rgba(197,179,88,0.05);
+    transform: translateX(4px);
+}
+
+.devlog-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.devlog-card-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+}
+
+.devlog-card-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 2px 9px;
+    border-radius: 2px;
+    background: rgba(139,26,26,0.2);
+    border: 1px solid rgba(139,26,26,0.4);
+    color: var(--stone);
+}
+
+.devlog-card-tag.tag-feature { background: rgba(30,80,40,0.2);  border-color: rgba(40,120,60,0.4);   color: #8ecf8e; }
+.devlog-card-tag.tag-art     { background: rgba(60,40,100,0.2); border-color: rgba(100,70,160,0.4);  color: #b89ee0; }
+.devlog-card-tag.tag-balance { background: rgba(80,60,10,0.2);  border-color: rgba(180,140,20,0.4);  color: var(--accent-gold); }
+.devlog-card-tag.tag-lore    { background: rgba(10,50,70,0.2);  border-color: rgba(20,100,140,0.4);  color: #8ec8e0; }
+
+.devlog-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-parchment);
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.devlog-card-excerpt {
+    font-size: 0.9rem;
+    color: rgba(245,237,216,0.6);
+    line-height: 1.7;
+}
+
+.devlog-card-read {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.devlog-card:hover .devlog-card-read { opacity: 1; }
+
+.devlog-empty {
+    text-align: center;
+    padding: 80px 0;
+    color: rgba(245,237,216,0.3);
+    font-style: italic;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ENTRY PAGE  (devlog-*.html)
+   ══════════════════════════════════════════════════════════ */
+
+.dl-entry-hero {
+    padding: 130px 40px 64px;
+    text-align: center;
+    border-bottom: 1px solid rgba(197,179,88,0.15);
+    background: linear-gradient(180deg, rgba(10,4,0,0.6) 0%, transparent 100%);
+    position: relative;
+}
+
+.dl-entry-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--accent-gold);
+}
+
+.dl-entry-tag {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 3px 12px;
+    border-radius: 2px;
+    background: rgba(139,26,26,0.2);
+    border: 1px solid rgba(139,26,26,0.4);
+    color: var(--stone);
+    margin-bottom: 18px;
+}
+
+.dl-entry-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+}
+
+.dl-entry-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 0.08em;
+    line-height: 1.15;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.7);
+    margin-bottom: 20px;
+}
+
+.dl-entry-subtitle {
+    font-style: italic;
+    font-size: 1.05rem;
+    color: rgba(245,237,216,0.6);
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* ── Entry body ─────────────────────────────────────────── */
+.dl-entry-body {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 72px 40px 120px;
+}
+
+.dl-entry-body h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.06em;
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(197,179,88,0.2);
+}
+
+.dl-entry-body h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-parchment);
+    letter-spacing: 0.04em;
+    margin: 28px 0 10px;
+}
+
+.dl-entry-body p {
+    font-size: 1rem;
+    color: rgba(245,237,216,0.82);
+    line-height: 2;
+    margin-bottom: 18px;
+}
+
+.dl-entry-body p:last-child { margin-bottom: 0; }
+
+.dl-entry-body strong { color: var(--text-parchment); }
+
+.dl-entry-body em { color: rgba(245,237,216,0.75); }
+
+.dl-entry-body ul,
+.dl-entry-body ol {
+    margin: 0 0 18px 24px;
+    color: rgba(245,237,216,0.8);
+    line-height: 2;
+}
+
+.dl-entry-body li { margin-bottom: 4px; }
+
+.dl-entry-body img {
+    width: 100%;
+    border: 1px solid rgba(197,179,88,0.15);
+    border-radius: 2px;
+    margin: 24px 0;
+}
+
+/* ── Prev / Next nav ────────────────────────────────────── */
+.dl-entry-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(197,179,88,0.15);
+    flex-wrap: wrap;
+}
+
+.dl-nav-link {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.dl-nav-link:hover { opacity: 1; }
+
+.dl-nav-index { opacity: 0.45; }
+
+.dl-nav-link[href="#"] {
+    opacity: 0.2;
+    pointer-events: none;
+}
