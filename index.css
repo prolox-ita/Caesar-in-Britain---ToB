@@ -57,6 +57,88 @@ h3,
     font-size: 0.9rem;
 }
 
+/* ── Nav Dropdown ────────────────────────────────────────── */
+.nav-dropdown-wrap {
+    position: relative;
+}
+
+.nav-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.nav-dropdown-trigger svg,
+.nav-dropdown-trigger span {
+    font-size: 0.6rem;
+    opacity: 0.7;
+}
+
+.nav-dropdown {
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    min-width: 180px;
+    background: rgba(10, 4, 0, 0.95);
+    border: 1px solid rgba(197, 179, 88, 0.25);
+    border-top: 2px solid var(--accent-gold);
+    list-style: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 200;
+}
+
+.nav-dropdown-wrap:hover .nav-dropdown {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-parchment) !important;
+    text-decoration: none;
+    transition: background 0.18s, color 0.18s;
+    border-bottom: 1px solid rgba(197, 179, 88, 0.08);
+}
+
+.nav-dropdown li:last-child .nav-dropdown-item {
+    border-bottom: none;
+}
+
+.nav-dropdown-item:hover:not(.nav-dropdown-disabled) {
+    background: rgba(197, 179, 88, 0.1);
+    color: var(--accent-gold) !important;
+}
+
+.nav-dropdown-disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+}
+
+.nav-dd-soon {
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    background: rgba(139, 26, 26, 0.35);
+    border: 1px solid rgba(139, 26, 26, 0.5);
+    color: var(--stone);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+}
+
 /* ── Hero ────────────────────────────────────────────────── */
 .hero {
     position: relative;
