@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TITOLO — Devlog | Caesars in Britain</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="devlog.css">
+    <!-- Cambia il titolo qui sopra: "TITOLO — Devlog | Caesars in Britain" -->
+</head>
+
+<body>
+
+    <!-- ══ NAVBAR (non modificare) ══════════════════════════════════ -->
+    <nav class="navbar">
+        <a href="index.html" class="logo" style="text-decoration:none">Caesars in Britain</a>
+        <ul class="nav-links">
+            <li><a href="index.html#history">History</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li class="nav-dropdown-wrap">
+                <a href="#" class="btn-small nav-dropdown-trigger">Download &#9660;</a>
+                <ul class="nav-dropdown">
+                    <li><a href="#" class="nav-dropdown-item nav-dropdown-disabled">Steam Workshop<span class="nav-dd-soon">Soon</span></a></li>
+                    <li><a href="devlog.html" class="nav-dropdown-item">Devlog</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <!-- ══════════════════════════════════════════════════════════════ -->
+
+    <header class="dl-entry-hero">
+        <!-- TAG: scegli tra dev / feature / art / balance / lore -->
+        <p class="dl-entry-tag">dev</p>
+        <!-- DATA nel formato "Month DD, YYYY" -->
+        <p class="dl-entry-version">DEMO # v0.0.1</p>
+        <!-- TITOLO del devlog -->
+        <h1 class="dl-entry-title">EXORDIUM</h1>
+        <!-- Breve sottotitolo / intro (opzionale, cancella il tag se non serve) -->
+        <p class="dl-entry-subtitle">Launch of the first demo of the mod</p>
+    </header>
+
+    <article class="dl-entry-body">
+
+        <a href="devlog.html" class="devlog-back">&#8592; Tutti i Devlog</a>
+
+        <!-- ══ CONTENUTO ══════════════════════════════════════════════ -->
+        <!--
+            Usa <h2> per le sezioni principali
+            Usa <h3> per sottosezioni
+            Usa <p> per i paragrafi
+            Usa <img src="..." alt="..."> per le immagini
+            Usa <ul> / <li> per le liste
+        -->
+
+        <h2>THE PLAN OF THIS DEMO</h2>
+        <p>This is not a full test version of the mod, but rather <strong>a demo build designed to ensure there are no crashes during this early stage of development</strong>, helping us narrow down the potential causes of any issues.
+            <br>In this release, you will find:
+            <strong><ul>
+                <li>A revamped map</li>
+                <li>New factions</li>
+                <li>New (standard) units for each cultural group</li>
+                <li>New buildings (need a lot of work tho)</li>
+            </ul></p>
+            </strong>
+        </p>
+        <p>The primary goal is to test as many scenarios as possible to uncover bugs, errors, and crashes, as well as to gather your feedback and suggestions. <strong>Everything included in this build is non-final and subject to change before the official release, depending largely on your input.</strong>
+            <br><br>For instance, resources have not yet been placed on the map: the initial plan was to restrict resources based on historical presence, but this might severely imbalance gameplay—leaving some regions completely resource-starved and forcing players to rely entirely on trade. <br>We’d love to hear your thoughts on this: would you prefer strict historical accuracy, or a light vs. heavy gameplay rebalance?
+            <br><br>Buildings are also currently very easy to construct (100 denarii and 1 turn), and their effects still need fine-tuning. The main goal here is to determine which buildings add real value and which could be removed. A few might still be missing to add strategic depth, and 3 building slots (+1 for the port) may not be enough—your feedback on this will be invaluable.
+            <br><br>Below is the (nearly) complete changelog.
+        </p>
+
+        <h2>CHANGELOG</h2>
+        <h3>MAP</h3>
+
+        <ul>
+            <li>Added Northern France to the map, with 10 region/settlements in this area</li>
+            <li>Redesigned the boundaries and renamed the regions, for a total of XXX land regions and XX sea regions (3 removed, still named as vanilla)</li>
+            <li>Edited the visual/heightmap to match the new regions in France</li>
+            <li>Now every provinces are made by one single region, thus meaming every city will have walls</li>
+            <details>
+                <summary>List of land/sea regions</summary>
+                <p>cib-</p>
+            </details>
+        </ul>
+
+        <!-- --------------------------------------------------------------- -->
+        <h3>FACTIONS</h3>
+
+        <ul>
+            <li>52 new factions</li>
+            <li>6 new cultural groups <strong>[playable factions in bold]</strong></strong>:</li>
+                <ul>
+                    </li><details>
+                            <summary><strong>Romans</strong></summary>
+                            <p><strong>Roman Republic</strong></p></details>
+                    </li>
+                    </li><details>
+                            <summary><strong>Britanni</strong></summary>
+                            <p><strong>Iceni</strong></p></details>
+                    </li>
+                    </li><details>
+                            <summary><strong>Galli</strong></summary>
+                            <p><strong>Iceni</strong></p></details>
+                    </li>
+                    </li><details>
+                            <summary><strong>Belgi</strong></summary>
+                            <p><strong>Ambiani</strong></p></details>
+                    </li>
+                    </li><details>
+                            <summary><strong>Hiberni</strong></summary>
+                            <p><strong>Iceni</strong></p></details>
+                    </li>
+                    </li><details>
+                            <summary><strong>Picti</strong></summary>
+                            <p><strong>Iceni</strong></p></details>
+                    </li>
+                </ul>
+            <li>6 generic rebels factions (one for each cultural group)</li>
+            <li>XX separatists factions (one for each playable faction)</li>
+        </ul>
+
+        <!-- ════════════════════════════════════════════════════════════ -->
+
+        <!-- Navigazione tra devlog: aggiorna i link quando esistono -->
+        <nav class="dl-entry-nav">
+            <a href="#" class="dl-nav-link dl-nav-prev">&#8592; Precedente</a>
+            <a href="devlog.html" class="dl-nav-link dl-nav-index">Indice</a>
+            <a href="#" class="dl-nav-link dl-nav-next">Successivo &#8594;</a>
+        </nav>
+
+    </article>
+
+    <!-- ══ FOOTER (non modificare) ══════════════════════════════════ -->
+    <footer class="footer">
+        <p></p>
+    </footer>
+    <!-- ══════════════════════════════════════════════════════════════ -->
+
+</body>
+
+</html>
