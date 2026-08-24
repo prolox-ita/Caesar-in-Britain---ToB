@@ -1,0 +1,157 @@
+/* ═══════════════════════════════════════════════════════════
+   navbar.css — standalone navbar, importabile su qualsiasi pagina
+   ═══════════════════════════════════════════════════════════ */
+
+/* variabili standalone — non sovrascrivono quelle già definite */
+:root {
+    --nb-bg:     rgba(10, 4, 0, 0.92);
+    --nb-gold:   #C5B358;
+    --nb-red:    #8B0000;
+    --nb-parch:  #F5E6BE;
+    --nb-stone:  #a89880;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.4rem 5%;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    background: var(--nb-bg);
+    border-bottom: 1px solid rgba(197, 179, 88, 0.15);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-sizing: border-box;
+}
+
+.navbar .logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--nb-parch);
+    text-decoration: none;
+}
+
+.navbar .nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.navbar .nav-links a {
+    color: var(--nb-parch);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+
+.navbar .nav-links a:hover { opacity: 1; }
+
+/* ── Dropdown ─────────────────────────────────────────────── */
+.nav-dropdown-wrap {
+    position: relative;
+}
+
+/* bridge invisibile: colma il gap tra trigger e menu */
+.nav-dropdown-wrap::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: -12px;
+    right: -12px;
+    height: 18px;
+}
+
+.nav-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    color: var(--nb-parch);
+    text-decoration: none;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+.nav-dropdown-trigger:hover { opacity: 1; }
+
+.nav-dropdown {
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    min-width: 190px;
+    background: rgba(8, 3, 0, 0.97);
+    border: 1px solid rgba(197, 179, 88, 0.2);
+    border-top: 2px solid var(--nb-gold);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 1001;
+}
+
+.nav-dropdown-wrap:hover .nav-dropdown {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 18px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nb-parch);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    border-bottom: 1px solid rgba(197, 179, 88, 0.07);
+}
+.nav-dropdown li:last-child .nav-dropdown-item { border-bottom: none; }
+
+.nav-dropdown-item:hover:not(.nav-dropdown-disabled) {
+    background: rgba(197, 179, 88, 0.1);
+    color: var(--nb-gold);
+}
+
+.nav-dropdown-disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+.nav-dd-soon {
+    font-size: 0.52rem;
+    letter-spacing: 0.15em;
+    background: rgba(139, 26, 26, 0.35);
+    border: 1px solid rgba(139, 26, 26, 0.5);
+    color: var(--nb-stone);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+}
+
+/* ── offset generico per le pagine con navbar fixed ──────── */
+body.has-navbar {
+    padding-top: 68px;
+}
