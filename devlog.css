@@ -406,7 +406,12 @@
     margin: 20px 0;
 }
 
-/* ── <details> / <summary> — collapsible sections ────────── */
+/* ── font size — corpo ridotto ───────────────────────────── */
+.dl-entry-body p          { font-size: 0.86rem; }
+.dl-entry-body ul li,
+.dl-entry-body ol li      { font-size: 0.84rem; }
+
+/* ── <details> / <summary> — livello 1 ──────────────────── */
 .dl-entry-body details {
     border: 1px solid rgba(197,179,88,0.1);
     border-left: 2px solid rgba(197,179,88,0.25);
@@ -418,7 +423,7 @@
 }
 .dl-entry-body summary {
     font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -435,12 +440,12 @@
 .dl-entry-body summary::-webkit-details-marker { display: none; }
 .dl-entry-body summary::before {
     content: '▶';
-    font-size: 0.5rem;
+    font-size: 0.48rem;
     color: rgba(197,179,88,0.45);
     transition: transform 0.15s;
     flex-shrink: 0;
 }
-.dl-entry-body details[open] summary::before { transform: rotate(90deg); }
+.dl-entry-body details[open] > summary::before { transform: rotate(90deg); }
 .dl-entry-body summary:hover {
     color: var(--text-parchment);
     background: rgba(197,179,88,0.04);
@@ -449,6 +454,42 @@
     padding: 0 14px 12px 28px;
 }
 .dl-entry-body details ul { margin: 6px 0 0; }
+
+/* ── <details> annidati — livello 2+ ────────────────────── */
+.dl-entry-body details details {
+    border-left-color: rgba(197,179,88,0.15);
+    background: rgba(0,0,0,0.08);
+    margin: 4px 0;
+}
+.dl-entry-body details details[open] {
+    border-left-color: rgba(197,179,88,0.5);
+}
+.dl-entry-body details details summary {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: rgba(245,237,216,0.5);
+    padding: 8px 12px;
+}
+.dl-entry-body details details summary::before {
+    content: '▸';
+    color: rgba(197,179,88,0.3);
+}
+.dl-entry-body details details[open] > summary::before { transform: rotate(90deg); }
+.dl-entry-body details details > *:not(summary) {
+    padding: 0 12px 10px 24px;
+}
+
+/* livello 3 (details > details > details) */
+.dl-entry-body details details details {
+    border-left-color: rgba(197,179,88,0.08);
+    background: rgba(0,0,0,0.06);
+}
+.dl-entry-body details details details summary {
+    font-size: 0.58rem;
+    color: rgba(245,237,216,0.4);
+    padding: 6px 10px;
+}
+.dl-entry-body details details details summary::before { content: '›'; }
 
 /* ── Prev / Next nav ─────────────────────────────────────── */
 .dl-entry-nav {
@@ -474,3 +515,110 @@
 .dl-nav-link:hover { opacity: 1; }
 .dl-nav-index { opacity: 0.35; }
 .dl-nav-link[href="#"] { opacity: 0.18; pointer-events: none; }
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT THEME  —  body.dl-light
+   ══════════════════════════════════════════════════════════ */
+body.dl-light {
+    background: #f0ebe0;
+    color: #1c1710;
+}
+
+/* hero: mantiene sfondo scuro per contrasto con navbar */
+body.dl-light .dl-entry-hero {
+    background: linear-gradient(180deg, #1a100a 0%, #2e1608 60%, #1a100a 100%);
+}
+
+/* body principale */
+body.dl-light .dl-entry-body {
+    background: #f0ebe0;
+}
+
+body.dl-light .dl-entry-body h2 {
+    color: #5c3d10;
+}
+body.dl-light .dl-entry-body h2::after {
+    background: rgba(92,61,16,0.2);
+}
+body.dl-light .dl-entry-body h3 {
+    color: #3a2808;
+    border-left-color: rgba(139,26,26,0.5);
+}
+
+body.dl-light .dl-entry-body p {
+    color: rgba(28,23,16,0.8);
+}
+body.dl-light .dl-entry-body strong { color: #1c1710; }
+body.dl-light .dl-entry-body em    { color: rgba(28,23,16,0.6); }
+
+body.dl-light .dl-entry-body ul,
+body.dl-light .dl-entry-body ol {
+    color: rgba(28,23,16,0.78);
+}
+body.dl-light .dl-entry-body ul li,
+body.dl-light .dl-entry-body ol li {
+    border-bottom-color: rgba(92,61,16,0.08);
+}
+body.dl-light .dl-entry-body ul li::before,
+body.dl-light .dl-entry-body ol li::before {
+    color: rgba(92,61,16,0.45);
+}
+
+/* details livello 1 */
+body.dl-light .dl-entry-body details {
+    border-color: rgba(92,61,16,0.12);
+    border-left-color: rgba(92,61,16,0.3);
+    background: rgba(255,255,255,0.45);
+}
+body.dl-light .dl-entry-body details[open] {
+    border-left-color: #8b6020;
+}
+body.dl-light .dl-entry-body summary {
+    color: rgba(28,23,16,0.6);
+}
+body.dl-light .dl-entry-body summary::before {
+    color: rgba(92,61,16,0.4);
+}
+body.dl-light .dl-entry-body summary:hover {
+    color: #1c1710;
+    background: rgba(92,61,16,0.05);
+}
+
+/* details livello 2 */
+body.dl-light .dl-entry-body details details {
+    background: rgba(0,0,0,0.04);
+    border-left-color: rgba(92,61,16,0.15);
+}
+body.dl-light .dl-entry-body details details[open] {
+    border-left-color: rgba(92,61,16,0.4);
+}
+body.dl-light .dl-entry-body details details summary {
+    color: rgba(28,23,16,0.45);
+}
+
+/* details livello 3 */
+body.dl-light .dl-entry-body details details details {
+    background: rgba(0,0,0,0.03);
+}
+body.dl-light .dl-entry-body details details details summary {
+    color: rgba(28,23,16,0.35);
+}
+
+/* back link */
+body.dl-light .devlog-back { color: #7a6518; }
+
+/* progress bars — label e pct su sfondo chiaro */
+body.dl-light .dl-bar-label { color: rgba(28,23,16,0.45); }
+body.dl-light .dl-bar-outer { background: rgba(92,61,16,0.12); }
+body.dl-light .dl-bar-pct   { color: #7a6518; }
+
+/* nav prev/next */
+body.dl-light .dl-entry-nav {
+    border-top-color: rgba(92,61,16,0.15);
+}
+body.dl-light .dl-nav-link { color: #7a6518; }
+
+/* img border */
+body.dl-light .dl-entry-body img {
+    border-color: rgba(92,61,16,0.15);
+}
