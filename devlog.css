@@ -264,28 +264,23 @@
     line-height: 1.6;
 }
 
-/* ── Progress bars (Demo / Beta) ─────────────────────────── */
+/* ── Progress bar (Demo → Beta) ──────────────────────────── */
 .dl-progress-track {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 420px;
-    margin: 0 auto;
-}
-.dl-bar-row {
     display: grid;
-    grid-template-columns: 56px 1fr 36px;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
+    max-width: 400px;
+    margin: 0 auto;
 }
 .dl-bar-label {
     font-family: 'Cinzel', serif;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 700;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(245,237,216,0.55);
-    text-align: right;
+    color: rgba(245,237,216,0.5);
+    white-space: nowrap;
 }
 .dl-bar-outer {
     height: 4px;
@@ -299,13 +294,6 @@
     border-radius: 2px;
     width: 0;
     transition: width 0.6s ease;
-}
-.dl-bar-pct {
-    font-family: 'Cinzel', serif;
-    font-size: 0.58rem;
-    color: var(--accent-gold);
-    text-align: left;
-    opacity: 0.7;
 }
 
 /* ── Entry body ─────────────────────────────────────────── */
@@ -607,10 +595,9 @@ body.dl-light .dl-entry-body details details details summary {
 /* back link */
 body.dl-light .devlog-back { color: #7a6518; }
 
-/* progress bars — label e pct su sfondo chiaro */
+/* progress bar — label su sfondo chiaro */
 body.dl-light .dl-bar-label { color: rgba(28,23,16,0.45); }
 body.dl-light .dl-bar-outer { background: rgba(92,61,16,0.12); }
-body.dl-light .dl-bar-pct   { color: #7a6518; }
 
 /* nav prev/next */
 body.dl-light .dl-entry-nav {
