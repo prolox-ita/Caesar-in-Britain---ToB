@@ -122,8 +122,25 @@
         /* ── Ambiguous candidates list ── */
         .amb-cand { font-size:.58rem; color:#6a5020; padding:2px 0; }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="navbar.css">
 </head>
-<body>
+<body class="has-navbar">
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">Caesars in Britain</a>
+        <ul class="nav-links">
+            <li><a href="index.html#history">History</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li class="nav-dropdown-wrap">
+                <a href="#" class="nav-dropdown-trigger">Download &#9660;</a>
+                <ul class="nav-dropdown">
+                    <li><a href="#" class="nav-dropdown-item nav-dropdown-disabled">Steam Workshop<span class="nav-dd-soon">Soon</span></a></li>
+                    <li><a href="devlog.html" class="nav-dropdown-item">Devlog</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
 
 <header>
     <h1>&#9671; VMD INSPECTOR</h1>
