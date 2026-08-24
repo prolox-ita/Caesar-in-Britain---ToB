@@ -76,6 +76,16 @@ h3,
     opacity: 0.7;
 }
 
+/* invisible bridge so the mouse can travel from trigger to dropdown */
+.nav-dropdown-wrap::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: -12px;
+    right: -12px;
+    height: 18px;
+}
+
 .nav-dropdown {
     position: absolute;
     top: calc(100% + 14px);
