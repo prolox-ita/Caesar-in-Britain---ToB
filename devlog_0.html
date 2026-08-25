@@ -46,15 +46,15 @@
             Cambia data-val con un decimale: 0.0 = Demo, 1.0 = Beta
         -->
         <div class="dl-progress-track">
-            <span class="dl-bar-label">Demo</span>
-            <div class="dl-bar-outer"><div class="dl-bar-inner" data-val="0.35"></div></div>
-            <span class="dl-bar-label">Beta</span>
+            <span class="dl-bar-label" style="color: #C5B358;">Demo</span>
+            <div class="dl-bar-outer"><div class="dl-bar-inner" data-val="0.05"></div></div>
+            <span class="dl-bar-label" style="color: #C5B358;">Beta</span>
         </div>
     </header>
 
     <article class="dl-entry-body">
 
-        <a href="devlog.html" class="devlog-back">&#8592; Tutti i Devlog</a>
+        <a href="devlog.html" class="devlog-back">&#8592; All Devlogs</a>
 
         <!-- ══ CONTENUTO ══════════════════════════════════════════════ -->
         <!--
@@ -65,7 +65,7 @@
             Usa <ul> / <li> per le liste
         -->
 
-        <h2>THE PLAN OF THIS DEMO</h2>
+        <h1>THE PLAN OF THIS DEMO</h1>
         <p>This is not a full test version of the mod, but rather <strong>a demo build designed to ensure there are no
                 crashes during this early stage of development</strong>, helping us narrow down the potential causes of
             any issues.
@@ -93,11 +93,67 @@
             be enough—your feedback on this will be invaluable.
             <br><br>Below is the (nearly) complete changelog.
         </p>
+        <br>
+        <h1>CHANGELOG</h1>
 
-        <h2>CHANGELOG</h2>
-        <h3>MAP</h3>
-
-        <ul>
+        <details>
+            <summary>BUILDINGS</summary>        
+            <ul>
+                <li>A lot of new buildings have been added
+                    <br>Some of them requires resources, like mint. Once built, these buildings cannot check if the resources are still available so they can give effects also when you don't have the resources. For this reason, these building give a bonus while having acces to the resource through a script, once lost the resource you will get a malus</li>
+            </ul>
+        </details> 
+        <details>
+            <summary>FACTIONS</summary>        
+            <ul>
+                <li>52 new factions</li>
+                <li>6 new cultural groups <strong>[playable factions in bold]</strong></strong>:</li>
+                <ul>
+                    </li>
+                    <details>
+                        <summary><strong>Romans</strong></summary>
+                        <p><strong>Roman Republic</strong></p>
+                    </details>
+                    </li>
+                    </li>
+                    <details>
+                        <summary><strong>Britanni</strong></summary>
+                        <p><strong>Iceni</strong></p>
+                    </details>
+                    </li>
+                    </li>
+                    <details>
+                        <summary><strong>Galli</strong></summary>
+                        <p><strong>Iceni</strong></p>
+                    </details>
+                    </li>
+                    </li>
+                    <details>
+                        <summary><strong>Belgi</strong></summary>
+                        <p><strong>Ambiani</strong></p>
+                    </details>
+                    </li>
+                    </li>
+                    <details>
+                        <summary><strong>Hiberni</strong></summary>
+                        <p><strong>Iceni</strong></p>
+                    </details>
+                    </li>
+                    </li>
+                    <details>
+                        <summary><strong>Picti</strong></summary>
+                        <p><strong>Iceni</strong></p>
+                    </details>
+                    </li>
+                </ul>
+                <li>6 generic rebels factions (one for each cultural group)</li>
+                <li>XX separatists factions (one for each playable faction)</li>
+            </ul>
+        </details>
+        <!-- --------------------------------------------------------------- -->
+        <details>
+            <summary>MAP</summary>
+            <ul>
             <li>Added Northern France to the map, with 10 region/settlements in this area</li>
             <li>Redesigned the boundaries and renamed the regions, for a total of XXX land regions and XX sea regions (3
                 removed, still named as vanilla)</li>
@@ -109,78 +165,41 @@
             </details>
             <li>Fixed some errors on the map</li>
             <li>Added and adjusted trees placement</li>
-        </ul>
-
-        <!-- --------------------------------------------------------------- -->
-        <h3>FACTIONS</h3>
-
-        <ul>
-            <li>52 new factions</li>
-            <li>6 new cultural groups <strong>[playable factions in bold]</strong></strong>:</li>
-            <ul>
-                </li>
-                <details>
-                    <summary><strong>Romans</strong></summary>
-                    <p><strong>Roman Republic</strong></p>
-                </details>
-                </li>
-                </li>
-                <details>
-                    <summary><strong>Britanni</strong></summary>
-                    <p><strong>Iceni</strong></p>
-                </details>
-                </li>
-                </li>
-                <details>
-                    <summary><strong>Galli</strong></summary>
-                    <p><strong>Iceni</strong></p>
-                </details>
-                </li>
-                </li>
-                <details>
-                    <summary><strong>Belgi</strong></summary>
-                    <p><strong>Ambiani</strong></p>
-                </details>
-                </li>
-                </li>
-                <details>
-                    <summary><strong>Hiberni</strong></summary>
-                    <p><strong>Iceni</strong></p>
-                </details>
-                </li>
-                </li>
-                <details>
-                    <summary><strong>Picti</strong></summary>
-                    <p><strong>Iceni</strong></p>
-                </details>
-                </li>
             </ul>
-            <li>6 generic rebels factions (one for each cultural group)</li>
-            <li>XX separatists factions (one for each playable faction)</li>
-        </ul>
+        </details>
         <!-- --------------------------------------------------------------- -->
-        <h3>SCRITPS</h3>
+
+        <details>
+            <summary>SCRITPS</summary>
             <ul>
-                <li><strong>Started to add a provincial population system</strong></li>
-                A more dynamic, complex and strategic campaign, in which the player must take into account the composition of their social fabric when managing their territories: the more nobles there are, the greater the wealth, but the smaller the recruitment pool and the greater the opposition from representatives of other cultures; the more tribesmen there are, the larger the recruitable population, provided they are of the same culture or one that is tolerated. <strong>Differences between cultures will lead to the need to manage conflicts, rebellions and unrest</strong>; you will need to decide whether other cultures should assimilate you into their own culture, show varying degrees of tolerance, or whether you should be forcibly eradicated.
+                <li><strong>Started to add a provincial population system</strong>
+                <br>A more dynamic, complex and strategic campaign, in which the player must take into account the composition of their social fabric when managing their territories: the more nobles there are, the greater the wealth, but the smaller the recruitment pool and the greater the opposition from representatives of other cultures; the more tribesmen there are, the larger the recruitable population, provided they are of the same culture or one that is tolerated. <strong>Differences between cultures will lead to the need to manage conflicts, rebellions and unrest</strong>; you will need to decide whether other cultures should assimilate you into their own culture, show varying degrees of tolerance, or whether you should be forcibly eradicated.
+                <br><strong>Actually only the interface has been created.</strong>
+            </li>
             </ul>
+        </details>
 
         <!-- --------------------------------------------------------------- -->
-        <h3>UNITS</h3>
+        <details>
+            <summary>UNITS</summary>
             <ul>
                 <li>
-                    Units have been taken from testin gold packs, so they're not done by me and maybe are balanced for custom battles. Roman has just 5 legions (1 unit for Eagle Cohort, 1 unit for the other Cohorts): VII, VIII, XIX, X and XI Legio. AUxiliairies didn't match the pool of auxilia that Caesar had so they need to be redone.
+                    Units have been taken from testing old packs of previous modders, so they're not done by me and maybe are balanced for custom battles. Roman has just 5 legions (1 unit for Eagle Cohort, 1 unit for the other Cohorts): VII, VIII, XIX, X and XI Legio. AUxiliairies didn't match the pool of auxilia that Caesar had so they need to be redone.
                     <br>Plus, <strong>an AOR system will be implemented</strong>, so Romans can recruit local units only once ready, while legions or auxiliaries from remote lands can be accessed only through scripts or events/decrees.
                 </li>
             </ul>
-
+        </details>
+        <ul>
+            <li>Other minor changes</li>
+        </ul>   
+        <br>
         <!-- --------------------------------------------------------------- -->
-        <h2>BUGS, CRASHES AND FUTURE DEVELOPMENT</h2>
+        <h1>BUGS, CRASHES AND FUTURE DEVELOPMENT</h1>
         <h2>CRASHES</h2>
         <details>
             <summary>TECHNOLOGIES</summary>
             <ul>
-                <li>Technologies are bugged. If you click on the button you will get a CTD. Technologies aren't still implemented and assigned to the new cultures</li>
+                <li>Technologies are bugged. If you click on the button you will get a CTD. Technologies need to be implemented and assigned to the new cultures</li>
             </ul>
 
         </details>
@@ -244,6 +263,15 @@
                 <li>Add skins for generals (Campaign Map)</li>
             </ul>
         </details>
+
+        <!-- ════════════════════════════════════════════════════════════ -->
+        <h2>LINKS</h2>
+        <p>
+            Download:
+            <br>Discord:
+            <br>Form (for bugs, crash or suggestions):
+        </p>
+
 
         <!-- ════════════════════════════════════════════════════════════ -->
 
