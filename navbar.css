@@ -155,3 +155,114 @@
 body.has-navbar {
     padding-top: 68px;
 }
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT THEME BASE — body.dl-light
+   Funziona su qualsiasi pagina che importa navbar.css.
+   Regole più specifiche (per devlog) restano in devlog.css.
+   ══════════════════════════════════════════════════════════ */
+
+body.dl-light {
+    background: #f0ebe0;
+    color: #1c1710;
+}
+
+/* ── Tool pages con background scuro inline ─────────────── */
+
+/* new_cib.html — pannelli laterali e controlli */
+body.dl-light #sidebar,
+body.dl-light #info-panel,
+body.dl-light .panel,
+body.dl-light .sidebar,
+body.dl-light .controls,
+body.dl-light .toolbar {
+    background: #f0ebe0 !important;
+    color: #1c1710 !important;
+    border-color: rgba(92,61,16,0.2) !important;
+}
+
+/* vmd-inspector — terminale */
+body.dl-light #tree,
+body.dl-light #detail,
+body.dl-light .tree-node,
+body.dl-light .detail-panel {
+    background: #f0ebe0 !important;
+    color: #1c1710 !important;
+}
+body.dl-light pre,
+body.dl-light code {
+    background: rgba(0,0,0,0.06);
+    color: #1c1710;
+    border-color: rgba(92,61,16,0.15);
+}
+
+/* input, select, button generici */
+body.dl-light input,
+body.dl-light select,
+body.dl-light textarea {
+    background: #fff !important;
+    color: #1c1710 !important;
+    border-color: rgba(92,61,16,0.25) !important;
+}
+body.dl-light button {
+    background: rgba(92,61,16,0.1) !important;
+    color: #1c1710 !important;
+    border-color: rgba(92,61,16,0.25) !important;
+}
+body.dl-light button:hover {
+    background: rgba(92,61,16,0.2) !important;
+}
+
+/* ── index.css sections (docs/index.html) ────────────────── */
+body.dl-light .section-news {
+    background: #e6dfd2;
+    border-top-color: rgba(92,61,16,0.15);
+}
+body.dl-light .news-card {
+    background: rgba(255,255,255,0.55);
+    border-color: rgba(92,61,16,0.12);
+}
+body.dl-light .news-card-title { color: #1c1710; }
+body.dl-light .news-card-body  { color: rgba(28,23,16,0.6); }
+body.dl-light .news-card-date  { color: rgba(92,61,16,0.65); }
+
+body.dl-light .features-section { background: #e8e0d0; }
+body.dl-light .section-title    { color: #7a5c10; }
+body.dl-light .feature-card {
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(92,61,16,0.12);
+}
+body.dl-light .feature-card h3  { color: #1c1710; }
+body.dl-light .feature-card p   { color: rgba(28,23,16,0.65); }
+
+/* tl-label e tl-date nel tema chiaro */
+body.dl-light .tl-label { color: rgba(28,23,16,0.55); }
+
+/* footer */
+body.dl-light .footer {
+    background: #e0d8c8;
+    border-top: 1px solid rgba(92,61,16,0.15);
+}
+
+/* ── devlog index (devlog.html) ──────────────────────────── */
+body.dl-light .devlog-hero {
+    /* mantiene sfondo scuro come le entry */
+    background: linear-gradient(180deg, #1a100a 0%, #2e1608 60%, #1a100a 100%);
+}
+body.dl-light .devlog-index-body { background: #f0ebe0; }
+
+body.dl-light .devlog-list {
+    border-color: rgba(92,61,16,0.15);
+}
+body.dl-light .devlog-card {
+    background: rgba(255,255,255,0.45);
+    border-bottom-color: rgba(92,61,16,0.08);
+}
+body.dl-light .devlog-card:hover {
+    background: rgba(255,255,255,0.7);
+}
+body.dl-light .devlog-card-title   { color: #1c1710; }
+body.dl-light .devlog-card-excerpt { color: rgba(28,23,16,0.5); }
+body.dl-light .devlog-card-date    { color: #7a5c10; }
+body.dl-light .devlog-card-read    { color: #7a5c10; }
+body.dl-light .devlog-divider-text { color: rgba(28,23,16,0.4); }
