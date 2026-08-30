@@ -1,0 +1,268 @@
+/* ═══════════════════════════════════════════════════════════
+   navbar.css — standalone navbar, importabile su qualsiasi pagina
+   ═══════════════════════════════════════════════════════════ */
+
+/* variabili standalone — non sovrascrivono quelle già definite */
+:root {
+    --nb-bg:     rgba(10, 4, 0, 0.92);
+    --nb-gold:   #C5B358;
+    --nb-red:    #8B0000;
+    --nb-parch:  #F5E6BE;
+    --nb-stone:  #a89880;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.4rem 5%;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    background: var(--nb-bg);
+    border-bottom: 1px solid rgba(197, 179, 88, 0.15);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-sizing: border-box;
+}
+
+.navbar .logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--nb-parch);
+    text-decoration: none;
+}
+
+.navbar .nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.navbar .nav-links a {
+    color: var(--nb-parch);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+
+.navbar .nav-links a:hover { opacity: 1; }
+
+/* ── Dropdown ─────────────────────────────────────────────── */
+.nav-dropdown-wrap {
+    position: relative;
+}
+
+/* bridge invisibile: colma il gap tra trigger e menu */
+.nav-dropdown-wrap::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: -12px;
+    right: -12px;
+    height: 18px;
+}
+
+.nav-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    color: var(--nb-parch);
+    text-decoration: none;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+.nav-dropdown-trigger:hover { opacity: 1; }
+
+.nav-dropdown {
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    min-width: 190px;
+    background: rgba(8, 3, 0, 0.97);
+    border: 1px solid rgba(197, 179, 88, 0.2);
+    border-top: 2px solid var(--nb-gold);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 1001;
+}
+
+.nav-dropdown-wrap:hover .nav-dropdown {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 18px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nb-parch);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    border-bottom: 1px solid rgba(197, 179, 88, 0.07);
+}
+.nav-dropdown li:last-child .nav-dropdown-item { border-bottom: none; }
+
+.nav-dropdown-item:hover:not(.nav-dropdown-disabled) {
+    background: rgba(197, 179, 88, 0.1);
+    color: var(--nb-gold);
+}
+
+.nav-dropdown-disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+.nav-dd-soon {
+    font-size: 0.52rem;
+    letter-spacing: 0.15em;
+    background: rgba(139, 26, 26, 0.35);
+    border: 1px solid rgba(139, 26, 26, 0.5);
+    color: var(--nb-stone);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+}
+
+/* ── offset generico per le pagine con navbar fixed ──────── */
+body.has-navbar {
+    padding-top: 68px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT THEME BASE — body.dl-light
+   Funziona su qualsiasi pagina che importa navbar.css.
+   Regole più specifiche (per devlog) restano in devlog.css.
+   ══════════════════════════════════════════════════════════ */
+
+body.dl-light {
+    background: #f0ebe0;
+    color: #1c1710;
+}
+
+/* ── Tool pages con background scuro inline ─────────────── */
+
+/* new_cib.html — pannelli laterali e controlli */
+body.dl-light #sidebar,
+body.dl-light #info-panel,
+body.dl-light .panel,
+body.dl-light .sidebar,
+body.dl-light .controls,
+body.dl-light .toolbar {
+    background: #f0ebe0 !important;
+    color: #1c1710 !important;
+    border-color: rgba(92,61,16,0.2) !important;
+}
+
+/* vmd-inspector — terminale */
+body.dl-light #tree,
+body.dl-light #detail,
+body.dl-light .tree-node,
+body.dl-light .detail-panel {
+    background: #f0ebe0 !important;
+    color: #1c1710 !important;
+}
+body.dl-light pre,
+body.dl-light code {
+    background: rgba(0,0,0,0.06);
+    color: #1c1710;
+    border-color: rgba(92,61,16,0.15);
+}
+
+/* input, select, button generici */
+body.dl-light input,
+body.dl-light select,
+body.dl-light textarea {
+    background: #fff !important;
+    color: #1c1710 !important;
+    border-color: rgba(92,61,16,0.25) !important;
+}
+body.dl-light button {
+    background: rgba(92,61,16,0.1) !important;
+    color: #1c1710 !important;
+    border-color: rgba(92,61,16,0.25) !important;
+}
+body.dl-light button:hover {
+    background: rgba(92,61,16,0.2) !important;
+}
+
+/* ── index.css sections (docs/index.html) ────────────────── */
+body.dl-light .section-news {
+    background: #e6dfd2;
+    border-top-color: rgba(92,61,16,0.15);
+}
+body.dl-light .news-card {
+    background: rgba(255,255,255,0.55);
+    border-color: rgba(92,61,16,0.12);
+}
+body.dl-light .news-card-title { color: #1c1710; }
+body.dl-light .news-card-body  { color: rgba(28,23,16,0.6); }
+body.dl-light .news-card-date  { color: rgba(92,61,16,0.65); }
+
+body.dl-light .features-section { background: #e8e0d0; }
+body.dl-light .section-title    { color: #7a5c10; }
+body.dl-light .feature-card {
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(92,61,16,0.12);
+}
+body.dl-light .feature-card h3  { color: #1c1710; }
+body.dl-light .feature-card p   { color: rgba(28,23,16,0.65); }
+
+/* tl-label e tl-date nel tema chiaro */
+body.dl-light .tl-label { color: rgba(28,23,16,0.55); }
+
+/* footer */
+body.dl-light .footer {
+    background: #e0d8c8;
+    border-top: 1px solid rgba(92,61,16,0.15);
+}
+
+/* ── devlog index (devlog.html) ──────────────────────────── */
+body.dl-light .devlog-hero {
+    /* mantiene sfondo scuro come le entry */
+    background: linear-gradient(180deg, #1a100a 0%, #2e1608 60%, #1a100a 100%);
+}
+body.dl-light .devlog-index-body { background: #f0ebe0; }
+
+body.dl-light .devlog-list {
+    border-color: rgba(92,61,16,0.15);
+}
+body.dl-light .devlog-card {
+    background: rgba(255,255,255,0.45);
+    border-bottom-color: rgba(92,61,16,0.08);
+}
+body.dl-light .devlog-card:hover {
+    background: rgba(255,255,255,0.7);
+}
+body.dl-light .devlog-card-title   { color: #1c1710; }
+body.dl-light .devlog-card-excerpt { color: rgba(28,23,16,0.5); }
+body.dl-light .devlog-card-date    { color: #7a5c10; }
+body.dl-light .devlog-card-read    { color: #7a5c10; }
+body.dl-light .devlog-divider-text { color: rgba(28,23,16,0.4); }
