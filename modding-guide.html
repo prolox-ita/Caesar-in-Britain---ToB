@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modding Guide — Caesars in Britain</title>
+    <style>
+        :root {
+            --bg:       #111;
+            --bg2:      #1a1a1a;
+            --bg3:      #222;
+            --border:   #333;
+            --text:     #d4c9b0;
+            --muted:    #888;
+            --accent:   #c5a040;
+            --code-bg:  #0d0d0d;
+            --code:     #a8d8a8;
+            --warn:     #c77;
+            --tip:      #7ab;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.88rem;
+            line-height: 1.65;
+        }
+
+        /* ── TOP BAR ─────────────────────────────────────── */
+        header {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        header h1 { font-size: 0.95rem; color: var(--accent); letter-spacing: 0.04em; }
+        header .tag { font-size: 0.72rem; color: var(--muted); border: 1px solid var(--border); padding: 2px 8px; border-radius: 3px; }
+
+        /* ── LAYOUT ──────────────────────────────────────── */
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 49px);
+        }
+
+        nav.sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            position: sticky;
+            top: 49px;
+            height: calc(100vh - 49px);
+            overflow-y: auto;
+        }
+        nav.sidebar a {
+            display: block;
+            padding: 7px 20px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.82rem;
+            border-left: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        nav.sidebar a:hover { color: var(--text); background: var(--bg3); }
+        nav.sidebar a.active { color: var(--accent); border-left-color: var(--accent); background: var(--bg3); }
+        nav.sidebar .nav-section {
+            font-size: 0.68rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 16px 20px 4px;
+        }
+
+        main {
+            flex: 1;
+            padding: 32px 40px;
+            max-width: 860px;
+        }
+
+        /* ── SECTIONS ────────────────────────────────────── */
+        .section { margin-bottom: 48px; }
+
+        .section-title {
+            font-size: 1.05rem;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            letter-spacing: 0.04em;
+        }
+
+        h3 {
+            font-size: 0.88rem;
+            color: var(--text);
+            margin: 20px 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        p { margin-bottom: 10px; color: var(--text); }
+
+        /* ── STEPS ───────────────────────────────────────── */
+        .steps { list-style: none; counter-reset: step; margin: 8px 0 16px; }
+        .steps li {
+            counter-increment: step;
+            padding: 8px 12px 8px 44px;
+            position: relative;
+            border-left: 2px solid var(--border);
+            margin-bottom: 4px;
+            background: var(--bg2);
+        }
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 12px;
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 0.82rem;
+        }
+
+        /* ── CODE ────────────────────────────────────────── */
+        code {
+            background: var(--code-bg);
+            color: var(--code);
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 0.84rem;
+        }
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 14px 16px;
+            margin: 10px 0 16px;
+            overflow-x: auto;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--code);
+        }
+        pre .c { color: #555; } /* comment */
+        pre .k { color: #c5a040; } /* keyword / tag */
+        pre .v { color: #a8d8a8; } /* value */
+
+        /* ── CALLOUTS ────────────────────────────────────── */
+        .note, .warn, .tip {
+            border-left: 3px solid;
+            padding: 8px 14px;
+            margin: 10px 0 16px;
+            font-size: 0.83rem;
+            background: var(--bg2);
+        }
+        .note { border-color: var(--tip); color: var(--tip); }
+        .warn { border-color: var(--warn); color: var(--warn); }
+        .tip  { border-color: #8a8; color: #aca; }
+
+        /* ── FILE TREE ───────────────────────────────────── */
+        .file-tree {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin: 10px 0 16px;
+            font-size: 0.82rem;
+            line-height: 2;
+            color: var(--muted);
+        }
+        .file-tree .dir  { color: var(--accent); }
+        .file-tree .file { color: var(--code); }
+        .file-tree .hl   { color: var(--text); background: rgba(197,160,64,0.1); padding: 0 4px; }
+
+        /* ── TABLE ───────────────────────────────────────── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 16px;
+            font-size: 0.82rem;
+        }
+        th {
+            background: var(--bg3);
+            color: var(--accent);
+            padding: 7px 12px;
+            text-align: left;
+            font-weight: normal;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border);
+        }
+        td {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            vertical-align: top;
+        }
+        tr:nth-child(even) td { background: var(--bg2); }
+
+        /* ── DETAILS / COLLAPSIBLE ───────────────────────── */
+        details {
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            margin: 6px 0;
+        }
+        details summary {
+            padding: 8px 14px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 0.84rem;
+            list-style: none;
+            background: var(--bg2);
+            user-select: none;
+        }
+        details summary::before { content: '▶  '; color: var(--accent); font-size: 0.7rem; }
+        details[open] summary::before { content: '▼  '; }
+        details .detail-body {
+            padding: 12px 16px;
+            font-size: 0.83rem;
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>CiB — MODDING GUIDE</h1>
+    <span class="tag">Total War: Thrones of Britannia</span>
+    <span class="tag" style="margin-left:auto; color: var(--muted);">internal reference</span>
+</header>
+
+<div class="layout">
+
+    <nav class="sidebar">
+        <div class="nav-section">Sections</div>
+        <a href="#map">Map Editing</a>
+        <a href="#faction">Adding a Faction</a>
+        <a href="#culture">Adding a Cultural Group</a>
+        <a href="#general">General Mesh</a>
+        <div class="nav-section">Quick ref</div>
+        <a href="#file-paths">File Paths</a>
+    </nav>
+
+    <main>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <div class="section" id="map">
+            <div class="section-title">01 — MAP EDITING</div>
+
+            <h3>Files involved</h3>
+            <div class="file-tree">
+                <span class="dir">data/</span><br>
+                &nbsp;&nbsp;<span class="dir">terrain/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl file">map.rwm</span> — compiled map (do NOT edit directly)<br>
+                &nbsp;&nbsp;<span class="dir">world/maps/campaign/imperial_campaign/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">map_regions.tga</span> — region colour map<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">map_heights.tga</span> — heightmap<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">map_ground_types.tga</span> — terrain types<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">map_climates.tga</span> — climate zones<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">map_fog_of_war.tga</span> — FoW overlay<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">descr_regions.txt</span> — region definitions (name, faction, resource)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">descr_strat.txt</span> — starting positions, faction start, units on map
+            </div>
+
+            <h3>Editing regions (colour map)</h3>
+            <p>Each region is a unique flat colour in <code>map_regions.tga</code>. The colour value links to an entry in <code>descr_regions.txt</code>.</p>
+            <ol class="steps">
+                <li>Open <code>map_regions.tga</code> in Photoshop / GIMP.</li>
+                <li>Pick a new unique RGB colour (not already used by any other region).</li>
+                <li>Paint the new region area with that colour on the correct layer.</li>
+                <li>Export as 24-bit TGA (no alpha).</li>
+                <li>Add a matching entry in <code>descr_regions.txt</code> — see format below.</li>
+                <li>Delete <code>map.rwm</code> so the game regenerates it on next launch.</li>
+            </ol>
+
+            <details>
+                <summary>descr_regions.txt — entry format</summary>
+                <div class="detail-body">
+<pre><span class="k">land_region</span>
+  <span class="k">name</span>          <span class="v">REGION_NAME</span>
+  <span class="k">colour</span>        <span class="v">R G B</span>          <span class="c">; matches the pixel colour in map_regions.tga</span>
+  <span class="k">settlement</span>    <span class="v">SETTLEMENT_NAME</span>
+  <span class="k">faction</span>       <span class="v">faction_key</span>    <span class="c">; starting owner</span>
+  <span class="k">resource</span>      <span class="v">resource_key</span>   <span class="c">; optional</span>
+  <span class="k">religion</span>      <span class="v">religion_key</span>
+end</pre>
+                </div>
+            </details>
+
+            <h3>Adding a new settlement</h3>
+            <ol class="steps">
+                <li>Add the region entry in <code>descr_regions.txt</code> (above).</li>
+                <li>Place the settlement icon in <code>descr_strat.txt</code> with coordinates.</li>
+                <li>Add localisation string for the settlement name in the LOC pack.</li>
+                <li>Assign the settlement to a province if using the province system.</li>
+            </ol>
+
+            <div class="warn">⚠ Always delete <code>map.rwm</code> after any map file change, otherwise the game uses the cached version.</div>
+            <div class="note">ℹ Sea regions use the same system as land regions but with the <code>sea_region</code> keyword in <code>descr_regions.txt</code>.</div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <div class="section" id="faction">
+            <div class="section-title">02 — ADDING A FACTION</div>
+
+            <h3>Files involved</h3>
+            <div class="file-tree">
+                <span class="dir">data/</span><br>
+                &nbsp;&nbsp;<span class="hl file">descr_campaign_db.xml</span> — faction list + cultural group assignment<br>
+                &nbsp;&nbsp;<span class="hl file">descr_strat.txt</span> — starting position on the map<br>
+                &nbsp;&nbsp;<span class="hl file">descr_rebel_factions.txt</span> — if the faction is a rebel/separatist<br>
+                &nbsp;&nbsp;<span class="dir">ui/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">faction_flags/ </span> — faction flag images<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">faction_symbols/</span> — small faction icons<br>
+                &nbsp;&nbsp;<span class="dir">text/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">faction_names.txt</span> — localised faction name
+            </div>
+
+            <h3>Steps</h3>
+            <ol class="steps">
+                <li>Add the faction entry in <code>descr_campaign_db.xml</code> — set <code>culture</code>, <code>religion</code>, <code>playable</code> (true/false), and other attributes.</li>
+                <li>Add a starting position block in <code>descr_strat.txt</code> — coordinates, starting settlements, starting units, starting characters.</li>
+                <li>Add the faction name string in the localisation pack (<code>faction_names.txt</code> or relevant LOC file).</li>
+                <li>Add flag images: <code>faction_key.tga</code> in <code>ui/faction_flags/</code> and <code>ui/faction_symbols/</code>.</li>
+                <li>If the faction needs a separatist rebel counterpart, add it in <code>descr_rebel_factions.txt</code>.</li>
+            </ol>
+
+            <details>
+                <summary>descr_campaign_db.xml — faction block skeleton</summary>
+                <div class="detail-body">
+<pre><span class="k">&lt;faction</span> <span class="v">name="faction_key"</span><span class="k">&gt;</span>
+  <span class="k">&lt;culture&gt;</span><span class="v">culture_key</span><span class="k">&lt;/culture&gt;</span>
+  <span class="k">&lt;religion&gt;</span><span class="v">religion_key</span><span class="k">&lt;/religion&gt;</span>
+  <span class="k">&lt;playable&gt;</span><span class="v">true</span><span class="k">&lt;/playable&gt;</span>
+  <span class="k">&lt;colour r=</span><span class="v">"R"</span> <span class="k">g=</span><span class="v">"G"</span> <span class="k">b=</span><span class="v">"B"</span><span class="k">/&gt;</span>
+  <span class="c">&lt;!-- add other faction attributes as needed --&gt;</span>
+<span class="k">&lt;/faction&gt;</span></pre>
+                </div>
+            </details>
+
+            <details>
+                <summary>descr_strat.txt — starting block skeleton</summary>
+                <div class="detail-body">
+<pre><span class="k">faction</span>     <span class="v">faction_key</span>
+  <span class="k">ai_label</span>  <span class="v">attacker</span>   <span class="c">; or defender</span>
+  <span class="k">unit</span>      <span class="v">unit_key</span> <span class="c">; starting units (optional)</span>
+  ...
+<span class="k">end</span></pre>
+                </div>
+            </details>
+
+            <div class="tip">✔ Playable factions need a complete starting position block with at least one settlement and one general character.</div>
+            <div class="warn">⚠ The faction key must be unique and contain no spaces. Use underscores: <code>roman_republic</code>.</div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <div class="section" id="culture">
+            <div class="section-title">03 — ADDING A CULTURAL GROUP</div>
+
+            <h3>Files involved</h3>
+            <div class="file-tree">
+                <span class="dir">data/</span><br>
+                &nbsp;&nbsp;<span class="hl file">descr_cultures.txt</span> — culture definitions<br>
+                &nbsp;&nbsp;<span class="hl file">descr_campaign_db.xml</span> — assign factions to the new culture<br>
+                &nbsp;&nbsp;<span class="hl file">export_descr_unit.txt (EDU)</span> — units that belong to the culture<br>
+                &nbsp;&nbsp;<span class="hl file">descr_building_battle.txt</span> — building effects per culture<br>
+                &nbsp;&nbsp;<span class="dir">text/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">culture_names.txt</span> — localised culture name
+            </div>
+
+            <h3>Steps</h3>
+            <ol class="steps">
+                <li>Add a new entry in <code>descr_cultures.txt</code> — set the culture key, tech tree, building levels, and any culture-specific modifiers.</li>
+                <li>Add the localised name in the LOC pack.</li>
+                <li>In <code>export_descr_unit.txt</code>, add <code>ownership</code> lines on each unit that belongs to this culture (or create new units — see unit guide if needed).</li>
+                <li>In <code>descr_campaign_db.xml</code>, set <code>&lt;culture&gt;new_culture_key&lt;/culture&gt;</code> on each faction that should belong to this group.</li>
+                <li>Add building effects in <code>descr_building_battle.txt</code> if the culture has unique buildings.</li>
+                <li>Create a rebel faction for this culture in <code>descr_rebel_factions.txt</code>.</li>
+            </ol>
+
+            <details>
+                <summary>descr_cultures.txt — entry format</summary>
+                <div class="detail-body">
+<pre><span class="k">culture</span> <span class="v">culture_key</span>
+  <span class="k">tech_tree</span>            <span class="v">tech_tree_key</span>
+  <span class="k">building_style</span>       <span class="v">style_key</span>
+  <span class="k">portrait_style</span>       <span class="v">portrait_style_key</span>
+  <span class="k">rebel_standard_index</span> <span class="v">0</span>
+<span class="k">end</span></pre>
+                </div>
+            </details>
+
+            <div class="note">ℹ A cultural group typically needs: its own rebel faction, at least one playable faction, and at least a basic unit roster in EDU.</div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <div class="section" id="general">
+            <div class="section-title">04 — ADDING A GENERAL MESH</div>
+
+            <h3>Files involved</h3>
+            <div class="file-tree">
+                <span class="dir">data/</span><br>
+                &nbsp;&nbsp;<span class="dir">models_unit/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl file">general_model.cas</span> — 3D mesh file<br>
+                &nbsp;&nbsp;<span class="dir">textures/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl file">general_texture.tga</span> — diffuse texture<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">general_texture_normal.tga</span> — normal map (optional)<br>
+                &nbsp;&nbsp;<span class="hl file">descr_model_battle.txt (DMB)</span> — model + texture → unit assignment<br>
+                &nbsp;&nbsp;<span class="hl file">export_descr_unit.txt (EDU)</span> — links unit to its DMB entry<br>
+                &nbsp;&nbsp;<span class="dir">animations/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">…</span> — skeleton must match the mesh rig
+            </div>
+
+            <h3>Steps</h3>
+            <ol class="steps">
+                <li>Export the general mesh as a <code>.cas</code> file from your 3D tool. The rig/skeleton must match an existing ToB skeleton (e.g. <code>fs_horse_heavy</code> for a mounted general, <code>MTW2_man</code> for infantry).</li>
+                <li>Place the <code>.cas</code> in <code>data/models_unit/</code> and textures in <code>data/textures/</code>.</li>
+                <li>Add a new model entry in <code>descr_model_battle.txt</code> pointing to the mesh and texture.</li>
+                <li>In <code>export_descr_unit.txt</code>, find the general unit and set its <code>soldier</code> / <code>officer</code> line to reference the new DMB entry.</li>
+                <li>Assign a faction-specific variant in DMB using <code>faction_override</code> blocks if you want different meshes per faction.</li>
+                <li>Launch the game in custom battle mode first to check for crashes before running a campaign.</li>
+            </ol>
+
+            <details>
+                <summary>DMB — model entry skeleton</summary>
+                <div class="detail-body">
+<pre><span class="k">type</span>         <span class="v">general_model_key</span>
+<span class="k">skeleton</span>     <span class="v">MTW2_man</span>           <span class="c">; or fs_horse_heavy for mounted</span>
+<span class="k">indiv_range</span>  <span class="v">40</span>
+<span class="k">texture</span>      <span class="v">faction_key</span>, <span class="v">data/textures/general_texture.tga</span>
+<span class="k">model</span>        <span class="v">data/models_unit/general_model.cas</span>, <span class="v">30</span>
+<span class="k">model</span>        <span class="v">data/models_unit/general_model_lo.cas</span>, <span class="v">max</span>  <span class="c">; LOD (low-poly version)</span></pre>
+                </div>
+            </details>
+
+            <details>
+                <summary>EDU — officer / general line</summary>
+                <div class="detail-body">
+<pre><span class="k">officer</span>   <span class="v">general_model_key</span>  <span class="c">; references the DMB type key</span></pre>
+                </div>
+            </details>
+
+            <div class="warn">⚠ If the skeleton does not match the mesh rig, the game will crash on load or show broken animations.</div>
+            <div class="tip">✔ Test with an existing faction general first (copy the DMB entry, change only the texture) to verify the pipeline before swapping the mesh.</div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <div class="section" id="file-paths">
+            <div class="section-title">QUICK REF — KEY FILE PATHS</div>
+            <table>
+                <tr><th>File</th><th>Purpose</th></tr>
+                <tr><td><code>descr_campaign_db.xml</code></td><td>Factions, cultures, religions, starting conditions</td></tr>
+                <tr><td><code>descr_strat.txt</code></td><td>Starting positions, units, characters, settlements on map</td></tr>
+                <tr><td><code>descr_cultures.txt</code></td><td>Cultural group definitions</td></tr>
+                <tr><td><code>descr_regions.txt</code></td><td>Region names, colours, owners, resources</td></tr>
+                <tr><td><code>export_descr_unit.txt</code></td><td>All unit stats, ownership, soldier model reference</td></tr>
+                <tr><td><code>descr_model_battle.txt</code></td><td>3D model + texture assignments per unit/general</td></tr>
+                <tr><td><code>descr_rebel_factions.txt</code></td><td>Rebel and separatist faction definitions</td></tr>
+                <tr><td><code>map_regions.tga</code></td><td>Colour-coded region boundaries</td></tr>
+                <tr><td><code>map_heights.tga</code></td><td>Heightmap (greyscale)</td></tr>
+                <tr><td><code>map.rwm</code></td><td>Compiled map cache — delete after any map edit</td></tr>
+            </table>
+        </div>
+
+    </main>
+</div>
+
+</body>
+</html>
