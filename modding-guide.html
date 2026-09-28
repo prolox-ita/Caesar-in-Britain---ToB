@@ -68,6 +68,8 @@ body {
     transition: background .12s, color .12s;
 }
 .tb-btn:hover { background: #2a2a2a; color: var(--accent); }
+.tb-btn.save-btn { border-color: var(--accent); color: var(--accent); }
+.tb-btn.save-btn:hover { background: rgba(197,160,64,.15); }
 .tb-btn.danger:hover { color: var(--warn); }
 #save-status {
     margin-left: auto;
@@ -75,7 +77,9 @@ body {
     color: var(--muted);
     white-space: nowrap;
 }
-#save-status.ok { color: var(--tip); }
+#save-status.ok     { color: var(--tip); }
+#save-status.unsaved { color: #b8a060; }
+#save-status.err    { color: var(--warn); }
 
 /* ── EDITOR ──────────────────────────────────────────────── */
 #editor-wrap {
@@ -116,10 +120,7 @@ body {
     font-style: italic;
 }
 #editor p { margin-bottom: 10px; }
-#editor ul, #editor ol {
-    padding-left: 24px;
-    margin: 6px 0 12px;
-}
+#editor ul, #editor ol { padding-left: 24px; margin: 6px 0 12px; }
 #editor li { margin-bottom: 3px; }
 #editor code {
     background: var(--code-bg);
@@ -192,17 +193,8 @@ body {
 }
 #editor details summary::before { content: '▶  '; color: var(--accent); font-size: .7rem; }
 #editor details[open] summary::before { content: '▼  '; }
-#editor details .det-body {
-    padding: 10px 14px;
-    font-size: 0.84rem;
-}
-#editor hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 24px 0;
-}
-
-/* placeholder */
+#editor details .det-body { padding: 10px 14px; font-size: 0.84rem; }
+#editor hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
 #editor:empty::before {
     content: 'Start writing… use the toolbar above to format.';
     color: var(--muted);
@@ -234,17 +226,17 @@ body {
     <button class="tb-btn" onclick="insertCodeBlock()" title="Code block">``` block</button>
     <div class="tb-sep"></div>
 
-    <button class="tb-btn" onclick="insertCallout('warn')" title="Warning callout">⚠ Warn</button>
-    <button class="tb-btn" onclick="insertCallout('note')" title="Note callout">ℹ Note</button>
-    <button class="tb-btn" onclick="insertCallout('tip')"  title="Tip callout">✔ Tip</button>
+    <button class="tb-btn" onclick="insertCallout('warn')" title="Warning">⚠ Warn</button>
+    <button class="tb-btn" onclick="insertCallout('note')" title="Note">ℹ Note</button>
+    <button class="tb-btn" onclick="insertCallout('tip')"  title="Tip">✔ Tip</button>
     <div class="tb-sep"></div>
 
     <button class="tb-btn" onclick="insertDetails()" title="Collapsible section">▶ Spoiler</button>
     <button class="tb-btn" onclick="execFmt('insertHorizontalRule')" title="Divider">— hr</button>
     <div class="tb-sep"></div>
 
-    <button class="tb-btn danger" onclick="resetContent()" title="Reset to default content">↺ Reset</button>
-    <button class="tb-btn" onclick="exportHTML()" title="Download as HTML file">⬇ Export</button>
+    <button class="tb-btn save-btn" onclick="saveToFile()" title="Save content into this file (Ctrl+S)">💾 Save to file</button>
+    <button class="tb-btn danger" onclick="resetContent()" title="Reset to original default content">↺ Reset</button>
 
     <span id="save-status">—</span>
 </div>
@@ -253,14 +245,8 @@ body {
     <div id="editor" contenteditable="true" spellcheck="false"></div>
 </div>
 
-<script>
-const editor = document.getElementById('editor');
-const status = document.getElementById('save-status');
-const STORAGE_KEY = 'cib-modding-guide-v1';
-
-/* ── DEFAULT CONTENT ─────────────────────────────────────── */
-const DEFAULT = `
-<h1>01 — Map Editing</h1>
+<!-- ── BAKED CONTENT (updated on every "Save to file") ───── -->
+<div id="dc" style="display:none"><h1>01 — Map Editing</h1>
 <h2>Files involved</h2>
 <pre>data/terrain/map.rwm                              ← compiled map, DELETE after any change
 data/world/maps/campaign/imperial_campaign/
@@ -374,132 +360,177 @@ model        data/models_unit/general_model_lo.cas, max  ; LOD</pre></div></deta
 <details><summary>EDU — officer line</summary><div class="det-body"><pre>officer   general_model_key  ; references the DMB type key</pre></div></details>
 
 <div class="warn">⚠ If the skeleton does not match the mesh rig the game will crash on load or show broken animations.</div>
-<div class="tip">✔ Test with an existing faction general first (copy DMB entry, change only the texture) before swapping the mesh.</div>
-`;
+<div class="tip">✔ Test with an existing faction general first (copy DMB entry, change only the texture) before swapping the mesh.</div></div>
 
-/* ── SAVE / LOAD ─────────────────────────────────────────── */
-let saveTimer;
+<script>
+const editor = document.getElementById('editor');
+const dc     = document.getElementById('dc');
+const status = document.getElementById('save-status');
+const LS_KEY = 'cib-mg-draft';
 
-function save() {
-    try { localStorage.setItem(STORAGE_KEY, editor.innerHTML); } catch(e){}
-    status.textContent = 'Saved ✓';
-    status.className = 'ok';
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => { status.textContent = 'Auto-save on'; status.className = ''; }, 2000);
+let fileHandle = null;
+let saveTimer  = null;
+let dirty      = false;
+
+/* ── LOAD ────────────────────────────────────────────────── */
+function load() {
+    // prefer localStorage draft over baked content
+    try {
+        const draft = localStorage.getItem(LS_KEY);
+        if (draft) { editor.innerHTML = draft; return; }
+    } catch(e) {}
+    editor.innerHTML = dc.innerHTML;
 }
 
-function load() {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) { editor.innerHTML = stored; return; }
-    } catch(e){}
-    editor.innerHTML = DEFAULT;
+/* ── AUTO-SAVE TO localStorage (draft buffer) ────────────── */
+function saveDraft() {
+    try { localStorage.setItem(LS_KEY, editor.innerHTML); } catch(e) {}
 }
 
 editor.addEventListener('input', () => {
+    dirty = true;
     status.textContent = 'Unsaved…';
-    status.className = '';
+    status.className = 'unsaved';
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(save, 900);
+    saveTimer = setTimeout(saveDraft, 800);
 });
+
+/* ── SAVE TO FILE (File System Access API) ───────────────── */
+async function saveToFile() {
+    // Bake current content into the #dc div so the file is self-contained
+    dc.innerHTML = editor.innerHTML;
+    // Clear draft so the next open reads the baked content
+    try { localStorage.removeItem(LS_KEY); } catch(e) {}
+
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+    // File System Access API (Chrome/Edge; works on file://)
+    if (window.showSaveFilePicker) {
+        try {
+            if (!fileHandle) {
+                fileHandle = await window.showSaveFilePicker({
+                    suggestedName: 'modding-guide.html',
+                    types: [{ description: 'HTML file', accept: { 'text/html': ['.html'] } }]
+                });
+            }
+            const writable = await fileHandle.createWritable();
+            await writable.write(html);
+            await writable.close();
+            dirty = false;
+            status.textContent = 'Saved to file ✓';
+            status.className = 'ok';
+            setTimeout(() => { if (!dirty) { status.textContent = '—'; status.className = ''; } }, 2500);
+            return;
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                // user cancelled the picker — restore dc to original
+                dc.innerHTML = editor.innerHTML;
+                return;
+            }
+            // other error: fall through to download
+        }
+    }
+
+    // Fallback: download the file
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'modding-guide.html';
+    a.click();
+    dirty = false;
+    status.textContent = 'Downloaded ✓ (replace the old file)';
+    status.className = 'ok';
+    setTimeout(() => { if (!dirty) { status.textContent = '—'; status.className = ''; } }, 4000);
+}
+
+/* ── RESET ───────────────────────────────────────────────── */
+function resetContent() {
+    if (!confirm('Reset to original default content? Your edits will be lost.')) return;
+    try { localStorage.removeItem(LS_KEY); } catch(e) {}
+    fileHandle = null;
+    // restore dc to the original markup (re-parse from a static copy)
+    editor.innerHTML = dc.innerHTML;
+    dirty = false;
+    status.textContent = 'Reset — save to file when ready';
+    status.className = 'unsaved';
+}
 
 /* ── FORMATTING ──────────────────────────────────────────── */
 function execFmt(cmd, val) {
     document.execCommand(cmd, false, val || null);
     editor.focus();
 }
-
 function fmt(tag) {
     document.execCommand('formatBlock', false, tag);
     editor.focus();
 }
-
 function insertCode() {
     const sel = window.getSelection();
     if (!sel.rangeCount) return;
     const range = sel.getRangeAt(0);
     const code = document.createElement('code');
-    const txt = sel.toString();
-    code.textContent = txt || 'code';
+    code.textContent = sel.toString() || 'code';
     range.deleteContents();
     range.insertNode(code);
     sel.collapse(code, 1);
     editor.focus();
 }
-
 function insertCodeBlock() {
-    const sel = window.getSelection();
-    const txt = sel.toString() || '// your code here';
     const pre = document.createElement('pre');
-    pre.textContent = txt;
-    pre.setAttribute('contenteditable', 'true');
-    insertBlockElement(pre);
+    pre.textContent = window.getSelection().toString() || '// your code here';
+    insertBlock(pre);
 }
-
 function insertCallout(type) {
     const div = document.createElement('div');
     div.className = type;
-    const icons = { warn: '⚠ ', note: 'ℹ ', tip: '✔ ' };
-    div.textContent = icons[type] + 'Write here…';
-    insertBlockElement(div);
+    div.textContent = { warn: '⚠ ', note: 'ℹ ', tip: '✔ ' }[type] + 'Write here…';
+    insertBlock(div);
 }
-
 function insertDetails() {
-    const details = document.createElement('details');
-    const summary = document.createElement('summary');
-    summary.textContent = 'Section title';
+    const det = document.createElement('details');
+    const sum = document.createElement('summary');
+    sum.textContent = 'Section title';
     const body = document.createElement('div');
     body.className = 'det-body';
-    body.setAttribute('contenteditable', 'true');
     body.textContent = 'Content here…';
-    details.appendChild(summary);
-    details.appendChild(body);
-    insertBlockElement(details);
+    det.appendChild(sum);
+    det.appendChild(body);
+    insertBlock(det);
 }
-
-function insertBlockElement(el) {
+function insertBlock(el) {
     const sel = window.getSelection();
-    if (!sel.rangeCount) { editor.appendChild(el); editor.focus(); return; }
-    const range = sel.getRangeAt(0);
-    range.collapse(false);
-    range.insertNode(el);
-    range.setStartAfter(el);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
+    if (sel.rangeCount) {
+        const r = sel.getRangeAt(0);
+        r.collapse(false);
+        r.insertNode(el);
+        r.setStartAfter(el);
+        r.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(r);
+    } else {
+        editor.appendChild(el);
+    }
     editor.focus();
 }
 
-/* ── RESET ───────────────────────────────────────────────── */
-function resetContent() {
-    if (!confirm('Reset to default content? Your edits will be lost.')) return;
-    try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
-    editor.innerHTML = DEFAULT;
-    save();
-}
-
-/* ── EXPORT ──────────────────────────────────────────────── */
-function exportHTML() {
-    const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'modding-guide.html';
-    a.click();
-}
-
 /* ── KEYBOARD SHORTCUTS ──────────────────────────────────── */
-editor.addEventListener('keydown', e => {
+document.addEventListener('keydown', e => {
     if (!e.ctrlKey && !e.metaKey) return;
-    const key = e.key.toLowerCase();
-    if (key === 's') { e.preventDefault(); save(); }
-    if (key === '1') { e.preventDefault(); fmt('h1'); }
-    if (key === '2') { e.preventDefault(); fmt('h2'); }
-    if (key === '3') { e.preventDefault(); fmt('h3'); }
+    const k = e.key.toLowerCase();
+    if (k === 's') { e.preventDefault(); saveToFile(); }
+    if (k === '1') { e.preventDefault(); fmt('h1'); }
+    if (k === '2') { e.preventDefault(); fmt('h2'); }
+    if (k === '3') { e.preventDefault(); fmt('h3'); }
+});
+
+/* ── WARN ON CLOSE IF UNSAVED ────────────────────────────── */
+window.addEventListener('beforeunload', e => {
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
 });
 
 /* ── INIT ────────────────────────────────────────────────── */
 load();
-status.textContent = 'Auto-save on';
+status.textContent = '—';
 </script>
 </body>
 </html>
