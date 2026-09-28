@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Modding Guide — CiB</title>
@@ -228,7 +227,7 @@ body {
 
     <button class="tb-btn" onclick="insertCallout('warn')" title="Warning">⚠ Warn</button>
     <button class="tb-btn" onclick="insertCallout('note')" title="Note">ℹ Note</button>
-    <button class="tb-btn" onclick="insertCallout('tip')"  title="Tip">✔ Tip</button>
+    <button class="tb-btn" onclick="insertCallout('tip')" title="Tip">✔ Tip</button>
     <div class="tb-sep"></div>
 
     <button class="tb-btn" onclick="insertDetails()" title="Collapsible section">▶ Spoiler</button>
@@ -238,129 +237,17 @@ body {
     <button class="tb-btn save-btn" onclick="saveToFile()" title="Save content into this file (Ctrl+S)">💾 Save to file</button>
     <button class="tb-btn danger" onclick="resetContent()" title="Reset to original default content">↺ Reset</button>
 
-    <span id="save-status">—</span>
+    <span id="save-status" class="unsaved">Unsaved…</span>
 </div>
 
 <div id="editor-wrap">
-    <div id="editor" contenteditable="true" spellcheck="false"></div>
+    <div id="editor" contenteditable="true" spellcheck="false"><h1>01 - GUIDA AL MODDING</h1>
+<h1><br></h1></div>
 </div>
 
 <!-- ── BAKED CONTENT (updated on every "Save to file") ───── -->
-<div id="dc" style="display:none"><h1>01 — Map Editing</h1>
-<h2>Files involved</h2>
-<pre>data/terrain/map.rwm                              ← compiled map, DELETE after any change
-data/world/maps/campaign/imperial_campaign/
-  map_regions.tga      ← region colour map
-  map_heights.tga      ← heightmap
-  map_ground_types.tga ← terrain types
-  map_climates.tga     ← climate zones
-  descr_regions.txt    ← region definitions (name, faction, resource)
-  descr_strat.txt      ← starting positions, units on map</pre>
-
-<h2>Editing regions</h2>
-<p>Each region is a unique flat colour in <code>map_regions.tga</code>. The RGB value links to an entry in <code>descr_regions.txt</code>.</p>
-<ol>
-<li>Open <code>map_regions.tga</code> in Photoshop / GIMP.</li>
-<li>Pick a new unique RGB colour (not used by any other region).</li>
-<li>Paint the new region with that colour.</li>
-<li>Export as 24-bit TGA (no alpha).</li>
-<li>Add a matching entry in <code>descr_regions.txt</code>.</li>
-<li>Delete <code>map.rwm</code> so the game regenerates it.</li>
-</ol>
-
-<details><summary>descr_regions.txt — entry format</summary><div class="det-body"><pre>land_region
-  name          REGION_NAME
-  colour        R G B       ; matches the pixel in map_regions.tga
-  settlement    SETTLEMENT_NAME
-  faction       faction_key ; starting owner
-  resource      resource_key
-  religion      religion_key
-end</pre></div></details>
-
-<div class="warn">⚠ Always delete <code>map.rwm</code> after any map file change, or the game will load the cached version.</div>
-
-<hr>
-<h1>02 — Adding a Faction</h1>
-<h2>Files involved</h2>
-<pre>descr_campaign_db.xml     ← faction list + cultural group assignment
-descr_strat.txt           ← starting position on the map
-descr_rebel_factions.txt  ← if the faction is a rebel/separatist
-ui/faction_flags/         ← faction flag images (.tga)
-ui/faction_symbols/       ← small faction icons
-text/faction_names.txt    ← localised faction name</pre>
-
-<h2>Steps</h2>
-<ol>
-<li>Add the faction entry in <code>descr_campaign_db.xml</code> — set <code>culture</code>, <code>religion</code>, <code>playable</code>.</li>
-<li>Add a starting position block in <code>descr_strat.txt</code> with coordinates, settlements, units, characters.</li>
-<li>Add the faction name string in the LOC pack.</li>
-<li>Add flag images: <code>faction_key.tga</code> in <code>ui/faction_flags/</code> and <code>ui/faction_symbols/</code>.</li>
-<li>If the faction needs a rebel counterpart, add it in <code>descr_rebel_factions.txt</code>.</li>
-</ol>
-
-<details><summary>descr_campaign_db.xml — faction block skeleton</summary><div class="det-body"><pre>&lt;faction name="faction_key"&gt;
-  &lt;culture&gt;culture_key&lt;/culture&gt;
-  &lt;religion&gt;religion_key&lt;/religion&gt;
-  &lt;playable&gt;true&lt;/playable&gt;
-  &lt;colour r="R" g="G" b="B"/&gt;
-&lt;/faction&gt;</pre></div></details>
-
-<div class="warn">⚠ The faction key must be unique and contain no spaces — use underscores: <code>roman_republic</code>.</div>
-<div class="tip">✔ Playable factions need a complete starting position block with at least one settlement and one general character.</div>
-
-<hr>
-<h1>03 — Adding a Cultural Group</h1>
-<h2>Files involved</h2>
-<pre>descr_cultures.txt        ← culture definitions
-descr_campaign_db.xml     ← assign factions to the new culture
-export_descr_unit.txt     ← units that belong to the culture
-descr_building_battle.txt ← building effects per culture
-text/culture_names.txt    ← localised culture name</pre>
-
-<h2>Steps</h2>
-<ol>
-<li>Add a new entry in <code>descr_cultures.txt</code>.</li>
-<li>Add the localised name in the LOC pack.</li>
-<li>In <code>export_descr_unit.txt</code>, add <code>ownership</code> lines on each unit that belongs to this culture.</li>
-<li>In <code>descr_campaign_db.xml</code>, set <code>&lt;culture&gt;new_culture_key&lt;/culture&gt;</code> on each faction.</li>
-<li>Create a rebel faction for this culture in <code>descr_rebel_factions.txt</code>.</li>
-</ol>
-
-<details><summary>descr_cultures.txt — entry format</summary><div class="det-body"><pre>culture culture_key
-  tech_tree            tech_tree_key
-  building_style       style_key
-  portrait_style       portrait_style_key
-  rebel_standard_index 0
-end</pre></div></details>
-
-<hr>
-<h1>04 — Adding a General Mesh</h1>
-<h2>Files involved</h2>
-<pre>data/models_unit/general_model.cas    ← 3D mesh
-data/textures/general_texture.tga     ← diffuse texture
-descr_model_battle.txt (DMB)          ← model + texture → unit assignment
-export_descr_unit.txt  (EDU)          ← links unit to its DMB entry</pre>
-
-<h2>Steps</h2>
-<ol>
-<li>Export the mesh as <code>.cas</code>. The rig must match an existing ToB skeleton (e.g. <code>MTW2_man</code> for infantry, <code>fs_horse_heavy</code> for mounted).</li>
-<li>Place <code>.cas</code> in <code>data/models_unit/</code> and textures in <code>data/textures/</code>.</li>
-<li>Add a model entry in <code>descr_model_battle.txt</code> pointing to mesh and texture.</li>
-<li>In <code>export_descr_unit.txt</code>, set the general unit's <code>officer</code> line to the new DMB key.</li>
-<li>Launch in custom battle first to check for crashes before running campaign.</li>
-</ol>
-
-<details><summary>DMB — model entry skeleton</summary><div class="det-body"><pre>type         general_model_key
-skeleton     MTW2_man          ; or fs_horse_heavy for mounted
-indiv_range  40
-texture      faction_key, data/textures/general_texture.tga
-model        data/models_unit/general_model.cas, 30
-model        data/models_unit/general_model_lo.cas, max  ; LOD</pre></div></details>
-
-<details><summary>EDU — officer line</summary><div class="det-body"><pre>officer   general_model_key  ; references the DMB type key</pre></div></details>
-
-<div class="warn">⚠ If the skeleton does not match the mesh rig the game will crash on load or show broken animations.</div>
-<div class="tip">✔ Test with an existing faction general first (copy DMB entry, change only the texture) before swapping the mesh.</div></div>
+<div id="dc" style="display:none"><h1>01 - GUIDA AL MODDING</h1>
+<h1><br></h1></div>
 
 <script>
 const editor = document.getElementById('editor');
@@ -532,5 +419,6 @@ window.addEventListener('beforeunload', e => {
 load();
 status.textContent = '—';
 </script>
-</body>
-</html>
+
+
+</body></html>
