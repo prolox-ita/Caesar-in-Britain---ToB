@@ -200,6 +200,62 @@ body {
     font-style: italic;
     pointer-events: none;
 }
+#editor a { color: var(--accent); text-decoration: underline; cursor: pointer; }
+#editor a:hover { opacity: .75; }
+
+/* ── COLOR SWATCHES ──────────────────────────────────────── */
+.color-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,.18);
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: transform .1s;
+}
+.color-swatch:hover { transform: scale(1.25); }
+
+/* ── LINK POPUP ──────────────────────────────────────────── */
+#link-wrap { position: relative; }
+#link-popup {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 400;
+    min-width: 270px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.6);
+}
+#link-popup.open { display: block; }
+#link-popup label { font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 4px; }
+#link-url {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 8px;
+    border-radius: 3px;
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+    font-family: 'Consolas', monospace;
+}
+#link-url:focus { outline: 1px solid var(--accent); }
+#link-headings { max-height: 130px; overflow-y: auto; margin-bottom: 8px; }
+.link-h-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.76rem;
+    color: var(--muted);
+}
+.link-h-item:hover { background: var(--bg3); color: var(--accent); }
+.link-popup-btns { display: flex; gap: 6px; }
+.link-popup-btns button { flex: 1; }
 </style>
 </head>
 <body>
@@ -215,6 +271,30 @@ body {
 
     <button class="tb-btn" onclick="execFmt('bold')" title="Bold (Ctrl+B)"><b>B</b></button>
     <button class="tb-btn" onclick="execFmt('italic')" title="Italic (Ctrl+I)"><i>I</i></button>
+    <div class="tb-sep"></div>
+
+    <button class="color-swatch" style="background:#c5a040" onmousedown="e=>e.preventDefault()" onclick="applyColor('#c5a040')" title="Gold"></button>
+    <button class="color-swatch" style="background:#cc7777" onclick="applyColor('#cc7777')" title="Red"></button>
+    <button class="color-swatch" style="background:#77aacc" onclick="applyColor('#77aacc')" title="Blue"></button>
+    <button class="color-swatch" style="background:#88cc88" onclick="applyColor('#88cc88')" title="Green"></button>
+    <button class="color-swatch" style="background:#cc9966" onclick="applyColor('#cc9966')" title="Orange"></button>
+    <button class="color-swatch" style="background:#aaaaaa" onclick="applyColor('#aaaaaa')" title="Grey"></button>
+    <button class="tb-btn" onclick="execFmt('removeFormat')" title="Remove color and formatting" style="padding:3px 6px">✕ col</button>
+    <div class="tb-sep"></div>
+
+    <span id="link-wrap">
+        <button class="tb-btn" id="link-btn" title="Insert link (Ctrl+K)">🔗 Link</button>
+        <div id="link-popup">
+            <label>URL or #anchor</label>
+            <input type="text" id="link-url" placeholder="https://… or #section-id" />
+            <label>Jump to section</label>
+            <div id="link-headings"></div>
+            <div class="link-popup-btns">
+                <button class="tb-btn" onclick="confirmLink()">Insert</button>
+                <button class="tb-btn" onclick="closeLinkPopup()">✕ Cancel</button>
+            </div>
+        </div>
+    </span>
     <div class="tb-sep"></div>
 
     <button class="tb-btn" onclick="execFmt('insertUnorderedList')" title="Bullet list">• List</button>
@@ -342,6 +422,100 @@ function resetContent() {
     status.className = 'unsaved';
 }
 
+/* ── COLORS ──────────────────────────────────────────────── */
+function applyColor(color) {
+    document.execCommand('foreColor', false, color);
+    editor.focus();
+}
+
+/* ── LINKS ───────────────────────────────────────────────── */
+let savedRange = null;
+
+function slugify(txt) {
+    return txt.toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').trim() || ('h-'+Date.now());
+}
+
+// Ensure all headings in the editor have an id
+function assignHeadingIds() {
+    editor.querySelectorAll('h1,h2,h3').forEach(h => {
+        if (!h.id) h.id = slugify(h.textContent);
+    });
+}
+
+document.getElementById('link-btn').addEventListener('mousedown', e => {
+    e.preventDefault(); // keep editor focus & selection
+});
+document.getElementById('link-btn').addEventListener('click', () => {
+    const popup = document.getElementById('link-popup');
+    if (popup.classList.contains('open')) { closeLinkPopup(); return; }
+
+    // Save current selection
+    const sel = window.getSelection();
+    savedRange = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+
+    // Populate headings list
+    assignHeadingIds();
+    const list = document.getElementById('link-headings');
+    list.innerHTML = '';
+    editor.querySelectorAll('h1,h2,h3').forEach(h => {
+        const item = document.createElement('div');
+        item.className = 'link-h-item';
+        item.textContent = '#' + h.id + ' — ' + h.textContent.trim();
+        item.onclick = () => { document.getElementById('link-url').value = '#' + h.id; };
+        list.appendChild(item);
+    });
+    if (!list.children.length) list.innerHTML = '<div class="link-h-item" style="cursor:default">No headings yet</div>';
+
+    popup.classList.add('open');
+    document.getElementById('link-url').focus();
+});
+
+function closeLinkPopup() {
+    document.getElementById('link-popup').classList.remove('open');
+    document.getElementById('link-url').value = '';
+}
+
+function confirmLink() {
+    const url = document.getElementById('link-url').value.trim();
+    closeLinkPopup();
+    if (!url) return;
+
+    // Restore saved selection
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    if (savedRange) sel.addRange(savedRange);
+
+    const selText = sel.toString();
+    const isAnchor = url.startsWith('#');
+    const target = isAnchor ? '' : ' target="_blank" rel="noopener"';
+
+    if (selText) {
+        const a = document.createElement('a');
+        a.href = url;
+        if (!isAnchor) { a.target = '_blank'; a.rel = 'noopener'; }
+        a.textContent = selText;
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(a);
+        sel.collapse(a, 1);
+    } else {
+        document.execCommand('insertHTML', false, `<a href="${url}"${target}>${url}</a>`);
+    }
+    editor.focus();
+}
+
+// Close popup when clicking outside
+document.addEventListener('click', e => {
+    const wrap = document.getElementById('link-wrap');
+    if (!wrap.contains(e.target)) closeLinkPopup();
+});
+
+// link-url Enter key confirms
+document.getElementById('link-url').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); confirmLink(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeLinkPopup(); }
+});
+
 /* ── FORMATTING ──────────────────────────────────────────── */
 function execFmt(cmd, val) {
     document.execCommand(cmd, false, val || null);
@@ -349,6 +523,16 @@ function execFmt(cmd, val) {
 }
 function fmt(tag) {
     document.execCommand('formatBlock', false, tag);
+    // Auto-assign id to the newly created heading
+    if (['h1','h2','h3'].includes(tag)) {
+        setTimeout(() => {
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const node = sel.getRangeAt(0).commonAncestorContainer;
+            const h = (node.nodeType === 3 ? node.parentElement : node).closest(tag);
+            if (h && !h.id) h.id = slugify(h.textContent);
+        }, 0);
+    }
     editor.focus();
 }
 function insertCode() {
@@ -405,6 +589,7 @@ document.addEventListener('keydown', e => {
     if (!e.ctrlKey && !e.metaKey) return;
     const k = e.key.toLowerCase();
     if (k === 's') { e.preventDefault(); saveToFile(); }
+    if (k === 'k') { e.preventDefault(); document.getElementById('link-btn').click(); }
     if (k === '1') { e.preventDefault(); fmt('h1'); }
     if (k === '2') { e.preventDefault(); fmt('h2'); }
     if (k === '3') { e.preventDefault(); fmt('h3'); }
