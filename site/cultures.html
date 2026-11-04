@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultures — Caesars in Britain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .cultures-hero {
+            padding: 100px 24px 60px;
+            text-align: center;
+            background: linear-gradient(180deg, #0a0400 0%, var(--bg-dark) 100%);
+        }
+        .cultures-hero h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: 0.06em;
+        }
+        .cultures-hero p {
+            color: var(--stone);
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
+            font-family: 'Cinzel', serif;
+        }
+        .cultures-body {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 2rem 24px 5rem;
+        }
+        .culture-block {
+            margin-bottom: 4rem;
+            padding-bottom: 4rem;
+            border-bottom: 1px solid rgba(197, 179, 88, 0.1);
+        }
+        .culture-block:last-child {
+            border-bottom: none;
+        }
+        .culture-block-header {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .culture-block-name {
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: var(--text-parchment);
+            letter-spacing: 0.06em;
+        }
+        .culture-block-count {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            color: var(--gold);
+            letter-spacing: 0.1em;
+            opacity: 0.7;
+        }
+        .culture-block-lore {
+            color: var(--stone);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin-bottom: 1.5rem;
+            max-width: 700px;
+        }
+        .trait-box {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(197, 179, 88, 0.2);
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+        .trait-box-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--gold);
+            letter-spacing: 0.08em;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(197, 179, 88, 0.15);
+            padding-bottom: 0.6rem;
+        }
+        .trait-bonuses {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .trait-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        .trait-row-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            color: var(--text-parchment);
+            font-weight: 700;
+            min-width: 180px;
+            padding-top: 0.1rem;
+            letter-spacing: 0.05em;
+        }
+        .trait-row-desc {
+            color: var(--stone);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+        .trait-row-desc.positive {
+            color: #8fc18a;
+        }
+        .trait-row-desc.negative {
+            color: #c18a8a;
+        }
+        .culture-factions-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 1rem;
+        }
+        .culture-faction-chip {
+            background: rgba(197, 179, 88, 0.07);
+            border: 1px solid rgba(197, 179, 88, 0.2);
+            color: var(--stone);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.65rem;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.06em;
+        }
+        .culture-faction-chip.playable {
+            border-color: rgba(197, 179, 88, 0.4);
+            color: var(--text-parchment);
+        }
+        .culture-factions-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            color: rgba(168, 152, 128, 0.5);
+            letter-spacing: 0.1em;
+            margin-top: 1.5rem;
+            margin-bottom: 0.4rem;
+        }
+        .religion-pill {
+            display: inline-block;
+            border: 1px solid rgba(197, 179, 88, 0.3);
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            padding: 0.2rem 0.7rem;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo" style="text-decoration:none">Caesars in Britain</a>
+        <ul class="nav-links">
+            <li><a href="index.html#history">History</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li class="nav-dropdown-wrap">
+                <a href="#" class="btn-small nav-dropdown-trigger">Download &#9660;</a>
+                <ul class="nav-dropdown">
+                    <li><a href="#" class="nav-dropdown-item nav-dropdown-disabled">Steam Workshop<span class="nav-dd-soon">Soon</span></a></li>
+                    <li><a href="devlog.html" class="nav-dropdown-item">Devlog</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <header class="cultures-hero">
+        <h1>Cultures of Britannia</h1>
+        <p>Six peoples &middot; Six faiths &middot; Six ways to rule</p>
+    </header>
+
+    <div class="cultures-body">
+
+        <!-- ── ROMANS ─────────────────────────────────────────────────── -->
+        <div class="culture-block">
+            <div class="culture-block-header">
+                <div class="culture-block-name">Romans</div>
+                <div class="culture-block-count">1 PLAYABLE</div>
+            </div>
+            <span class="religion-pill">cib_religion_roman</span>
+            <p class="culture-block-lore" style="margin-top:1rem;">
+                By 55 BCE the Roman Republic has conquered half the known world. Caesar's legions represent the most professional and disciplined military machine of the ancient world — standardized equipment, coordinated tactics, and an institutional memory of centuries of warfare. Roman culture in this mod emphasizes legitimacy, law, and the economic power of empire.
+            </p>
+            <div class="trait-box">
+                <div class="trait-box-title">Culture Trait — Pax Romana</div>
+                <div class="trait-bonuses">
+                    <div class="trait-row">
+                        <div class="trait-row-label">Romanitas</div>
+                        <div class="trait-row-desc positive">+Legitimacy when holding Roman titles; bonus to stability in administered provinces</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Ius Civile</div>
+                        <div class="trait-row-desc positive">+Public order in settled provinces; reduces unrest from recent conquests</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Trade Network</div>
+                        <div class="trait-row-desc positive">+Trade income bonus; Roman roads and infrastructure multiply economic returns</div>
+                    </div>
+                </div>
+            </div>
+            <div class="culture-factions-label">PLAYABLE</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip playable">Rome</span>
+            </div>
+        </div>
+
+        <!-- ── BRITANNI ────────────────────────────────────────────────── -->
+        <div class="culture-block">
+            <div class="culture-block-header">
+                <div class="culture-block-name">Britanni</div>
+                <div class="culture-block-count">12 PLAYABLE &middot; 8 AI</div>
+            </div>
+            <span class="religion-pill">cib_religion_britanni</span>
+            <p class="culture-block-lore" style="margin-top:1rem;">
+                The native Iron Age tribes of Britain — settled farmers, skilled metalworkers, and fierce warriors who have never bowed to outside rule. The Britanni are defined by their attachment to their land and their sacred groves. Their Druids hold enormous social power, acting as judges, teachers and priests across tribal boundaries. Militarily they rely on chariots, light cavalry, and dense hillfort networks to absorb and bleed invaders.
+            </p>
+            <div class="trait-box">
+                <div class="trait-box-title">Culture Trait — Defenders of Britannia</div>
+                <div class="trait-bonuses">
+                    <div class="trait-row">
+                        <div class="trait-row-label">Cradle of Druids</div>
+                        <div class="trait-row-desc positive">+Religious unity and Druidic authority; bonus to morale when defending sacred territory</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Hillforts</div>
+                        <div class="trait-row-desc positive">+Garrison strength and defensive bonuses for existing fortifications; cheaper hillfort construction</div>
+                    </div>
+                </div>
+            </div>
+            <div class="culture-factions-label">PLAYABLE</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip playable">Brigantes</span>
+                <span class="culture-faction-chip playable">Cantiaci</span>
+                <span class="culture-faction-chip playable">Catuvellauni</span>
+                <span class="culture-faction-chip playable">Cornovii</span>
+                <span class="culture-faction-chip playable">Durotriges</span>
+                <span class="culture-faction-chip playable">Iceni</span>
+                <span class="culture-faction-chip playable">Ordovices</span>
+                <span class="culture-faction-chip playable">Parisi</span>
+                <span class="culture-faction-chip playable">Regni</span>
+                <span class="culture-faction-chip playable">Silures</span>
+                <span class="culture-faction-chip playable">Trinovantes</span>
+                <span class="culture-faction-chip playable">Votadini</span>
+            </div>
+            <div class="culture-factions-label">AI ONLY</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip">Carvetii</span>
+                <span class="culture-faction-chip">Coritani</span>
+                <span class="culture-faction-chip">Deceangli</span>
+                <span class="culture-faction-chip">Demetae</span>
+                <span class="culture-faction-chip">Dobunni</span>
+                <span class="culture-faction-chip">Dumnonii</span>
+                <span class="culture-faction-chip">Selgovae</span>
+                <span class="culture-faction-chip">Setanti</span>
+            </div>
+        </div>
+
+        <!-- ── BELGI ───────────────────────────────────────────────────── -->
+        <div class="culture-block">
+            <div class="culture-block-header">
+                <div class="culture-block-name">Belgi</div>
+                <div class="culture-block-count">2 PLAYABLE &middot; 3 AI</div>
+            </div>
+            <span class="religion-pill">cib_religion_belgi</span>
+            <p class="culture-block-lore" style="margin-top:1rem;">
+                The Belgic tribes occupy both sides of the channel — coastal Gaul and southeastern Britain — maintaining cultural ties that Rome has now severed. They are the most sophisticated of the non-Roman cultures, with a long tradition of coinage, agricultural surplus, and trade with Mediterranean merchants. Caesar used the Atrebates king Commius as an envoy, making them an ambiguous faction: neither fully Roman allies nor fully independent.
+            </p>
+            <div class="trait-box">
+                <div class="trait-box-title">Culture Trait — Continental Heritage</div>
+                <div class="trait-bonuses">
+                    <div class="trait-row">
+                        <div class="trait-row-label">Cultural Isolation</div>
+                        <div class="trait-row-desc negative">Diplomatic penalty with purely British and purely Gaulish factions; caught between worlds</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Advanced Agriculture</div>
+                        <div class="trait-row-desc positive">+Food surplus from farming; agricultural buildings produce more in Belgic-settled provinces</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Warriors Society</div>
+                        <div class="trait-row-desc positive">+Melee attack for core infantry; warrior aristocracy provides higher-quality base troops</div>
+                    </div>
+                </div>
+            </div>
+            <div class="culture-factions-label">PLAYABLE</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip playable">Ambiani</span>
+                <span class="culture-faction-chip playable">Atrebates</span>
+            </div>
+            <div class="culture-factions-label">AI ONLY</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip">Bellovaci</span>
+                <span class="culture-faction-chip">Morini</span>
+                <span class="culture-faction-chip">Remi</span>
+            </div>
+        </div>
+
+        <!-- ── GALLI ───────────────────────────────────────────────────── -->
+        <div class="culture-block">
+            <div class="culture-block-header">
+                <div class="culture-block-name">Galli</div>
+                <div class="culture-block-count">4 AI ONLY</div>
+            </div>
+            <span class="religion-pill">cib_religion_galli</span>
+            <p class="culture-block-lore" style="margin-top:1rem;">
+                The Gaulish tribes of coastal Normandy and Brittany — Caletes, Lexovii, Veliocasses, Venellii — are the shoreside backdrop to Caesar's British campaigns. They have all been subjugated or intimidated into submission by this point, but they remain proud and Celtic to the core. Their Druidic networks span the channel, and their cavalry traditions are second to none. All four are AI-controlled in the current build.
+            </p>
+            <div class="trait-box">
+                <div class="trait-box-title">Culture Trait — Celtic Fervor</div>
+                <div class="trait-bonuses">
+                    <div class="trait-row">
+                        <div class="trait-row-label">Celtic Fervor</div>
+                        <div class="trait-row-desc positive">+Charge bonus for all cavalry and elite infantry units on first contact</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Aristocratic Cavalry</div>
+                        <div class="trait-row-desc positive">+Melee attack and morale for noble cavalry units; Gaulish horse are among the finest in the world</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Druidic Network</div>
+                        <div class="trait-row-desc positive">+Diplomacy with other Galli factions; shared sacred sites create strong intra-cultural bonds</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Rivalry</div>
+                        <div class="trait-row-desc negative">Passive tension penalty with neighbouring Galli factions; inter-tribal competition is structural</div>
+                    </div>
+                </div>
+            </div>
+            <div class="culture-factions-label">AI ONLY</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip">Caletes</span>
+                <span class="culture-faction-chip">Lexovii</span>
+                <span class="culture-faction-chip">Veliocasses</span>
+                <span class="culture-faction-chip">Venellii</span>
+            </div>
+        </div>
+
+        <!-- ── HIBERNI ─────────────────────────────────────────────────── -->
+        <div class="culture-block">
+            <div class="culture-block-header">
+                <div class="culture-block-name">Hiberni</div>
+                <div class="culture-block-count">4 PLAYABLE &middot; 11 AI</div>
+            </div>
+            <span class="religion-pill">cib_religion_hiberni</span>
+            <p class="culture-block-lore" style="margin-top:1rem;">
+                The peoples of ancient Ireland are beyond the edge of the Roman world. No Roman army has ever set foot in Ireland, and most Romans think it barely exists. The Hiberni are cattle lords and sea raiders — a pastoral people whose wealth is measured in cattle and whose status depends on the generosity of their hospitality. Their warriors are fierce light infantry, mobile and unpredictable, more comfortable in coastal raids than pitched battles.
+            </p>
+            <div class="trait-box">
+                <div class="trait-box-title">Culture Trait — Children of the Western Sea</div>
+                <div class="trait-bonuses">
+                    <div class="trait-row">
+                        <div class="trait-row-label">Raiders</div>
+                        <div class="trait-row-desc positive">+Raid income from coastal and river raids; looting is embedded in Irish martial culture</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Cattle Wealth</div>
+                        <div class="trait-row-desc positive">+Food and treasury from pastoral buildings; cattle herding scales with province size</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Sacred Hospitality</div>
+                        <div class="trait-row-desc positive">+Diplomacy with other Hiberni factions; guest-right is a sacred institution</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Isolated</div>
+                        <div class="trait-row-desc negative">Navigation penalty; Ireland's Atlantic position limits access to Mediterranean trade routes</div>
+                    </div>
+                </div>
+            </div>
+            <div class="culture-factions-label">PLAYABLE</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip playable">Coriondi</span>
+                <span class="culture-faction-chip playable">Darini</span>
+                <span class="culture-faction-chip playable">Gangani</span>
+                <span class="culture-faction-chip playable">Nagnate</span>
+            </div>
+            <div class="culture-factions-label">AI ONLY</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip">Auteni</span>
+                <span class="culture-faction-chip">Cauci</span>
+                <span class="culture-faction-chip">Ebdani</span>
+                <span class="culture-faction-chip">Erdin</span>
+                <span class="culture-faction-chip">Iverni</span>
+                <span class="culture-faction-chip">Luceni</span>
+                <span class="culture-faction-chip">Menapi</span>
+                <span class="culture-faction-chip">Robogdi</span>
+                <span class="culture-faction-chip">Velabri</span>
+                <span class="culture-faction-chip">Vodiae</span>
+                <span class="culture-faction-chip">Volunti</span>
+            </div>
+        </div>
+
+        <!-- ── PICTI ───────────────────────────────────────────────────── -->
+        <div class="culture-block">
+            <div class="culture-block-header">
+                <div class="culture-block-name">Picti</div>
+                <div class="culture-block-count">6 PLAYABLE &middot; 5 AI</div>
+            </div>
+            <span class="religion-pill">cib_religion_picti</span>
+            <p class="culture-block-lore" style="margin-top:1rem;">
+                The painted people of the northern highlands are the most alien culture in the mod — mysterious even to their British neighbours, unknown entirely to Rome. The Picti live in a world of rugged mountains, dark lochs, and dense forest. Their social structure is matrilineal, their warriors fight light and fast, and their knowledge of the land gives them enormous tactical advantage on home terrain. They are the hardest faction group to play — isolated, poorly-equipped compared to Rome, but with deep bonuses on their native ground.
+            </p>
+            <div class="trait-box">
+                <div class="trait-box-title">Culture Trait — Sons of the Highlands</div>
+                <div class="trait-bonuses">
+                    <div class="trait-row">
+                        <div class="trait-row-label">Wild Lands</div>
+                        <div class="trait-row-desc positive">Attrition resistance when operating in highland and forested terrain; Pictish armies do not tire in their own wilderness</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Light Steps</div>
+                        <div class="trait-row-desc positive">+Ambush chance and stealth movement in highland regions; Pictish scouts are nearly invisible</div>
+                    </div>
+                    <div class="trait-row">
+                        <div class="trait-row-label">Highland Skirmishers</div>
+                        <div class="trait-row-desc positive">+Range and reload speed for all skirmisher units; Pictish javelinmen and archers are exceptional on broken ground</div>
+                    </div>
+                </div>
+            </div>
+            <div class="culture-factions-label">PLAYABLE</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip playable">Caledoni</span>
+                <span class="culture-faction-chip playable">Damnonii</span>
+                <span class="culture-faction-chip playable">Lugi</span>
+                <span class="culture-faction-chip playable">Novantae</span>
+                <span class="culture-faction-chip playable">Smertae</span>
+                <span class="culture-faction-chip playable">Taexali</span>
+            </div>
+            <div class="culture-factions-label">AI ONLY</div>
+            <div class="culture-factions-row">
+                <span class="culture-faction-chip">Cornavii</span>
+                <span class="culture-faction-chip">Creones</span>
+                <span class="culture-faction-chip">Epidii</span>
+                <span class="culture-faction-chip">Vacomagi</span>
+                <span class="culture-faction-chip">Venicones</span>
+            </div>
+        </div>
+
+        <div style="text-align:center; padding-top:1rem;">
+            <a href="factions.html" style="color:var(--gold); font-family:'Cinzel',serif; font-size:0.85rem; letter-spacing:0.1em; text-decoration:none;">&#8592; VIEW ALL FACTIONS</a>
+        </div>
+
+    </div>
+
+    <footer class="footer"><p></p></footer>
+</body>
+</html>
