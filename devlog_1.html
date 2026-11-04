@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foundations — Devlog | Caesars in Britain</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="devlog.css">
+</head>
+
+<body class="dl-light">
+
+    <!-- ══ NAVBAR ══════════════════════════════════════════════════════ -->
+    <nav class="navbar">
+        <a href="index.html" class="logo" style="text-decoration:none">Caesars in Britain</a>
+        <ul class="nav-links">
+            <li><a href="index.html#history">History</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li class="nav-dropdown-wrap">
+                <a href="#" class="btn-small nav-dropdown-trigger">Download &#9660;</a>
+                <ul class="nav-dropdown">
+                    <li><a href="#" class="nav-dropdown-item nav-dropdown-disabled">Steam Workshop<span
+                                class="nav-dd-soon">Soon</span></a></li>
+                    <li><a href="devlog.html" class="nav-dropdown-item">Devlog</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <!-- ══════════════════════════════════════════════════════════════ -->
+
+    <header class="dl-entry-hero">
+        <div class="dl-entry-hero-meta">
+            <span class="dl-entry-tag">dev</span>
+            <span class="dl-entry-version">v0.0.7</span>
+        </div>
+        <h1 class="dl-entry-title">FOUNDATIONS</h1>
+        <p class="dl-entry-subtitle">Culture traits, the Pictish roster, custom religions and six cultures given a voice</p>
+
+        <div class="dl-progress-track">
+            <span class="dl-bar-label" style="color: #C5B358;">Demo</span>
+            <div class="dl-bar-outer">
+                <div class="dl-bar-inner" data-val="0.12"></div>
+            </div>
+            <span class="dl-bar-label" style="color: #C5B358;">Beta</span>
+        </div>
+    </header>
+
+    <article class="dl-entry-body">
+
+        <a href="devlog.html" class="devlog-back">&#8592; All Devlogs</a>
+
+        <!-- ══ CONTENUTO ════════════════════════════════════════════════ -->
+
+        <h1>WHAT THIS CYCLE IS ABOUT</h1>
+        <p>
+            After the Exordium demo established that the mod could load and run without crashing, this development
+            cycle focused on building the <strong>underlying identity systems</strong> that will shape every
+            playthrough. Each of the six cultural groups now has its own religion, its own character names, and a
+            set of culture-level traits that passively define how that faction feels to play.
+        </p>
+        <p>
+            Alongside that work, the <strong>Pictish unit roster is now complete</strong> — 20 units covering
+            cavalry, skirmishers, infantry and archers — and a first pass at faction-specific traits has been
+            written for every playable faction, even if many effects are still marked WIP and not yet active
+            in-game. The separatist faction list has also been cleaned up: several placeholder separatists have
+            been replaced with four new, properly-configured factions.
+        </p>
+        <p>Below is the condensed changelog for dev builds 3 through 7.</p>
+        <br>
+
+        <h1>CHANGELOG</h1>
+
+        <!-- ── FACTIONS ──────────────────────────────────────────────── -->
+        <details>
+            <summary>FACTIONS</summary>
+            <ul>
+                <li>Removed 11 non-functional separatist factions and replaced them with 4 fully configured ones:
+                    <strong>Durotriges, Cantiaci, Iverni</strong> and <strong>Coriondi</strong></li>
+                <li>All Britanni factions now use the custom <code>cib_britanni</code> military group instead of
+                    the vanilla one</li>
+                <li>Assigned a dedicated culture trait to each faction group (Roman, Britanni, Belgi)</li>
+                <li>Fixed Atrebates faction colors</li>
+                <li>Added Atrebates to the frontend faction selection screen</li>
+                <li>All separatist rulers now start with full authority (initial power 100)</li>
+                <li>Assigned correct <strong>custom religions</strong> to every faction based on their culture
+                    (see Cultures &amp; Religions section)</li>
+                <li>Fixed starting territory and capital assignments for Irish factions</li>
+            </ul>
+        </details>
+
+        <!-- ── POLITICS & OFFICES ────────────────────────────────────── -->
+        <details>
+            <summary>POLITICS &amp; OFFICES</summary>
+            <ul>
+                <li>Added political parties for the four new factions (Durotriges, Cantiaci, Iverni, Coriondi)
+                    and for Lugi</li>
+                <li>Removed political parties belonging to the eliminated separatist factions</li>
+                <li>Fixed starting character assignments so each new faction leader is correctly linked to their
+                    political party</li>
+            </ul>
+        </details>
+
+        <!-- ── CHARACTERS & GENERALS ─────────────────────────────────── -->
+        <details>
+            <summary>CHARACTERS &amp; GENERALS</summary>
+            <ul>
+                <li>Added Caesar's custom general portrait and battle model
+                    (<code>Caesar_General</code> / <code>Caesar_General_Battle</code>)</li>
+                <li>Added ship uniform entries for the new general model</li>
+                <li>Added <strong>character name lists for all six cultural groups</strong>:
+                    <ul>
+                        <li>Belgi — 40 names</li>
+                        <li>Britanni — 40 names</li>
+                        <li>Gallic — 40 names</li>
+                        <li>Hiberni — 40 names</li>
+                        <li>Picti — 70 names</li>
+                        <li>Roman — expanded by 20 names</li>
+                    </ul>
+                </li>
+            </ul>
+        </details>
+
+        <!-- ── MAP ──────────────────────────────────────────────────── -->
+        <details>
+            <summary>MAP</summary>
+            <ul>
+                <li>Removed incorrectly placed wall bundles from four regions
+                    (Camulodunon, Eburakon, Bodun, Cilta)</li>
+                <li>Reorganized Irish faction territory and capital assignments</li>
+                <li>Added three starting diplomacy entries</li>
+            </ul>
+        </details>
+
+        <!-- ── BUILDINGS ─────────────────────────────────────────────── -->
+        <details>
+            <summary>BUILDINGS</summary>
+            <ul>
+                <li>Fixed food production scope: buildings now correctly produce food at region level rather than
+                    at building level</li>
+                <li>Added construction cost and time modifiers for all building sets</li>
+                <li>Added cattle wealth and northern herders effects to relevant building chains</li>
+            </ul>
+        </details>
+
+        <!-- ── CULTURES & RELIGIONS ──────────────────────────────────── -->
+        <details>
+            <summary>CULTURES &amp; RELIGIONS</summary>
+            <ul>
+                <li>Added <strong>6 custom religions</strong>, one per cultural group:
+                    <code>cib_religion_roman</code>, <code>cib_religion_britanni</code>,
+                    <code>cib_religion_belgi</code>, <code>cib_religion_galli</code>,
+                    <code>cib_religion_hiberni</code>, <code>cib_religion_picti</code></li>
+                <li>All factions have been assigned their culture's religion, replacing the vanilla placeholders</li>
+                <li>Added display names for all six religions</li>
+                <li>Added full diplomatic effect junctions between religions (how much each faith likes or
+                    dislikes the others)</li>
+            </ul>
+        </details>
+
+        <!-- ── TRAITS & EFFECTS ──────────────────────────────────────── -->
+        <details>
+            <summary>TRAITS &amp; EFFECTS</summary>
+            <ul>
+                <li>Added a <strong>culture-level trait for each of the six groups</strong>, each with its own
+                    passive bonuses:
+                    <ul>
+                        <li><strong>Roman</strong> — Romanitas, Ius Civile, Trade Network</li>
+                        <li><strong>Britanni</strong> — Cradle of Druids, Hillforts</li>
+                        <li><strong>Belgi</strong> — Cultural Isolation, Advanced Agriculture, Warriors Society</li>
+                        <li><strong>Galli</strong> — Celtic Fervor, Aristocratic Cavalry, Druidic Network, Rivalry</li>
+                        <li><strong>Picti</strong> — Wild Lands, Light Steps, Highland Skirmishers</li>
+                        <li><strong>Hiberni</strong> — Raiders, Cattle Wealth, Sacred Hospitality, Isolated</li>
+                    </ul>
+                </li>
+                <li>Added <strong>47 new custom effects</strong> supporting culture traits and faction bonuses</li>
+                <li>Added battle context modifiers: morale, melee attack and defence bonuses tied to being inside
+                    or outside your own territory, plus legionary discipline bonuses for Rome</li>
+                <li>Added subculture diplomatic modifiers (e.g. Friends of Caesar for Atrebates, Druidic Network
+                    diplomacy for Galli factions)</li>
+                <li>Added attrition resistance modifiers for northern cultures</li>
+                <li>Added WIP unique faction traits for every playable faction — written and linked but
+                    <strong>not yet active in-game</strong></li>
+            </ul>
+        </details>
+
+        <!-- ── UNITS ─────────────────────────────────────────────────── -->
+        <details>
+            <summary>UNITS</summary>
+            <ul>
+                <li>Added a <strong>complete Pictish unit roster — 20 units</strong>:
+                    <ul>
+                        <li>Cavalry — 3 units</li>
+                        <li>Infantry — 11 units</li>
+                        <li>Skirmishers — 3 units</li>
+                        <li>Archers &amp; Slingers — 3 units</li>
+                    </ul>
+                </li>
+                <li>Replaced the generic Picti commander with the <strong>Pictish Noble Guard</strong> as
+                    faction commander unit</li>
+                <li>Added unit visual variants (models/textures) for all Pictish units</li>
+                <li>Added Roman unit grouping labels for the frontend: Legionary Cohort, Auxilia, Numeri</li>
+            </ul>
+        </details>
+
+        <!-- ── UI & ART ──────────────────────────────────────────────── -->
+        <details>
+            <summary>UI &amp; ART</summary>
+            <ul>
+                <li>Added custom <strong>trait icons for 11 factions</strong>
+                    (Ambiani, Atrebates, Brigantes, Caledoni, Catuvellauni, Cornovii, Lugi, Ordovices, Parisi,
+                    Silures, Trinovantes)</li>
+                <li>Added flags (banner sets) for 6 Pictish/northern factions:
+                    Smertae, Taexali, Trinovantes, Vacomagi, Venicones, Votadini</li>
+                <li>Added Cornovii 256px faction icon</li>
+                <li>Added <strong>frontend faction selection maps</strong> for 8 factions:
+                    Rome, Atrebates, Ambiani, Brigantes, Catuvellauni, Cornovii, Ordovices, Parisi</li>
+                <li>Added campaign map minimap background images</li>
+                <li>Fixed file naming convention issues (capitalization) for unit icons and masks</li>
+            </ul>
+        </details>
+
+        <!-- ── LOCALIZATION ──────────────────────────────────────────── -->
+        <details>
+            <summary>LOCALIZATION</summary>
+            <ul>
+                <li>Added <strong>220 new character names</strong> across all five non-Roman cultures</li>
+                <li>Added display names and descriptions for all culture traits and their effects</li>
+                <li>Added religion display names for all six custom religions</li>
+                <li>Added unit grouping display names (Roman military terminology)</li>
+                <li>Fixed faction name capitalization in the LOC file</li>
+                <li>Renamed the faction name group for Rome to <em>Romans</em></li>
+                <li>Added correct name groups for each cultural group so characters generate contextually
+                    appropriate names</li>
+            </ul>
+        </details>
+
+        <!-- ════════════════════════════════════════════════════════════ -->
+        <br>
+        <h1>REMAINING WORK &amp; KNOWN ISSUES</h1>
+
+        <h2>STILL IN PROGRESS</h2>
+        <details>
+            <summary>TRAITS &amp; EFFECTS</summary>
+            <ul>
+                <li>Faction-specific traits exist and are linked, but their effects are placeholder or inactive
+                    — full implementation is the next priority</li>
+                <li>Some battle context bonuses need further testing and tuning</li>
+            </ul>
+        </details>
+        <details>
+            <summary>TECHNOLOGIES</summary>
+            <ul>
+                <li>Technologies are still unimplemented — clicking the technology panel will cause a CTD.
+                    Each culture group needs its own technology tree</li>
+            </ul>
+        </details>
+        <details>
+            <summary>UNITS</summary>
+            <ul>
+                <li>Pictish unit stats are a first pass and need balancing</li>
+                <li>Roman auxiliaries (AOR system) still not implemented</li>
+                <li>Hiberni unit roster is incomplete</li>
+            </ul>
+        </details>
+
+        <h2>FUTURE IMPLEMENTATION</h2>
+        <details>
+            <summary>POPULATION SYSTEM</summary>
+            <ul>
+                <li>The provincial population interface (started in Exordium) is still awaiting its backend
+                    script logic — the UI exists but does nothing yet</li>
+            </ul>
+        </details>
+        <details>
+            <summary>UI</summary>
+            <ul>
+                <li>Frontend faction selection art is still missing for many Britanni, Galli, Picti and Hiberni
+                    factions</li>
+                <li>Many unit cards are still placeholder or missing entirely</li>
+            </ul>
+        </details>
+        <details>
+            <summary>RESOURCES</summary>
+            <ul>
+                <li>Resources are not yet placed on the map — historical placement vs. gameplay balance is still
+                    an open design question</li>
+            </ul>
+        </details>
+
+        <!-- ════════════════════════════════════════════════════════════ -->
+        <h2>LINKS</h2>
+        <p>
+            Download: <a href="https://drive.google.com/drive/folders/1c1_chBizPvt5y_0Yvo80hzU0IDFjctHr?usp=sharing"
+                style="color: inherit; text-decoration: none;"><strong><u>Mod + models</u></strong></a>
+            <br>Discord: <a href="https://discord.gg/9S2M4UCuU"
+                style="color: inherit; text-decoration: none;"><strong><u>Link</u></strong></a>
+            <br>Form (bugs, crashes or suggestions): <a href="https://discord.gg/y2H4NJnvJJ"
+                style="color: inherit; text-decoration: none;"><strong><u>Link</u></strong></a>
+        </p>
+
+        <!-- ════════════════════════════════════════════════════════════ -->
+
+        <nav class="dl-entry-nav">
+            <a href="devlog_0.html" class="dl-nav-link dl-nav-prev">&#8592; Previous</a>
+            <a href="devlog.html" class="dl-nav-link dl-nav-index">Index</a>
+            <a href="#" class="dl-nav-link dl-nav-next">Next &#8594;</a>
+        </nav>
+
+    </article>
+
+    <!-- ══ FOOTER ══════════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <p></p>
+    </footer>
+    <!-- ══════════════════════════════════════════════════════════════ -->
+
+    <script>
+        document.querySelectorAll('.dl-bar-inner[data-val]').forEach(el => {
+            const v = Math.min(1, Math.max(0, parseFloat(el.dataset.val) || 0));
+            el.style.width = (v * 100) + '%';
+        });
+    </script>
+</body>
+
+</html>
