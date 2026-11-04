@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Effects &amp; Traits — Caesars in Britain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="navbar.css">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --accent-red: #8B0000;
+            --accent-gold: #C5B358;
+            --text-parchment: #F5E6BE;
+            --gold: #C5B358;
+            --gold-dim: rgba(197,179,88,0.4);
+            --stone: #a89880;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-parchment);
+            font-family: 'Lora', serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .effects-hero {
+            padding: 100px 24px 60px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+        }
+
+        .effects-hero h1 {
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--gold);
+            letter-spacing: 0.1em;
+            margin: 0 0 0.5rem;
+        }
+
+        .effects-hero p {
+            color: var(--stone);
+            font-style: italic;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .effects-body {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px 4rem;
+        }
+
+        .effects-section {
+            padding: 2.5rem 0 1rem;
+            border-top: 1px solid rgba(197,179,88,0.1);
+        }
+
+        .effects-section:first-child {
+            border-top: none;
+        }
+
+        .effects-section-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--text-parchment);
+            letter-spacing: 0.08em;
+            margin: 0 0 0.4rem;
+        }
+
+        .effects-section-desc {
+            color: var(--stone);
+            font-size: 0.88rem;
+            font-style: italic;
+            margin: 0 0 1.8rem;
+        }
+
+        .effects-culture-group {
+            margin-bottom: 2rem;
+        }
+
+        .effects-culture-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            color: var(--gold);
+            border-bottom: 1px solid rgba(197,179,88,0.2);
+            padding-bottom: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .effect-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(197,179,88,0.15);
+            padding: 1rem 1.2rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .effect-card:hover {
+            border-color: rgba(197,179,88,0.4);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .effect-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            padding: 0.15rem 0.5rem;
+            border: 1px solid;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .effect-tag.culture { border-color: var(--gold); background: rgba(197,179,88,0.08); color: var(--gold); }
+        .effect-tag.faction { border-color: #8B0000; background: rgba(139,0,0,0.1); color: #c05050; }
+        .effect-tag.battle { border-color: #4A7A8A; background: rgba(50,100,120,0.1); color: #6aacbe; }
+        .effect-tag.diplomacy { border-color: #5D4E8A; background: rgba(80,60,140,0.1); color: #9b8ed4; }
+        .effect-tag.production { border-color: #555; background: rgba(80,80,80,0.1); color: #999; }
+        .effect-tag.wip { border-color: rgba(255,165,0,0.5); background: rgba(255,165,0,0.07); color: rgba(255,165,0,0.8); }
+
+        .effect-name {
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            color: var(--text-parchment);
+            font-weight: 700;
+            margin: 0 0 0.4rem;
+        }
+
+        .effect-desc {
+            font-size: 0.82rem;
+            color: var(--stone);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .effect-faction-label {
+            font-size: 0.7rem;
+            color: rgba(168,152,128,0.5);
+            font-style: italic;
+            margin-top: 0.4rem;
+        }
+
+        .page-nav {
+            text-align: center;
+            padding: 3rem 24px;
+            border-top: 1px solid rgba(197,179,88,0.1);
+        }
+
+        .page-nav a {
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        .page-nav a:hover { text-decoration: underline; }
+
+        .footer {
+            border-top: 1px solid rgba(197,179,88,0.15);
+            padding: 2rem 24px;
+            text-align: center;
+            color: rgba(168,152,128,0.4);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            .effects-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="index.html" class="logo" style="text-decoration:none">Caesars in Britain</a>
+    <ul class="nav-links">
+        <li><a href="index.html#history">History</a></li>
+        <li><a href="index.html#features">Features</a></li>
+        <li class="nav-dropdown-wrap">
+            <a href="#" class="btn-small nav-dropdown-trigger">Mod &#9660;</a>
+            <ul class="nav-dropdown">
+                <li><a href="factions.html" class="nav-dropdown-item">Factions</a></li>
+                <li><a href="cultures.html" class="nav-dropdown-item">Cultures</a></li>
+                <li><a href="buildings.html" class="nav-dropdown-item">Buildings</a></li>
+                <li><a href="effects.html" class="nav-dropdown-item">Effects</a></li>
+                <li><a href="devlog.html" class="nav-dropdown-item">Devlog</a></li>
+            </ul>
+        </li>
+        <li class="nav-dropdown-wrap">
+            <a href="#" class="btn-small nav-dropdown-trigger">Download &#9660;</a>
+            <ul class="nav-dropdown">
+                <li><a href="#" class="nav-dropdown-item nav-dropdown-disabled">Steam Workshop<span class="nav-dd-soon">Soon</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+<header class="effects-hero">
+    <h1>EFFECTS &amp; TRAITS</h1>
+    <p>Passive bonuses, modifiers, and faction abilities</p>
+</header>
+
+<main class="effects-body">
+
+    <div class="effects-section">
+        <div class="effects-section-title">1. Culture Traits</div>
+        <div class="effects-section-desc">Permanent bonuses granted to all factions of a culture group. Active in all dev builds from v0.0.7 onward.</div>
+
+        <div class="effects-culture-group">
+            <div class="effects-culture-label">ROMANS — PAX ROMANA</div>
+            <div class="effects-grid">
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Romanitas</div>
+                    <div class="effect-desc">Increases legitimacy for the Roman faction leader. The weight of Rome's civilization demands order.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Ius Civile</div>
+                    <div class="effect-desc">Roman law brings order and stability to newly captured provinces. +Public Order in governed regions.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Trade Network</div>
+                    <div class="effect-desc">Roman road infrastructure multiplies trade income across all ports. +% Income from Trade.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Legionary Discipline</div>
+                    <div class="effect-desc">Professional legionaries train harder than any tribal warrior. +% Attack, Defense and Morale for all Roman units.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Mos Maiorum</div>
+                    <div class="effect-desc">The old ways bind Roman officers to their commander. +Loyalty for all characters in the faction.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Roads Builder</div>
+                    <div class="effect-desc">Roman legions march on roads they build themselves. +% Campaign Movement Range for all Roman armies.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="effects-culture-group">
+            <div class="effects-culture-label">BRITANNI — DEFENDERS OF BRITANNIA</div>
+            <div class="effects-grid">
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Cradle of Druids</div>
+                    <div class="effect-desc">Born in Britain, druidic lore binds the tribes under one shared tradition. +Public Order and Allegiance across all Britanni provinces.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Hillforts</div>
+                    <div class="effect-desc">Atop every ridge and hill, the tribes raised earthen ramparts and timber gates. Those who defend them fight with the earth itself at their back. Increases garrison size and settlement defense.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="effects-culture-group">
+            <div class="effects-culture-label">BELGI — CONTINENTAL HERITAGE</div>
+            <div class="effects-grid">
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Cultural Isolation</div>
+                    <div class="effect-desc">+% Morale and Defense when defending in own territories. The Belgae are strangers in both Britain and Gaul — they fight hardest at home.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Advanced Agriculture</div>
+                    <div class="effect-desc">The Belgae introduced tools like the iron plowshare to northern Europe. Agricultural buildings grant +% Food Production.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Warriors Society</div>
+                    <div class="effect-desc">Belgic warriors are defined by martial excellence above all. +% Melee Attack for all infantry units.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="effects-culture-group">
+            <div class="effects-culture-label">GALLI — CELTIC FERVOR</div>
+            <div class="effects-grid">
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Celtic Fervor</div>
+                    <div class="effect-desc">The Gauls hurl themselves into battle with terrifying fury, but that fire burns brightest in the first clash. +Charge bonus and Resistance for all Land Units.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Aristocratic Cavalry</div>
+                    <div class="effect-desc">Gallic nobles ride to war on their own horses and at their own expense, making mounted warriors cheaper to raise. Reduced recruitment cost for cavalry units.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Aristocratic Cavalry (Morale)</div>
+                    <div class="effect-desc">Gallic nobles ride to battle with their honour at stake, and would rather die than be seen to flee. +Morale for Cavalry.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Druidic Network (Diplomacy)</div>
+                    <div class="effect-desc">The druids move freely between tribes, untouched by war and feud. Through their counsel, chieftains who share the old faith are more willing to listen, trade and make peace.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Druidic Network (Loyalty)</div>
+                    <div class="effect-desc">Where the druids hold sway, the people look to the sacred groves before their rulers. Loyalty runs deeper in lands that keep the old rites.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Rivalry Between Tribes</div>
+                    <div class="effect-desc">Old feuds and rival clienteles keep the tribes of Gaul forever divided against one another. -% Diplomatic Relations with other Gaulish factions.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="effects-culture-group">
+            <div class="effects-culture-label">PICTI — SONS OF THE HIGHLANDS</div>
+            <div class="effects-grid">
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Wild Lands (Attrition)</div>
+                    <div class="effect-desc">Born among frozen glens and mountain snows, these peoples endure winters that would break any foreign army. Reduced Winter Attrition for Pictish armies.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Wild Lands (Movement)</div>
+                    <div class="effect-desc">Every hidden path and mountain pass is known to them, and they cross their own lands faster than any stranger. +% Campaign Movement Range in highland terrain.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Light Steps</div>
+                    <div class="effect-desc">Lightly armed and used to rough ground, their warriors strike and withdraw before the enemy can close. +% Speed for Light Troops in battle.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Highland Skirmishers</div>
+                    <div class="effect-desc">From the heights, slingers and javelin-men rain missiles on the enemy long before the lines meet. +% Ammunition for Missile Infantry.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="effects-culture-group">
+            <div class="effects-culture-label">HIBERNI — CHILDREN OF THE WESTERN SEA</div>
+            <div class="effects-grid">
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Raiders</div>
+                    <div class="effect-desc">Raiding is the path to glory; cattle, slaves and treasure taken from enemies fill the halls of kings. +% Income from sacking and raiding enemy settlements.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Cattle Wealth</div>
+                    <div class="effect-desc">Wealth is measured in cattle, and great herds feed the people and the warband alike. +% Food Production from cattle farming buildings.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Sacred Hospitality</div>
+                    <div class="effect-desc">Guests are sacred and a lord's open table binds his people to him, keeping peace throughout the land. +Public Order in all provinces.</div>
+                </div>
+                <div class="effect-card">
+                    <span class="effect-tag culture">Culture Trait</span>
+                    <div class="effect-name">Isolated</div>
+                    <div class="effect-desc">Beyond the sea, the Hiberni lie far from the trade routes that enrich Britannia and Gaul. -% Trade income from ports and markets.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="effects-section">
+        <div class="effects-section-title">2. Faction Traits</div>
+        <div class="effects-section-desc">Unique bonuses for specific factions. Implemented in the database as of v0.0.7, but not yet fully active in-game — coming in a future build.</div>
+
+        <div class="effects-grid">
+            <div class="effect-card">
+                <span class="effect-tag faction">Faction Trait</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Friends of Caesar</div>
+                <div class="effect-desc">Atrebates' long alliance with Caesar earns them a unique diplomatic bonus with Rome. +Diplomatic Relations with Romans.</div>
+                <div class="effect-faction-label">Faction: Atrebates</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag faction">Faction Trait</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Cavalry of Commius</div>
+                <div class="effect-desc">Commius brings his finest horsemen to Britain. +% Charge and Melee Bonus for cavalry units.</div>
+                <div class="effect-faction-label">Faction: Atrebates</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag faction">Faction Trait</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Ties Across the Channel</div>
+                <div class="effect-desc">Atrebates' kinship with southern British tribes opens diplomatic doors. +% Diplomatic Relations with Britanni factions.</div>
+                <div class="effect-faction-label">Faction: Atrebates</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag faction">Faction Trait</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Northern Confederation</div>
+                <div class="effect-desc">Many clans bound under one name hold together the widest lands in Britain. +Public Order across all Caledoni territories.</div>
+                <div class="effect-faction-label">Faction: Caledoni</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag faction">Faction Trait</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Lords of the Hills</div>
+                <div class="effect-desc">Every crag and valley of the Pennines is home ground, and no invader fights there on equal terms. +% Defense when fighting in own territory.</div>
+                <div class="effect-faction-label">Faction: Brigantes</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag faction">Faction Trait</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Northern Herders</div>
+                <div class="effect-desc">Great flocks and herds roam the uplands, the true wealth of the north. Pastoral wealth and food bonus for northern settlements.</div>
+                <div class="effect-faction-label">Factions: Brigantes, Votadini</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag faction">Faction Trait</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Endless Wars</div>
+                <div class="effect-desc">Ever at war with their neighbours, their young men learn the sword before they learn the plough. +Experience Level for newly recruited units.</div>
+                <div class="effect-faction-label">Factions: Silures and others</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag faction">Faction Trait</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Traitors</div>
+                <div class="effect-desc">A reputation for switching sides has its diplomatic uses. +Diplomatic Relations with Belgi, Britanni, and Gallic tribes.</div>
+                <div class="effect-faction-label">Faction: TBD (Belgi)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="effects-section">
+        <div class="effects-section-title">3. Battle Context Bonuses</div>
+        <div class="effects-section-desc">These bonuses activate during battle based on context — defending your own territory, unit type, or relationship to the enemy.</div>
+
+        <div class="effects-grid">
+            <div class="effect-card">
+                <span class="effect-tag battle">Battle</span>
+                <div class="effect-name">Territory Defense Bonus</div>
+                <div class="effect-desc">Morale and melee defense bonus when fighting inside your own territory. The home-ground advantage is real.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag battle">Battle</span>
+                <div class="effect-name">Enemy Attrition (Own Territory)</div>
+                <div class="effect-desc">Enemies suffer additional attrition when moving through your lands. Raiding armies wear down in hostile ground.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag battle">Battle</span>
+                <div class="effect-name">Legionary Discipline</div>
+                <div class="effect-desc">Roman units gain attack, defense, and morale bonuses tied to unit discipline. The legion is not merely trained — it is a machine.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag battle">Battle</span>
+                <div class="effect-name">Chariot Bonus (Britanni)</div>
+                <div class="effect-desc">Britanni chariots have modified recruitment cost and special experience bonuses. Caesar himself was impressed by their battlefield effectiveness.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag battle">Battle</span>
+                <div class="effect-name">Cavalry Speed</div>
+                <div class="effect-desc">Cavalry movement speed modifier tied to culture trait. Gallic and Roman horses move faster than the ponies of the north.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag battle">Battle</span>
+                <div class="effect-name">Unit Fatigue Resistance</div>
+                <div class="effect-desc">Some northern cultures have reduced fatigue effects. Pictish and Hiberni warriors are hardened by terrain that would exhaust a Roman legionary.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="effects-section">
+        <div class="effects-section-title">4. Diplomatic &amp; Subculture Modifiers</div>
+        <div class="effects-section-desc">Passive relations bonuses between factions of the same cultural group, and special subculture diplomacy from the Druidic Network.</div>
+
+        <div class="effects-grid">
+            <div class="effect-card">
+                <span class="effect-tag diplomacy">Diplomacy</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Gallic Culture Diplomacy</div>
+                <div class="effect-desc">Galli factions receive positive diplomatic modifiers with other Galli tribes. A common tongue and shared gods ease negotiation.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag diplomacy">Diplomacy</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Belgic Culture Diplomacy</div>
+                <div class="effect-desc">Belgi factions receive positive diplomatic modifiers with other Belgi tribes. Continental kinship runs deep even under Roman pressure.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag diplomacy">Diplomacy</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">British Culture Diplomacy</div>
+                <div class="effect-desc">Britanni factions receive positive diplomatic modifiers with other Britanni. Shared language and custom create a foundation for alliance.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag diplomacy">Diplomacy</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Hibernian Culture Diplomacy</div>
+                <div class="effect-desc">Hiberni factions receive positive diplomatic modifiers with other Hiberni. Shared Brehon law and sacred hospitality bind the Irish clans.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag diplomacy">Diplomacy</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Pictish Culture Diplomacy</div>
+                <div class="effect-desc">Picti factions receive positive diplomatic modifiers with other Picti. The painted people answer to their own councils, not Rome's.</div>
+            </div>
+            <div class="effect-card">
+                <span class="effect-tag diplomacy">Diplomacy</span>
+                <span class="effect-tag wip">WIP</span>
+                <div class="effect-name">Druidic Network</div>
+                <div class="effect-desc">Extra diplomacy bonus specifically for Galli and Britanni factions sharing the druidic tradition. The druids serve as neutral go-betweens across tribal lines.</div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div class="page-nav">
+    <a href="buildings.html">&#8592; Buildings</a>
+    <a href="cultures.html">Cultures &#8594;</a>
+</div>
+
+<footer class="footer"><p></p></footer>
+
+</body>
+</html>

@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buildings — Caesars in Britain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="navbar.css">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --accent-red: #8B0000;
+            --accent-gold: #C5B358;
+            --text-parchment: #F5E6BE;
+            --gold: #C5B358;
+            --gold-dim: rgba(197,179,88,0.4);
+            --stone: #a89880;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-parchment);
+            font-family: 'Lora', serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .buildings-hero {
+            padding: 100px 24px 60px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+        }
+
+        .buildings-hero h1 {
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--gold);
+            letter-spacing: 0.1em;
+            margin: 0 0 0.5rem;
+        }
+
+        .buildings-hero p {
+            color: var(--stone);
+            font-style: italic;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .filter-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            padding: 2rem 24px 1rem;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--gold-dim);
+            color: var(--stone);
+            padding: 0.4rem 1.2rem;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(197,179,88,0.08);
+        }
+
+        .tab-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 24px 3rem;
+        }
+
+        .tab-section-header {
+            border-bottom: 1px solid var(--gold-dim);
+            padding-bottom: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-section-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--text-parchment);
+            letter-spacing: 0.1em;
+        }
+
+        .buildings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .bldg-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(197,179,88,0.15);
+            padding: 1.2rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .bldg-card:hover {
+            border-color: rgba(197,179,88,0.4);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .bldg-card-top {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .bldg-icon-wrap {
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+        }
+
+        .bldg-icon-img {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            border: 1px solid rgba(197,179,88,0.3);
+        }
+
+        .bldg-icon-placeholder {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .bldg-icon-placeholder.food { border: 1px solid #21391E; background: rgba(33,57,30,0.4); }
+        .bldg-icon-placeholder.religion { border: 1px solid #5D4E8A; background: rgba(60,45,100,0.4); }
+        .bldg-icon-placeholder.market { border: 1px solid #C5A820; background: rgba(197,168,32,0.2); }
+        .bldg-icon-placeholder.entertainment { border: 1px solid #4A7A8A; background: rgba(50,100,120,0.2); }
+        .bldg-icon-placeholder.administration { border: 1px solid #7700CC; background: rgba(80,0,150,0.2); }
+        .bldg-icon-placeholder.military { border: 1px solid #8B0000; background: rgba(139,0,0,0.2); }
+        .bldg-icon-placeholder.port { border: 1px solid #006080; background: rgba(0,80,100,0.2); }
+        .bldg-icon-placeholder.production { border: 1px solid #555; background: rgba(80,80,80,0.2); }
+
+        .bldg-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .bldg-name {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-parchment);
+            margin: 0 0 0.3rem;
+        }
+
+        .bldg-culture {
+            display: inline-block;
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.08em;
+            padding: 0.1rem 0.5rem;
+            border: 1px solid rgba(197,179,88,0.3);
+            background: rgba(197,179,88,0.07);
+            color: var(--stone);
+            margin-bottom: 0.4rem;
+        }
+
+        .bldg-levels {
+            font-size: 0.75rem;
+            color: rgba(168,152,128,0.65);
+            line-height: 1.6;
+            margin: 0.5rem 0 0;
+        }
+
+        .bldg-levels span {
+            color: var(--gold);
+            opacity: 0.6;
+        }
+
+        .bldg-desc {
+            font-size: 0.82rem;
+            color: var(--stone);
+            line-height: 1.55;
+            margin-top: 0.6rem;
+            border-top: 1px solid rgba(197,179,88,0.1);
+            padding-top: 0.6rem;
+        }
+
+        .tab-divider {
+            border: none;
+            border-top: 1px solid rgba(197,179,88,0.1);
+            margin: 0 24px;
+        }
+
+        .page-nav {
+            text-align: center;
+            padding: 3rem 24px;
+            border-top: 1px solid rgba(197,179,88,0.1);
+        }
+
+        .page-nav a {
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        .page-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            border-top: 1px solid rgba(197,179,88,0.15);
+            padding: 2rem 24px;
+            text-align: center;
+            color: rgba(168,152,128,0.4);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            .buildings-grid { grid-template-columns: 1fr; }
+            .filter-tabs { gap: 0.4rem; }
+            .filter-btn { font-size: 0.7rem; padding: 0.35rem 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="index.html" class="logo" style="text-decoration:none">Caesars in Britain</a>
+    <ul class="nav-links">
+        <li><a href="index.html#history">History</a></li>
+        <li><a href="index.html#features">Features</a></li>
+        <li class="nav-dropdown-wrap">
+            <a href="#" class="btn-small nav-dropdown-trigger">Mod &#9660;</a>
+            <ul class="nav-dropdown">
+                <li><a href="factions.html" class="nav-dropdown-item">Factions</a></li>
+                <li><a href="cultures.html" class="nav-dropdown-item">Cultures</a></li>
+                <li><a href="buildings.html" class="nav-dropdown-item">Buildings</a></li>
+                <li><a href="effects.html" class="nav-dropdown-item">Effects</a></li>
+                <li><a href="devlog.html" class="nav-dropdown-item">Devlog</a></li>
+            </ul>
+        </li>
+        <li class="nav-dropdown-wrap">
+            <a href="#" class="btn-small nav-dropdown-trigger">Download &#9660;</a>
+            <ul class="nav-dropdown">
+                <li><a href="#" class="nav-dropdown-item nav-dropdown-disabled">Steam Workshop<span class="nav-dd-soon">Soon</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+<header class="buildings-hero">
+    <h1>BUILDINGS OF BRITANNIA</h1>
+    <p>Construct, expand, survive</p>
+</header>
+
+<div class="filter-tabs">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="food">Food</button>
+    <button class="filter-btn" data-filter="religion">Religion</button>
+    <button class="filter-btn" data-filter="market">Market</button>
+    <button class="filter-btn" data-filter="entertainment">Entertainment</button>
+    <button class="filter-btn" data-filter="administration">Administration</button>
+    <button class="filter-btn" data-filter="military">Military</button>
+    <button class="filter-btn" data-filter="port">Port</button>
+    <button class="filter-btn" data-filter="production">Production</button>
+</div>
+
+<div class="tab-section" data-tab="food">
+    <div class="tab-section-header">
+        <div class="tab-section-title">Food &amp; Agriculture</div>
+    </div>
+    <div class="buildings-grid">
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap">
+                    <img src="images/buildings/cib_land_use.png" alt="Land Use" width="64" height="64" class="bldg-icon-img" style="object-fit:contain">
+                </div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Land Use</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Land Use <span>&#8594;</span> Fields <span>&#8594;</span> Lynchets <span>&#8594;</span> Farms<br><span style="opacity:0.5">[b]</span> Pastures <span>&#8594;</span> Enclosures <span>&#8594;</span> Cattle Farms</div>
+            <div class="bldg-desc">Grants food and agricultural income. Upgrades into cereal fields, then organized farmland.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap">
+                    <img src="images/buildings/cib_high_value_crops.png" alt="High-Value Crops" width="64" height="64" class="bldg-icon-img" style="object-fit:contain">
+                </div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">High-Value Crops</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Arbusta <span>&#8594;</span> Pomerium <span>&#8594;</span> Ars Insilivi <span>&#8594;</span> Oporotheca<br><span style="opacity:0.5">[b]</span> Vinea <span>&#8594;</span> Torcularium <span>&#8594;</span> Forum Vinarium</div>
+            <div class="bldg-desc">Specialized agricultural produce for export and consumption. Roman path focuses on vineyards.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap">
+                    <img src="images/buildings/cib_hunters_camp.png" alt="Hunter's Camp" width="64" height="64" class="bldg-icon-img" style="object-fit:contain">
+                </div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Hunter's Camp</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Hunting Ground <span>&#8594;</span> Hunter's Lodge <span>&#8594;</span> Trapper's Camp</div>
+            <div class="bldg-desc">Sustains the settlement through hunting. Limited upgrades but fast to build.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap">
+                    <img src="images/buildings/cib_mead_production.png" alt="Mead Production" width="64" height="64" class="bldg-icon-img" style="object-fit:contain">
+                </div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Mead Production</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Bee Hives <span>&#8594;</span> Brewing Sheds <span>&#8594;</span> Storage Cellar <span>&#8594;</span> Feast Hall</div>
+            <div class="bldg-desc">Fermented honey drink production. Provides food and entertainment bonuses.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap">
+                    <div class="bldg-icon-placeholder food">&#10045;</div>
+                </div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Wild Gathering</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Forager's Path <span>&#8594;</span> Herb Gatherer's Hut <span>&#8594;</span> Wisewoman's Larder</div>
+            <div class="bldg-desc">Foraged herbs and produce from the wilds. The northern peoples' subsistence fallback.</div>
+        </div>
+
+    </div>
+</div>
+
+<hr class="tab-divider">
+
+<div class="tab-section" data-tab="religion">
+    <div class="tab-section-header">
+        <div class="tab-section-title">Religion &amp; Sacred Sites</div>
+    </div>
+    <div class="buildings-grid">
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Druid</div>
+                    <span class="bldg-culture">Britanni &amp; Hiberni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Druid Circle <span>&#8594;</span> Druid Teachings <span>&#8594;</span> Sacred Oak Grove <span>&#8594;</span> Heart of the Forest</div>
+            <div class="bldg-desc">The druid's circle binds tribe, land, and spirit into one sacred covenant.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">College of Druids</div>
+                    <span class="bldg-culture">Britanni &amp; Hiberni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Druid Assembly <span>&#8594;</span> College of Druids <span>&#8594;</span> Grand College <span>&#8594;</span> Nemeton</div>
+            <div class="bldg-desc">Higher learning of druidic lore, culminating in the great forest nemeton.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Fountains of the Gods</div>
+                    <span class="bldg-culture">All (Celtic)</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Sacred Fountain <span>&#8594;</span> Divinatory Soothsayer <span>&#8594;</span> Oracle of the Deep <span>&#8594;</span> Gateway to the Otherworld<br><span style="opacity:0.5">[b]</span> Sacrificial Pond <span>&#8594;</span> Black Pond of the Dead <span>&#8594;</span> Sunken Offerings</div>
+            <div class="bldg-desc">Sacred water sites where offerings are made and prophecies read.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Warrior Ancestors</div>
+                    <span class="bldg-culture">All (Celtic)</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Ancestor Cairn <span>&#8594;</span> Hall of the Fallen <span>&#8594;</span> Shrine of the Hero Kings <span>&#8594;</span> Eternal Warband</div>
+            <div class="bldg-desc">Cairns and halls honouring the warrior dead, whose memory bonds the living.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Matrona Cults</div>
+                    <span class="bldg-culture">Belgi</span>
+                </div>
+            </div>
+            <div class="bldg-levels">[1] <span>&#8594;</span> Weirding Circles <span>&#8594;</span> [3] <span>&#8594;</span> Oracle of the Belgae<br><span style="opacity:0.5">[b]</span> Hall of Prophecy</div>
+            <div class="bldg-desc">The three mother goddesses of the Belgae, givers of sovereignty and prophecy.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Spirits of War</div>
+                    <span class="bldg-culture">Belgi &amp; Britanni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">War Altar <span>&#8594;</span> Shrine of Teutates <span>&#8594;</span> Temple of the Tribe<br><span style="opacity:0.5">[b]</span> Shrine of Camulos <span>&#8594;</span> Hall of the War God</div>
+            <div class="bldg-desc">Offerings to Teutates and Camulos, gods of tribe and battle.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Earth &amp; Sky</div>
+                    <span class="bldg-culture">Picti &amp; Belgi</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Stone Circle <span>&#8594;</span> Antlered Idol <span>&#8594;</span> Grove of the Horned God<br><span style="opacity:0.5">[b]</span> Altar of the Wheel <span>&#8594;</span> Temple of Thunder</div>
+            <div class="bldg-desc">The sky-wheel and the horned god of forest and wild places.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Goddess of the Animals</div>
+                    <span class="bldg-culture">Belgi &amp; Britanni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Woodland Shrine <span>&#8594;</span> Stables of Epona <span>&#8594;</span> Sacred Pastures<br><span style="opacity:0.5">[b]</span> Grove of Abnoba <span>&#8594;</span> Huntress Sanctuary</div>
+            <div class="bldg-desc">Epona and Abnoba, protectors of horse, herd, and hunt.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Cult of the Cailleach</div>
+                    <span class="bldg-culture">Picti</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Sacred Well <span>&#8594;</span> Weirding Circles <span>&#8594;</span> Inauguration Rock <span>&#8594;</span> Seat of the Cailleach</div>
+            <div class="bldg-desc">The hag-goddess of winter, storms, and the cycle of the land.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Sacred Stones</div>
+                    <span class="bldg-culture">Picti</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Carved Pillar <span>&#8594;</span> Symbol Stone <span>&#8594;</span> Ancestor Stone</div>
+            <div class="bldg-desc">Pictish carved monoliths; records, boundaries, and spirit-houses in stone.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Sovereignty &amp; Otherworld</div>
+                    <span class="bldg-culture">Hiberni &amp; Picti</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Fairy Mound <span>&#8594;</span> [2] <span>&#8594;</span> Gate of the Otherworld<br><span style="opacity:0.5">[b]</span> Hall of the Dagda <span>&#8594;</span> [b3] <span>&#8594;</span> Cauldron of the Dagda</div>
+            <div class="bldg-desc">Gateway to the land beneath the land, home of the Dagda.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Tuatha Da Danann</div>
+                    <span class="bldg-culture">Hiberni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Cult of Traditions <span>&#8594;</span> The Four Treasures <span>&#8594;</span> Gods of the S&#237;de <span>&#8594;</span> Connection to the Underworld</div>
+            <div class="bldg-desc">The old gods of Ireland — divine craftsmen, warriors, and seers.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Fir Bolg</div>
+                    <span class="bldg-culture">Hiberni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Eochaid's Legacy <span>&#8594;</span> Sacred Wells <span>&#8594;</span> Feast of Tailtiu<br><span style="opacity:0.5">[b]</span> Song of the Broad Spears <span>&#8594;</span> Mound of Sreng</div>
+            <div class="bldg-desc">The first people of Ireland; their traditions bind land to clan.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder religion">&#9775;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Cult of Mil</div>
+                    <span class="bldg-culture">Hiberni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Landing Shore <span>&#8594;</span> Shrine of the Three Queens <span>&#8594;</span> Seat of the High King<br><span style="opacity:0.5">[b]</span> Stone of Destiny <span>&#8594;</span> Hall of Amergin</div>
+            <div class="bldg-desc">The sons of Mil brought the Gaels to Ireland; their landing shore is sacred.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap">
+                    <img src="images/buildings/cib_divi_belli.png" alt="Divi Belli" width="64" height="64" class="bldg-icon-img" style="object-fit:contain">
+                </div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Divi Belli</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Ara <span>&#8594;</span> Aedes Martis <span>&#8594;</span> Magnum Templum Martis<br><span style="opacity:0.5">[b]</span> Ara Fortunae <span>&#8594;</span> Magnum Templum Fortunae</div>
+            <div class="bldg-desc">Shrines and temples to Mars and Fortuna, gods of Roman war.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap">
+                    <img src="images/buildings/cib_divi_iulii.png" alt="Divi Iulii" width="64" height="64" class="bldg-icon-img" style="object-fit:contain">
+                </div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Divi Iulii</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Fanum <span>&#8594;</span> Iovis Templum <span>&#8594;</span> Basilica Patris Iovis<br><span style="opacity:0.5">[b]</span> Venus Templum <span>&#8594;</span> Basilica Veneris Genetricis</div>
+            <div class="bldg-desc">Temples to Jupiter and Venus Genetrix, divine patron of the Julii.</div>
+        </div>
+
+    </div>
+</div>
+
+<hr class="tab-divider">
+
+<div class="tab-section" data-tab="market">
+    <div class="tab-section-header">
+        <div class="tab-section-title">Markets &amp; Trade</div>
+    </div>
+    <div class="buildings-grid">
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder market">&#10038;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Mercatus</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Pergula <span>&#8594;</span> [2] <span>&#8594;</span> Forum Nundinarium <span>&#8594;</span> [4]</div>
+            <div class="bldg-desc">Roman market infrastructure; from street stalls to the great market forum.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder market">&#10038;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Commercium</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Statio <span>&#8594;</span> Mutatio <span>&#8594;</span> Porticus <span>&#8594;</span> Emporium</div>
+            <div class="bldg-desc">Roman road-and-station trading network linking provinces to the capital.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder market">&#10038;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Mercati &amp; Fiere</div>
+                    <span class="bldg-culture">Non-Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Trading Post <span>&#8594;</span> [2] <span>&#8594;</span> Grand Market <span>&#8594;</span> [4]<br><span style="opacity:0.5">[b]</span> Barter Ground <span>&#8594;</span> [b3] <span>&#8594;</span> Great Assembly Fair</div>
+            <div class="bldg-desc">Celtic trading posts and seasonal fairs connecting tribal territories.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder market">&#10038;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Comm. Terrestre</div>
+                    <span class="bldg-culture">Non-Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Trackway <span>&#8594;</span> Merchant's Camp <span>&#8594;</span> Waystation <span>&#8594;</span> Grand Emporium</div>
+            <div class="bldg-desc">Overland trade routes; trackways become permanent waystation roads.</div>
+        </div>
+
+    </div>
+</div>
+
+<hr class="tab-divider">
+
+<div class="tab-section" data-tab="entertainment">
+    <div class="tab-section-header">
+        <div class="tab-section-title">Entertainment &amp; Culture</div>
+    </div>
+    <div class="buildings-grid">
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder entertainment">&#9834;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Ludes et Cultura</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Ludus <span>&#8594;</span> [2] <span>&#8594;</span> Bibliotheca <span>&#8594;</span> [4]<br><span style="opacity:0.5">[b]</span> Theatrum</div>
+            <div class="bldg-desc">Roman education and games; the library is the pinnacle of civic culture.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder entertainment">&#9834;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Voluptates</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Thermopolium <span>&#8594;</span> Taberna Vinaria <span>&#8594;</span> Caupona <span>&#8594;</span> Lupanar</div>
+            <div class="bldg-desc">Roman leisure establishments from street food to the bathhouse wine bar.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder entertainment">&#9834;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Cultura &amp; Intrat.</div>
+                    <span class="bldg-culture">Non-Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Gathering Ground <span>&#8594;</span> Bard's Hearth / Filid's Hearth / Carver's Workshop <span>&#8594;</span> Hall level <span>&#8594;</span> Seat level<br><span style="opacity:0.5">[b]</span> Festival Ground <span>&#8594;</span> Hall of Games <span>&#8594;</span> Great Tribal Assembly</div>
+            <div class="bldg-desc">Celtic cultural halls — bards for Britanni, filid for Hiberni, symbol carvers for Picti.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder entertainment">&#9834;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Alehouse</div>
+                    <span class="bldg-culture">Non-Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Fireside Alehouse <span>&#8594;</span> Mead Hall <span>&#8594;</span> Feasting Hall <span>&#8594;</span> [Hall varies by culture]</div>
+            <div class="bldg-desc">The alehouse grows into the great mead hall, centre of Celtic social life.</div>
+        </div>
+
+    </div>
+</div>
+
+<hr class="tab-divider">
+
+<div class="tab-section" data-tab="administration">
+    <div class="tab-section-header">
+        <div class="tab-section-title">Administration &amp; Politics</div>
+    </div>
+    <div class="buildings-grid">
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder administration">&#9784;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Politica &amp; Iustitia</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Forum <span>&#8594;</span> Basilica <span>&#8594;</span> Conventus <span>&#8594;</span> Curia<br><span style="opacity:0.5">[b]</span> Statio Annona <span>&#8594;</span> Fiscus Provincialis <span>&#8594;</span> Palatium</div>
+            <div class="bldg-desc">Roman law and administration, from the open forum to the governor's palace.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder administration">&#9784;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Politics — Britanni</div>
+                    <span class="bldg-culture">Britanni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Chief's Hall <span>&#8594;</span> Council of Elders <span>&#8594;</span> Hall of the High Chief <span>&#8594;</span> Seat of the High King<br><span style="opacity:0.5">[b]</span> Druid Tribunal <span>&#8594;</span> Sacred Court of the Druids <span>&#8594;</span> Druid Seat of Power</div>
+            <div class="bldg-desc">Tribal councils and druid courts; law rooted in ancestral custom and oral tradition.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder administration">&#9784;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Politics — Hiberni</div>
+                    <span class="bldg-culture">Hiberni</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Brehon's Fire <span>&#8594;</span> Brehon Court <span>&#8594;</span> School of Brehon Law <span>&#8594;</span> Seat of the Ollam &#201;renn<br><span style="opacity:0.5">[b]</span> Hall of the R&#237; <span>&#8594;</span> Court of the R&#237; Tuath <span>&#8594;</span> Hall of the High King</div>
+            <div class="bldg-desc">The Brehon law tradition; a unique Irish legal culture with its own hierarchy.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder administration">&#9784;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Politics — Picti</div>
+                    <span class="bldg-culture">Picti</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Elder's Cairn <span>&#8594;</span> Matriarch's Council <span>&#8594;</span> Hall of the Mormaer <span>&#8594;</span> Seat of the Pictish King</div>
+            <div class="bldg-desc">Matriarchal councils and mormaer halls; Pictish governance is older than memory.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder administration">&#9784;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Politics — Belgae</div>
+                    <span class="bldg-culture">Belgi</span>
+                </div>
+            </div>
+            <div class="bldg-levels">War Chief's Hall <span>&#8594;</span> Council of War <span>&#8594;</span> Hall of the Vergobret <span>&#8594;</span> Seat of the High Chief<br><span style="opacity:0.5">[b]</span> Sacred Assembly <span>&#8594;</span> Nemeton of Law <span>&#8594;</span> Grand Sacred Assembly</div>
+            <div class="bldg-desc">War council and sacred assembly; the Belgae resolve disputes in arms or by nemeton oath.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder administration">&#9784;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Politics — Gauls</div>
+                    <span class="bldg-culture">Galli</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Village Council <span>&#8594;</span> Hall of the Vergobret <span>&#8594;</span> Senate of the Tribe <span>&#8594;</span> Grand Council of Gaul<br><span style="opacity:0.5">[b]</span> Druid Court <span>&#8594;</span> Sacred Tribunal <span>&#8594;</span> Seat of the Arch Druid</div>
+            <div class="bldg-desc">From village councils to grand tribal assemblies, mediated by the arch druid.</div>
+        </div>
+
+    </div>
+</div>
+
+<hr class="tab-divider">
+
+<div class="tab-section" data-tab="military">
+    <div class="tab-section-header">
+        <div class="tab-section-title">Military &amp; Fortifications</div>
+    </div>
+    <div class="buildings-grid">
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder military">&#9876;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Civile — Romani</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Details TBD</div>
+            <div class="bldg-desc">Roman civilian infrastructure; roads, walls, and civic buildings for the camp.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder military">&#9876;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Militare — Romani</div>
+                    <span class="bldg-culture">Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Details TBD</div>
+            <div class="bldg-desc">Roman military chain; the legion's permanent camp and fortifications.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder military">&#9876;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Civile e Militare</div>
+                    <span class="bldg-culture">Non-Romans</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Details TBD</div>
+            <div class="bldg-desc">Combined chain for Celtic peoples; the oppidum as both home and fortress.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder military">&#9876;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Barracks</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Details TBD</div>
+            <div class="bldg-desc">Recruits trained warriors for the faction's army.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder military">&#9876;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Practice Field</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Details TBD</div>
+            <div class="bldg-desc">Improves unit experience and training efficiency.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder military">&#9876;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Workshop</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Details TBD</div>
+            <div class="bldg-desc">Produces weapons, armor, and siege equipment.</div>
+        </div>
+
+    </div>
+</div>
+
+<hr class="tab-divider">
+
+<div class="tab-section" data-tab="port">
+    <div class="tab-section-header">
+        <div class="tab-section-title">Port &amp; Naval</div>
+    </div>
+    <div class="buildings-grid">
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder port">&#9875;</div></div>
+                <div class="bldg-card-info">
+                    <div class="bldg-name">Harbour</div>
+                    <span class="bldg-culture">All cultures</span>
+                </div>
+            </div>
+            <div class="bldg-levels">Details TBD</div>
+            <div class="bldg-desc">The harbour links your territory to the sea lanes of the Atlantic world.</div>
+        </div>
+
+    </div>
+</div>
+
+<hr class="tab-divider">
+
+<div class="tab-section" data-tab="production">
+    <div class="tab-section-header">
+        <div class="tab-section-title">Resources &amp; Production</div>
+    </div>
+    <div class="buildings-grid">
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Tin</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Tin ore smelted into trade bars.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Bronze</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Alloy of copper and tin; weapons, tools, and prestige goods.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Lead</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Mined and smelted; used in pipes, weights, and trade.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Copper</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Raw copper mining; feeds the bronze industry.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Iron</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">The metal of war; forges swords, spearheads, and farm tools.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Silver</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Refined silver for coinage and tribute.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Gold</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Precious metal; fuels the mint and diplomatic gifts.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Wood</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Managed timber resources for construction and shipbuilding.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Salt</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Preservative and trade good; worth its weight in grain.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Wine</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Imported and locally produced; Roman vice and British luxury.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Amber</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Traded from the Baltic coast; valued across the ancient world.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Glass</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Roman luxury industry; glassware for the wealthy.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Tannery</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Animal hides processed into leather for armor and trade.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Cloth</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Woven fabric; Belgic and Britanni tribes are skilled weavers.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Pottery</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Wheel-thrown ceramics for storage, trade, and daily use.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Forge</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Arms and armor production beyond basic ironworking.</div>
+        </div>
+
+        <div class="bldg-card">
+            <div class="bldg-card-top">
+                <div class="bldg-icon-wrap"><div class="bldg-icon-placeholder production">&#9874;</div></div>
+                <div class="bldg-card-info"><div class="bldg-name">Mint</div><span class="bldg-culture">All cultures</span></div>
+            </div>
+            <div class="bldg-desc">Coins struck for trade, tribute, and prestige.</div>
+        </div>
+
+    </div>
+</div>
+
+<div class="page-nav">
+    <a href="cultures.html">&#8592; Cultures</a>
+    <a href="effects.html">Effects &amp; Traits &#8594;</a>
+</div>
+
+<footer class="footer"><p></p></footer>
+
+<script>
+    const btns = document.querySelectorAll('.filter-btn');
+    const sections = document.querySelectorAll('.tab-section');
+    const dividers = document.querySelectorAll('.tab-divider');
+
+    function applyFilter(filter) {
+        btns.forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-filter="' + filter + '"]').classList.add('active');
+
+        sections.forEach(s => {
+            s.style.display = (filter === 'all' || s.dataset.tab === filter) ? 'block' : 'none';
+        });
+        dividers.forEach(d => d.style.display = filter === 'all' ? 'block' : 'none');
+    }
+
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+    });
+</script>
+
+</body>
+</html>
